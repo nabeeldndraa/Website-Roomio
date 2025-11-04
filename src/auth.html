@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Masuk / Daftar - Roomio</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .auth-card {
+            max-width: 450px;
+            width: 100%;
+        }
+        
+        .nav-tabs .nav-link {
+            border: none;
+            color: #6b7280;
+        }
+        
+        .nav-tabs .nav-link.active {
+            color: #2563eb;
+            border-bottom: 2px solid #2563eb;
+            background: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="auth-card mx-auto">
+            <div class="card shadow-lg">
+                <div class="card-body p-5">
+                    <div class="text-center mb-4">
+                        <div class="d-flex align-items-center justify-content-center mb-3">
+                            <i class="bi bi-building text-primary fs-1 me-2"></i>
+                            <h2 class="mb-0 text-primary">Roomio</h2>
+                        </div>
+                        <p class="text-muted">Selamat datang di Roomio</p>
+                    </div>
+                    
+                    <!-- Tabs -->
+                    <ul class="nav nav-tabs nav-fill mb-4" role="tablist">
+                        <li class="nav-item">
+                            <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#login">Masuk</button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#register">Daftar</button>
+                        </li>
+                    </ul>
+                    
+                    <div class="tab-content">
+                        <!-- Login Tab -->
+                        <div class="tab-pane fade show active" id="login">
+                            <form onsubmit="handleLogin(event)">
+                                <div class="mb-3">
+                                    <label class="form-label">Email</label>
+                                    <input type="email" class="form-control" id="loginEmail" required placeholder="nama@email.com">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Password</label>
+                                    <input type="password" class="form-control" id="loginPassword" required placeholder="••••••••">
+                                </div>
+                                <div class="mb-3 form-check">
+                                    <input type="checkbox" class="form-check-input" id="rememberMe">
+                                    <label class="form-check-label" for="rememberMe">Ingat saya</label>
+                                </div>
+                                <button type="submit" class="btn btn-primary w-100 mb-3">Masuk</button>
+                                <div class="text-center">
+                                    <a href="#" class="text-decoration-none small">Lupa password?</a>
+                                </div>
+                            </form>
+                        </div>
+                        
+                        <!-- Register Tab -->
+                        <div class="tab-pane fade" id="register">
+                            <form onsubmit="handleRegister(event)">
+                                <div class="mb-3">
+                                    <label class="form-label">Nama Lengkap</label>
+                                    <input type="text" class="form-control" id="registerName" required placeholder="John Doe">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Email</label>
+                                    <input type="email" class="form-control" id="registerEmail" required placeholder="nama@email.com">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">No. Telepon</label>
+                                    <input type="tel" class="form-control" id="registerPhone" required placeholder="08123456789">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Password</label>
+                                    <input type="password" class="form-control" id="registerPassword" required placeholder="••••••••">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Daftar sebagai</label>
+                                    <select class="form-select" id="registerRole">
+                                        <option value="user">Pencari Kos</option>
+                                        <option value="host">Pemilik Properti</option>
+                                        <option value="both">Keduanya</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3 form-check">
+                                    <input type="checkbox" class="form-check-input" id="agreeTerms" required>
+                                    <label class="form-check-label small" for="agreeTerms">
+                                        Saya setuju dengan <a href="#" class="text-decoration-none">Syarat & Ketentuan</a>
+                                    </label>
+                                </div>
+                                <button type="submit" class="btn btn-primary w-100">Daftar</button>
+                            </form>
+                        </div>
+                    </div>
+                    
+                    <hr class="my-4">
+                    
+                    <div class="text-center">
+                        <p class="text-muted small mb-3">Atau masuk dengan</p>
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-outline-secondary flex-fill" onclick="socialLogin('google')">
+                                <i class="bi bi-google me-2"></i>Google
+                            </button>
+                            <button class="btn btn-outline-secondary flex-fill" onclick="socialLogin('facebook')">
+                                <i class="bi bi-facebook me-2"></i>Facebook
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="text-center mt-3">
+                <a href="index.html" class="text-white text-decoration-none">
+                    <i class="bi bi-arrow-left me-2"></i>Kembali ke Beranda
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/auth.js"></script>
+    <script>
+        function handleLogin(event) {
+            event.preventDefault();
+            
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            // Mock login - In production, this would call an API
+            const user = mockLogin(email, password, 'User Demo', 'both');
+            
+            alert('Login berhasil! Selamat datang ' + user.name);
+            window.location.href = 'index.html';
+        }
+        
+        function handleRegister(event) {
+            event.preventDefault();
+            
+            const name = document.getElementById('registerName').value;
+            const email = document.getElementById('registerEmail').value;
+            const phone = document.getElementById('registerPhone').value;
+            const password = document.getElementById('registerPassword').value;
+            const role = document.getElementById('registerRole').value;
+            
+            // Mock register - In production, this would call an API
+            const user = mockLogin(email, password, name, role);
+            
+            alert('Registrasi berhasil! Selamat datang ' + user.name);
+            window.location.href = 'index.html';
+        }
+        
+        function socialLogin(provider) {
+            // Mock social login
+            const user = mockLogin(provider + '@demo.com', '123456', 'User ' + provider, 'user');
+            alert('Login dengan ' + provider + ' berhasil!');
+            window.location.href = 'index.html';
+        }
+        
+        // Check if already logged in
+        document.addEventListener('DOMContentLoaded', function() {
+            const user = getCurrentUser();
+            if (user) {
+                window.location.href = 'index.html';
+            }
+        });
+    </script>
+</body>
+</html>
