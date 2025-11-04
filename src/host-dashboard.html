@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Host - Roomio</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #f9fafb;
+        }
+        
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            width: 260px;
+            background: white;
+            border-right: 1px solid #e5e7eb;
+            z-index: 1000;
+            transition: transform 0.3s ease;
+        }
+        
+        @media (max-width: 991px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            .sidebar.show {
+                transform: translateX(0);
+            }
+        }
+        
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+        }
+        
+        .sidebar-overlay.show {
+            display: block;
+        }
+        
+        .main-content {
+            margin-left: 260px;
+            min-height: 100vh;
+        }
+        
+        @media (max-width: 991px) {
+            .main-content {
+                margin-left: 0;
+            }
+        }
+        
+        .nav-link-custom {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            color: #6b7280;
+            text-decoration: none;
+            border-radius: 0.5rem;
+            margin-bottom: 0.25rem;
+            transition: all 0.2s;
+        }
+        
+        .nav-link-custom:hover {
+            background: #f3f4f6;
+            color: #1f2937;
+        }
+        
+        .nav-link-custom.active {
+            background: #e5e7eb;
+            color: #1f2937;
+        }
+        
+        .nav-link-custom i {
+            margin-right: 0.75rem;
+            width: 20px;
+        }
+        
+        .mobile-header {
+            display: none;
+            position: sticky;
+            top: 0;
+            z-index: 998;
+            background: white;
+            border-bottom: 1px solid #e5e7eb;
+            padding: 1rem;
+        }
+        
+        @media (max-width: 991px) {
+            .mobile-header {
+                display: flex;
+            }
+        }
+        
+        .stat-card {
+            border-left: 4px solid;
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+    
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="p-4">
+            <div class="d-flex align-items-center">
+                <i class="bi bi-building text-primary fs-2 me-2"></i>
+                <h4 class="mb-0 text-primary">Roomio</h4>
+            </div>
+        </div>
+        
+        <nav class="px-3">
+            <a href="index.html" class="nav-link-custom">
+                <i class="bi bi-house-door"></i>
+                Beranda
+            </a>
+            <a href="search.html" class="nav-link-custom">
+                <i class="bi bi-search"></i>
+                Cari Kos
+            </a>
+            <a href="inbox.html" class="nav-link-custom">
+                <i class="bi bi-chat-dots"></i>
+                Pesan
+            </a>
+            <a href="user-dashboard.html" class="nav-link-custom">
+                <i class="bi bi-heart"></i>
+                Favorit & Booking
+            </a>
+            
+            <div class="pt-3 pb-2 px-3 text-muted small">PEMILIK</div>
+            <a href="host-dashboard.html" class="nav-link-custom active">
+                <i class="bi bi-building"></i>
+                Dashboard Host
+            </a>
+            <a href="create-listing.html" class="nav-link-custom">
+                <i class="bi bi-plus-circle"></i>
+                Tambah Listing
+            </a>
+        </nav>
+        
+        <div class="position-absolute bottom-0 start-0 end-0 p-3 border-top">
+            <a href="profile.html" class="nav-link-custom mb-2">
+                <i class="bi bi-person"></i>
+                <span id="userName">User</span>
+            </a>
+            <button class="btn btn-outline-secondary w-100" onclick="logout()">Keluar</button>
+        </div>
+    </aside>
+    
+    <main class="main-content">
+        <div class="mobile-header">
+            <button class="btn btn-link text-dark" onclick="toggleSidebar()">
+                <i class="bi bi-list fs-4"></i>
+            </button>
+            <div class="d-flex align-items-center mx-auto">
+                <i class="bi bi-building text-primary fs-5 me-2"></i>
+                <h5 class="mb-0 text-primary">Roomio</h5>
+            </div>
+            <div style="width: 40px;"></div>
+        </div>
+        
+        <div class="container py-4">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2>Dashboard Host</h2>
+                <a href="create-listing.html" class="btn btn-primary">
+                    <i class="bi bi-plus-circle me-2"></i>Tambah Listing
+                </a>
+            </div>
+            
+            <!-- Stats -->
+            <div class="row g-4 mb-4">
+                <div class="col-md-3">
+                    <div class="card stat-card border-primary shadow-sm">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <p class="text-muted mb-1">Total Listing</p>
+                                    <h3 class="mb-0" id="totalListings">0</h3>
+                                </div>
+                                <i class="bi bi-building fs-1 text-primary opacity-25"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card stat-card border-success shadow-sm">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <p class="text-muted mb-1">Kamar Tersewa</p>
+                                    <h3 class="mb-0" id="totalBooked">0</h3>
+                                </div>
+                                <i class="bi bi-check-circle fs-1 text-success opacity-25"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card stat-card border-warning shadow-sm">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <p class="text-muted mb-1">Total Views</p>
+                                    <h3 class="mb-0">324</h3>
+                                </div>
+                                <i class="bi bi-eye fs-1 text-warning opacity-25"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card stat-card border-info shadow-sm">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <p class="text-muted mb-1">Pendapatan</p>
+                                    <h3 class="mb-0 small">Rp 12,5 jt</h3>
+                                </div>
+                                <i class="bi bi-cash fs-1 text-info opacity-25"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Tabs -->
+            <ul class="nav nav-tabs mb-4" role="tablist">
+                <li class="nav-item">
+                    <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#listings">
+                        <i class="bi bi-list-ul me-2"></i>Semua Listing
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#bookings">
+                        <i class="bi bi-calendar-check me-2"></i>Booking Masuk
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#reviews">
+                        <i class="bi bi-star me-2"></i>Ulasan
+                    </button>
+                </li>
+            </ul>
+            
+            <div class="tab-content">
+                <!-- Listings Tab -->
+                <div class="tab-pane fade show active" id="listings">
+                    <div class="row g-4" id="hostListings">
+                        <!-- Listings will be loaded here -->
+                    </div>
+                    <div id="noListings" class="text-center py-5 d-none">
+                        <i class="bi bi-building fs-1 text-muted mb-3"></i>
+                        <h5 class="text-muted">Belum ada listing</h5>
+                        <p class="text-muted">Mulai tambahkan properti Anda</p>
+                        <a href="create-listing.html" class="btn btn-primary">Tambah Listing</a>
+                    </div>
+                </div>
+                
+                <!-- Bookings Tab -->
+                <div class="tab-pane fade" id="bookings">
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle me-2"></i>
+                        Belum ada booking masuk untuk properti Anda
+                    </div>
+                </div>
+                
+                <!-- Reviews Tab -->
+                <div class="tab-pane fade" id="reviews">
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle me-2"></i>
+                        Belum ada ulasan untuk properti Anda
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/listings.js"></script>
+    <script>
+        if (!requireHost()) {
+            // redirected by requireHost()
+        }
+        
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            sidebar.classList.toggle('show');
+            overlay.classList.toggle('show');
+        }
+        
+        document.getElementById('sidebarOverlay').addEventListener('click', toggleSidebar);
+        
+        function loadHostListings() {
+            const listings = getHostListings();
+            const container = document.getElementById('hostListings');
+            const noListings = document.getElementById('noListings');
+            
+            document.getElementById('totalListings').textContent = listings.length;
+            
+            if (listings.length === 0) {
+                container.innerHTML = '';
+                noListings.classList.remove('d-none');
+                return;
+            }
+            
+            noListings.classList.add('d-none');
+            
+            container.innerHTML = listings.map(listing => `
+                <div class="col-12">
+                    <div class="card shadow-sm">
+                        <div class="card-body">
+                            <div class="row align-items-center">
+                                <div class="col-md-2">
+                                    <img src="${listing.image}" class="img-fluid rounded" alt="${listing.title}">
+                                </div>
+                                <div class="col-md-5">
+                                    <h6 class="mb-2">${listing.title}</h6>
+                                    <p class="text-muted small mb-2">
+                                        <i class="bi bi-geo-alt me-1"></i>${listing.location}
+                                    </p>
+                                    <div>
+                                        <span class="badge bg-light text-dark border">${listing.type}</span>
+                                        ${listing.badges.map(b => `<span class="badge bg-primary">${b}</span>`).join(' ')}
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <p class="mb-1"><strong>Harga:</strong> Rp ${listing.price.toLocaleString('id-ID')}</p>
+                                    <p class="mb-1"><strong>Kamar:</strong> ${listing.available}/${listing.rooms} tersedia</p>
+                                    <p class="mb-0"><strong>Status:</strong> <span class="text-success">Aktif</span></p>
+                                </div>
+                                <div class="col-md-2 text-end">
+                                    <div class="btn-group-vertical gap-2">
+                                        <a href="listing-detail.html?id=${listing.id}" class="btn btn-sm btn-outline-primary">Lihat</a>
+                                        <button class="btn btn-sm btn-outline-secondary" onclick="editListing('${listing.id}')">Edit</button>
+                                        <button class="btn btn-sm btn-outline-danger" onclick="deleteListing('${listing.id}')">Hapus</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        function editListing(id) {
+            alert('Fitur edit akan segera hadir');
+        }
+        
+        function deleteListing(id) {
+            if (confirm('Apakah Anda yakin ingin menghapus listing ini?')) {
+                deleteHostListing(id);
+                loadHostListings();
+            }
+        }
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            updateAuthUI();
+            loadHostListings();
+        });
+    </script>
+</body>
+</html>

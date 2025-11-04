@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard User - Roomio</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #f9fafb;
+        }
+        
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            width: 260px;
+            background: white;
+            border-right: 1px solid #e5e7eb;
+            z-index: 1000;
+            transition: transform 0.3s ease;
+        }
+        
+        @media (max-width: 991px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            .sidebar.show {
+                transform: translateX(0);
+            }
+        }
+        
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+        }
+        
+        .sidebar-overlay.show {
+            display: block;
+        }
+        
+        .main-content {
+            margin-left: 260px;
+            min-height: 100vh;
+        }
+        
+        @media (max-width: 991px) {
+            .main-content {
+                margin-left: 0;
+            }
+        }
+        
+        .nav-link-custom {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            color: #6b7280;
+            text-decoration: none;
+            border-radius: 0.5rem;
+            margin-bottom: 0.25rem;
+            transition: all 0.2s;
+        }
+        
+        .nav-link-custom:hover {
+            background: #f3f4f6;
+            color: #1f2937;
+        }
+        
+        .nav-link-custom.active {
+            background: #e5e7eb;
+            color: #1f2937;
+        }
+        
+        .nav-link-custom i {
+            margin-right: 0.75rem;
+            width: 20px;
+        }
+        
+        .mobile-header {
+            display: none;
+            position: sticky;
+            top: 0;
+            z-index: 998;
+            background: white;
+            border-bottom: 1px solid #e5e7eb;
+            padding: 1rem;
+        }
+        
+        @media (max-width: 991px) {
+            .mobile-header {
+                display: flex;
+            }
+        }
+        
+        .card-hover {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+    
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="p-4">
+            <div class="d-flex align-items-center">
+                <i class="bi bi-building text-primary fs-2 me-2"></i>
+                <h4 class="mb-0 text-primary">Roomio</h4>
+            </div>
+        </div>
+        
+        <nav class="px-3">
+            <a href="index.html" class="nav-link-custom">
+                <i class="bi bi-house-door"></i>
+                Beranda
+            </a>
+            <a href="search.html" class="nav-link-custom">
+                <i class="bi bi-search"></i>
+                Cari Kos
+            </a>
+            <a href="inbox.html" class="nav-link-custom">
+                <i class="bi bi-chat-dots"></i>
+                Pesan
+            </a>
+            <a href="user-dashboard.html" class="nav-link-custom active">
+                <i class="bi bi-heart"></i>
+                Favorit & Booking
+            </a>
+            
+            <div id="hostNavLinks" class="d-none">
+                <div class="pt-3 pb-2 px-3 text-muted small">PEMILIK</div>
+                <a href="host-dashboard.html" class="nav-link-custom">
+                    <i class="bi bi-building"></i>
+                    Dashboard Host
+                </a>
+                <a href="create-listing.html" class="nav-link-custom">
+                    <i class="bi bi-plus-circle"></i>
+                    Tambah Listing
+                </a>
+            </div>
+        </nav>
+        
+        <div class="position-absolute bottom-0 start-0 end-0 p-3 border-top">
+            <a href="profile.html" class="nav-link-custom mb-2">
+                <i class="bi bi-person"></i>
+                <span id="userName">User</span>
+            </a>
+            <button class="btn btn-outline-secondary w-100" onclick="logout()">Keluar</button>
+        </div>
+    </aside>
+    
+    <main class="main-content">
+        <div class="mobile-header">
+            <button class="btn btn-link text-dark" onclick="toggleSidebar()">
+                <i class="bi bi-list fs-4"></i>
+            </button>
+            <div class="d-flex align-items-center mx-auto">
+                <i class="bi bi-building text-primary fs-5 me-2"></i>
+                <h5 class="mb-0 text-primary">Roomio</h5>
+            </div>
+            <div style="width: 40px;"></div>
+        </div>
+        
+        <div class="container py-4">
+            <h2 class="mb-4">Dashboard Saya</h2>
+            
+            <!-- Tabs -->
+            <ul class="nav nav-tabs mb-4" role="tablist">
+                <li class="nav-item">
+                    <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#favorites">
+                        <i class="bi bi-heart me-2"></i>Favorit
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#bookings">
+                        <i class="bi bi-calendar-check me-2"></i>Booking Saya
+                    </button>
+                </li>
+            </ul>
+            
+            <div class="tab-content">
+                <!-- Favorites Tab -->
+                <div class="tab-pane fade show active" id="favorites">
+                    <div class="row g-4" id="favoritesList">
+                        <!-- Favorites will be loaded here -->
+                    </div>
+                    <div id="noFavorites" class="text-center py-5 d-none">
+                        <i class="bi bi-heart fs-1 text-muted mb-3"></i>
+                        <h5 class="text-muted">Belum ada favorit</h5>
+                        <p class="text-muted">Mulai simpan properti yang Anda sukai</p>
+                        <a href="search.html" class="btn btn-primary">Cari Kos</a>
+                    </div>
+                </div>
+                
+                <!-- Bookings Tab -->
+                <div class="tab-pane fade" id="bookings">
+                    <div class="row g-4" id="bookingsList">
+                        <!-- Bookings will be loaded here -->
+                    </div>
+                    <div id="noBookings" class="text-center py-5 d-none">
+                        <i class="bi bi-calendar-x fs-1 text-muted mb-3"></i>
+                        <h5 class="text-muted">Belum ada booking</h5>
+                        <p class="text-muted">Temukan tempat tinggal ideal Anda</p>
+                        <a href="search.html" class="btn btn-primary">Cari Kos</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/listings.js"></script>
+    <script>
+        if (!requireAuth()) {
+            // redirected by requireAuth()
+        }
+        
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            sidebar.classList.toggle('show');
+            overlay.classList.toggle('show');
+        }
+        
+        document.getElementById('sidebarOverlay').addEventListener('click', toggleSidebar);
+        
+        function loadFavorites() {
+            const favorites = getFavorites();
+            const container = document.getElementById('favoritesList');
+            const noFavorites = document.getElementById('noFavorites');
+            
+            if (favorites.length === 0) {
+                container.innerHTML = '';
+                noFavorites.classList.remove('d-none');
+                return;
+            }
+            
+            noFavorites.classList.add('d-none');
+            const allListings = getFeaturedListings();
+            const favoriteListings = allListings.filter(l => favorites.includes(l.id));
+            
+            container.innerHTML = favoriteListings.map(listing => `
+                <div class="col-md-6 col-lg-4">
+                    <div class="card card-hover h-100 border-0 shadow-sm">
+                        <div class="position-relative overflow-hidden" style="height: 200px;">
+                            <img src="${listing.image}" class="card-img-top h-100 object-fit-cover" alt="${listing.title}">
+                            <span class="badge bg-primary position-absolute top-0 start-0 m-3">${listing.type}</span>
+                            <button class="btn btn-danger btn-sm rounded-circle position-absolute top-0 end-0 m-3" 
+                                    onclick="removeFavorite('${listing.id}')">
+                                <i class="bi bi-heart-fill"></i>
+                            </button>
+                        </div>
+                        <div class="card-body">
+                            <h6 class="card-title mb-2">${listing.title}</h6>
+                            <div class="d-flex align-items-center text-muted small mb-2">
+                                <i class="bi bi-geo-alt me-1"></i>
+                                ${listing.location}
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <div class="d-flex align-items-center gap-1">
+                                    <i class="bi bi-star-fill text-warning"></i>
+                                    <span>${listing.rating}</span>
+                                </div>
+                                <div class="text-end">
+                                    <h6 class="text-primary mb-0">Rp ${listing.price.toLocaleString('id-ID')}</h6>
+                                    <small class="text-muted">per bulan</small>
+                                </div>
+                            </div>
+                            <a href="listing-detail.html?id=${listing.id}" class="btn btn-outline-primary w-100">Lihat Detail</a>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        function loadBookings() {
+            const bookings = getBookings();
+            const container = document.getElementById('bookingsList');
+            const noBookings = document.getElementById('noBookings');
+            
+            if (bookings.length === 0) {
+                container.innerHTML = '';
+                noBookings.classList.remove('d-none');
+                return;
+            }
+            
+            noBookings.classList.add('d-none');
+            
+            container.innerHTML = bookings.map(booking => {
+                const statusBadge = {
+                    'pending': 'bg-warning',
+                    'confirmed': 'bg-success',
+                    'cancelled': 'bg-danger'
+                }[booking.status] || 'bg-secondary';
+                
+                const statusText = {
+                    'pending': 'Menunggu',
+                    'confirmed': 'Dikonfirmasi',
+                    'cancelled': 'Dibatalkan'
+                }[booking.status] || 'Pending';
+                
+                return `
+                    <div class="col-12">
+                        <div class="card shadow-sm">
+                            <div class="card-body">
+                                <div class="row align-items-center">
+                                    <div class="col-md-3">
+                                        <img src="${booking.listing.image}" class="img-fluid rounded" alt="${booking.listing.title}">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <h6 class="mb-2">${booking.listing.title}</h6>
+                                        <p class="text-muted small mb-2">
+                                            <i class="bi bi-geo-alt me-1"></i>${booking.listing.location}
+                                        </p>
+                                        <p class="mb-2">
+                                            <strong>Check-in:</strong> ${new Date(booking.checkIn).toLocaleDateString('id-ID')}<br>
+                                            <strong>Durasi:</strong> ${booking.duration} bulan
+                                        </p>
+                                        <span class="badge ${statusBadge}">${statusText}</span>
+                                    </div>
+                                    <div class="col-md-3 text-end">
+                                        <h5 class="text-primary mb-3">Rp ${(booking.listing.price * parseInt(booking.duration)).toLocaleString('id-ID')}</h5>
+                                        <a href="listing-detail.html?id=${booking.listing.id}" class="btn btn-sm btn-outline-primary d-block mb-2">Lihat Detail</a>
+                                        ${booking.status === 'pending' ? `
+                                            <button class="btn btn-sm btn-outline-danger d-block" onclick="cancelBooking('${booking.id}')">Batalkan</button>
+                                        ` : ''}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        function removeFavorite(id) {
+            removeFromFavorites(id);
+            loadFavorites();
+        }
+        
+        function cancelBooking(id) {
+            if (confirm('Apakah Anda yakin ingin membatalkan booking ini?')) {
+                // In real app, this would call an API
+                alert('Booking dibatalkan');
+                loadBookings();
+            }
+        }
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            updateAuthUI();
+            loadFavorites();
+            loadBookings();
+        });
+    </script>
+</body>
+</html>
