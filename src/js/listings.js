@@ -3,13 +3,13 @@ function getFeaturedListings() {
     return [
         {
             id: '1',
-            title: 'Kos Nyaman Dekat Kampus UNEJ',
+            title: 'Kos Nyaman Dekat Kampus POLIJE',
             type: 'Kos Putri',
             location: 'Tegalboto, Jember',
             price: 850000,
             rating: 4.8,
             reviews: 24,
-            image: 'https://images.unsplash.com/photo-1616418928117-4e6d19be2df1?w=800',
+            image: 'assets/Kosan4.jpg',
             facilities: ['Wifi', 'AC', 'Kamar Mandi Dalam'],
             badges: ['Student-Friendly', 'Verified'],
             description: 'Kos nyaman dan strategis dekat kampus UNEJ dengan fasilitas lengkap',

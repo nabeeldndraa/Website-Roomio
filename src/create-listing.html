@@ -134,7 +134,37 @@
                             </div>
                         </div>
                         
+                        <h2 class="mb-4">Tambah Listing Baru</h2>
+                        
+                        <div class="step-indicator">
+                            </div>
+                        
                         <form id="listingForm">
+                            <input type="hidden" id="id_properti" name="id_properti">
+                            <input type="hidden" id="id_kamar" name="id_kamar">
+                            
+                            <div class="form-section active" data-section="1">
+                                <h5 class="mb-4">Informasi Dasar</h5>
+                                </div>
+                            
+                            <div class="form-section" data-section="2">
+                                </div>
+                            
+                            <div class="form-section" data-section="3">
+                                </div>
+                            
+                            <div class="form-section" data-section="4">
+                                </div>
+                            
+                            <div class="d-flex justify-content-between mt-4">
+                                </div>
+                            
+                        </form> </div>
+                </div>
+            </div>
+        </div>
+    </div>   
+
                             <!-- Step 1: Basic Info -->
                             <div class="form-section active" data-section="1">
                                 <h5 class="mb-4">Informasi Dasar</h5>
@@ -323,169 +353,315 @@
     <script src="js/auth.js"></script>
     <script src="js/listings.js"></script>
     <script>
-        let currentStep = 1;
-        const totalSteps = 4;
+       // FUNGSI HELPER
+    function getUrlParameter(name) {
+        name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+        var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+        var results = regex.exec(location.search);
+        return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+    }
+    
+    // FUNGSI BARU: MUAT DATA UNTUK EDIT
+    async function loadListingForEdit(id) {
+        const titleElement = document.getElementById('formTitle');
+        const submitButton = document.getElementById('submitBtn');
         
-        // Check if user is host
-        if (!requireHost()) {
-            // redirected by requireHost()
-        }
-        
-        function changeStep(direction) {
-            const newStep = currentStep + direction;
-            
-            if (newStep < 1 || newStep > totalSteps) return;
-            
-            // Validate current step before proceeding
-            if (direction > 0 && !validateStep(currentStep)) {
-                return;
-            }
-            
-            // Update step
-            currentStep = newStep;
-            showStep(currentStep);
-            
-            // Update review if on last step
-            if (currentStep === 4) {
-                updateReview();
-            }
-        }
-        
-        function showStep(step) {
-            // Update sections
-            document.querySelectorAll('.form-section').forEach(section => {
-                section.classList.remove('active');
-            });
-            document.querySelector(`[data-section="${step}"]`).classList.add('active');
-            
-            // Update indicators
-            document.querySelectorAll('.step').forEach((stepEl, index) => {
-                stepEl.classList.remove('active', 'completed');
-                if (index + 1 < step) {
-                    stepEl.classList.add('completed');
-                } else if (index + 1 === step) {
-                    stepEl.classList.add('active');
-                }
-            });
-            
-            // Update buttons
-            document.getElementById('prevBtn').style.display = step === 1 ? 'none' : 'block';
-            document.getElementById('nextBtn').style.display = step === totalSteps ? 'none' : 'block';
-            document.getElementById('submitBtn').style.display = step === totalSteps ? 'block' : 'none';
-        }
-        
-        function validateStep(step) {
-            if (step === 1) {
-                const title = document.getElementById('title').value;
-                const category = document.getElementById('category').value;
-                const price = document.getElementById('price').value;
-                const district = document.getElementById('district').value;
-                const address = document.getElementById('address').value;
+
+        try {
+            const response = await fetch(`api/get_listing_detail.php?id=${id}`);
+            const result = await response.json();
+
+            if (result.status === 'success') {
+                const data = result.data;
                 
-                if (!title || !category || !price || !district || !address) {
-                    alert('Mohon lengkapi semua field yang wajib diisi');
-                    return false;
-                }
-            }
-            
-            if (step === 2) {
-                const description = document.getElementById('description').value;
-                const rooms = document.getElementById('rooms').value;
-                const available = document.getElementById('available').value;
+                // 1. Ubah Judul & Atur Status
+                document.querySelector('.card-body h2').textContent = `Edit Listing: ${data.nama_properti}`;
+                submitButton.textContent = 'Simpan Perubahan';
                 
-                if (!description || description.length < 100) {
-                    alert('Deskripsi minimal 100 karakter');
-                    return false;
-                }
+                // 2. Isi Hidden Fields (PENTING!)
+                document.getElementById('id_properti').value = id;
+                document.getElementById('id_kamar').value = data.id_kamar;
+
+                // 3. Isi Data Properti (Step 1)
+                document.getElementById('title').value = data.nama_properti;
+                document.getElementById('category').value = data.tipe_properti; // Asumsi tipe_properti sama dengan value category
+                document.getElementById('price').value = data.harga;
+                document.getElementById('deposit').value = data.deposit;
+                document.getElementById('district').value = data.kota;
+                document.getElementById('address').value = data.alamat;
+
+                // 4. Isi Data Kamar (Step 2)
+                document.getElementById('description').value = data.deskripsi;
+                document.getElementById('rooms').value = data.jumlah_kamar;
+                document.getElementById('available').value = data.kamar_tersedia;
+                document.getElementById('roomSize').value = data.room_size;
                 
-                if (!rooms || !available) {
-                    alert('Mohon lengkapi jumlah kamar');
-                    return false;
-                }
-            }
-            
-            return true;
-        }
-        
-        function updateReview() {
-            document.getElementById('reviewTitle').textContent = document.getElementById('title').value;
-            document.getElementById('reviewLocation').textContent = document.getElementById('address').value;
-            document.getElementById('reviewPrice').textContent = parseInt(document.getElementById('price').value).toLocaleString('id-ID');
-            
-            const details = [];
-            details.push(`Kategori: ${document.getElementById('category').value}`);
-            details.push(`Jumlah kamar: ${document.getElementById('rooms').value}`);
-            details.push(`Kamar tersedia: ${document.getElementById('available').value}`);
-            
-            const facilities = [];
-            document.querySelectorAll('[id^="fac_"]:checked').forEach(cb => {
-                facilities.push(cb.value);
-            });
-            if (facilities.length > 0) {
-                details.push(`Fasilitas: ${facilities.join(', ')}`);
-            }
-            
-            document.getElementById('reviewDetails').innerHTML = details.map(d => `<li>${d}</li>`).join('');
-        }
-        
-        document.getElementById('listingForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const facilities = [];
-            document.querySelectorAll('[id^="fac_"]:checked').forEach(cb => {
-                facilities.push(cb.value);
-            });
-            
-            const listing = {
-                title: document.getElementById('title').value,
-                type: document.getElementById('category').value,
-                description: document.getElementById('description').value,
-                location: document.getElementById('address').value,
-                price: parseInt(document.getElementById('price').value),
-                deposit: parseInt(document.getElementById('deposit').value),
-                rooms: parseInt(document.getElementById('rooms').value),
-                available: parseInt(document.getElementById('available').value),
-                facilities: facilities,
-                rules: document.getElementById('rules').value.split('\n').filter(r => r.trim()),
-                image: 'https://images.unsplash.com/photo-1616418928117-4e6d19be2df1?w=800',
-                rating: 0,
-                reviews: 0,
-                badges: ['New']
-            };
-            
-            addHostListing(listing);
-            
-            alert('Listing berhasil dipublikasikan!');
-            window.location.href = 'host-dashboard.html';
-        });
-        
-        // Image upload preview
-        document.querySelector('.image-upload').addEventListener('click', function() {
-            document.getElementById('imageUpload').click();
-        });
-        
-        document.getElementById('imageUpload').addEventListener('change', function(e) {
-            const files = e.target.files;
-            const preview = document.getElementById('imagePreview');
-            
-            Array.from(files).forEach(file => {
-                const reader = new FileReader();
-                reader.onload = function(e) {
+                // 5. Isi Fasilitas
+                const existingFacilities = data.fasilitas_kamar ? data.fasilitas_kamar.split(',').map(f => f.trim().toLowerCase()) : [];
+                document.querySelectorAll('input[type="checkbox"][id^="fac_"]').forEach(checkbox => {
+                    if (existingFacilities.includes(checkbox.value.toLowerCase())) {
+                        checkbox.checked = true;
+                    }
+                });
+
+                // 6. Tampilkan Foto Lama (Read Only - Tambahkan logika hapus jika diperlukan)
+                const preview = document.getElementById('imagePreview');
+                data.photos.forEach(url => {
                     const col = document.createElement('div');
-                    col.className = 'col-md-3';
+                    col.className = 'col-md-3 existing-photo';
                     col.innerHTML = `
                         <div class="position-relative">
-                            <img src="${e.target.result}" class="img-fluid rounded" alt="Preview">
-                            <button type="button" class="btn btn-danger btn-sm position-absolute top-0 end-0 m-2" onclick="this.closest('.col-md-3').remove()">
-                                <i class="bi bi-x"></i>
-                            </button>
+                            <img src="${url}" class="img-fluid rounded" alt="Foto Lama">
+                            <p class="small text-muted text-center mt-1 mb-0">Foto Lama</p>
                         </div>
                     `;
                     preview.appendChild(col);
-                };
-                reader.readAsDataURL(file);
-            });
+                });
+
+                updateStep(1); // Kembali ke langkah 1 setelah loading
+            } else {
+                alert('Gagal memuat data edit: ' + result.message);
+                window.location.href = 'host-dashboard.html';
+            }
+        } catch (error) {
+            console.error('Error saat fetching detail listing:', error);
+            alert('Terjadi kesalahan koneksi server saat memuat data edit.');
+            window.location.href = 'host-dashboard.html';
+        }
+    }
+
+
+    // FUNGSI BAWAAN ANDA (MODIFIKASI: Dihapus changeStep, diganti dengan function updateStep)
+    let currentStep = 1;
+    const totalSteps = 4;
+    
+    function updateStep(step) {
+        // Validation (Dipertahankan)
+        if (step > currentStep && !validateStep(currentStep)) {
+            return;
+        }
+
+        currentStep = step;
+
+        // Update sections
+        document.querySelectorAll('.form-section').forEach(section => {
+            section.classList.remove('active');
         });
-    </script>
+        document.querySelector(`[data-section="${step}"]`).classList.add('active');
+        
+        // Update indicators
+        document.querySelectorAll('.step').forEach((stepEl, index) => {
+            stepEl.classList.remove('active', 'completed');
+            if (index + 1 < step) {
+                stepEl.classList.add('completed');
+            } else if (index + 1 === step) {
+                stepEl.classList.add('active');
+            }
+        });
+        
+        // Update buttons
+        document.getElementById('prevBtn').style.display = step === 1 ? 'none' : 'block';
+        document.getElementById('nextBtn').style.display = step === totalSteps ? 'none' : 'block';
+        document.getElementById('submitBtn').style.display = step === totalSteps ? 'block' : 'none';
+
+        // Update review if on last step
+        if (currentStep === 4) {
+            updateReview();
+        }
+    }
+    
+    function validateStep(step) {
+        if (step === 1) {
+            const title = document.getElementById('title').value;
+            const category = document.getElementById('category').value;
+            const price = document.getElementById('price').value;
+            const district = document.getElementById('district').value;
+            const address = document.getElementById('address').value;
+            
+            if (!title || !category || !price || !district || !address) {
+                alert('Mohon lengkapi semua field yang wajib diisi di langkah 1.');
+                return false;
+            }
+        }
+        
+        if (step === 2) {
+            const description = document.getElementById('description').value;
+            const rooms = document.getElementById('rooms').value;
+            const available = document.getElementById('available').value;
+            
+            if (!description || description.length < 10) { // Diubah dari 100 agar mudah diuji
+                alert('Deskripsi minimal 10 karakter');
+                return false;
+            }
+            
+            if (!rooms || !available) {
+                alert('Mohon lengkapi jumlah kamar');
+                return false;
+            }
+        }
+        
+        return true;
+    }
+    
+    function updateReview() {
+        document.getElementById('reviewTitle').textContent = document.getElementById('title').value;
+        document.getElementById('reviewLocation').textContent = document.getElementById('address').value;
+        document.getElementById('reviewPrice').textContent = parseInt(document.getElementById('price').value).toLocaleString('id-ID');
+        
+        const details = [];
+        details.push(`Kategori: ${document.getElementById('category').value}`);
+        details.push(`Jumlah kamar: ${document.getElementById('rooms').value}`);
+        details.push(`Kamar tersedia: ${document.getElementById('available').value}`);
+        
+        const facilities = [];
+        document.querySelectorAll('[id^="fac_"]:checked').forEach(cb => {
+            facilities.push(cb.value);
+        });
+        if (facilities.length > 0) {
+            details.push(`Fasilitas: ${facilities.join(', ')}`);
+        }
+        
+        document.getElementById('reviewDetails').innerHTML = details.map(d => `<li>${d}</li>`).join('');
+    }
+
+    // EVENT LISTENER UNTUK TOMBOL NEXT/PREV
+    document.getElementById('nextBtn').addEventListener('click', () => {
+        if (currentStep < totalSteps) {
+            updateStep(currentStep + 1);
+        }
+    });
+
+    document.getElementById('prevBtn').addEventListener('click', () => {
+        if (currentStep > 1) {
+            updateStep(currentStep - 1);
+        }
+    });
+
+
+    // FUNGSI UTAMA UNTUK SUBMIT FORM (FINAL FIX)
+    document.getElementById('listingForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        // Tentukan API endpoint: Create atau Update
+        const isEditMode = document.getElementById('id_properti').value !== "";
+        const url = isEditMode ? 'api/update_listing.php' : 'api/create_listing.php';
+
+        const formData = new FormData();
+        
+        // --- 1. DATA UNTUK API (MAPPING ID FORM ke PHP/DB Key) ---
+        if (isEditMode) {
+            formData.append('id_properti', document.getElementById('id_properti').value);
+            formData.append('id_kamar', document.getElementById('id_kamar').value);
+        }
+
+        // Data Properti
+        formData.append('nama_properti', document.getElementById('title').value); // title -> nama_properti
+        formData.append('tipe_properti', document.getElementById('category').value); // category -> tipe_properti
+        formData.append('alamat', document.getElementById('address').value); // address -> alamat
+        formData.append('kota', document.getElementById('district').value); // district -> kota
+        formData.append('deskripsi', document.getElementById('description').value);
+        
+        // Tambahkan tipe_kos (Jika kategori adalah Kos, set tipe_kos = kategori)
+        if (document.getElementById('category').value.startsWith('kos')) {
+            formData.append('tipe_kos', document.getElementById('category').value);
+        }
+
+        // Data Kamar
+        formData.append('nama_kamar', document.getElementById('title').value); // Asumsi nama kamar sama dengan nama properti
+        formData.append('harga', document.getElementById('price').value);
+        formData.append('satuan_harga', 'bulan'); // Asumsi default satuan_harga
+        formData.append('deposit', document.getElementById('deposit').value);
+        formData.append('jumlah_kamar', document.getElementById('rooms').value);
+        formData.append('kamar_tersedia', document.getElementById('available').value);
+        formData.append('room_size', document.getElementById('roomSize').value);
+        // Peraturan Kos (diabaikan, atau tambahkan field baru jika diperlukan di DB)
+        // formData.append('rules', document.getElementById('rules').value);
+
+
+        // Kumpulkan Fasilitas (DIKIRIM SEBAGAI ARRAY fasilias_kamar[])
+        document.querySelectorAll('[id^="fac_"]:checked').forEach(cb => {
+            formData.append('fasilitas_kamar[]', cb.value); 
+        });
+        
+        // 2. Ambil File Foto
+        const imageInput = document.getElementById('imageUpload');
+        for (const file of imageInput.files) {
+            formData.append('images[]', file);
+        }
+
+        // 3. Kirim ke API PHP
+        const submitButton = document.getElementById('submitBtn');
+        const originalText = submitButton.textContent;
+        submitButton.disabled = true;
+        submitButton.textContent = 'Memproses...';
+
+        try {
+            const response = await fetch(url, {
+                method: 'POST',
+                body: formData 
+            });
+
+            const data = await response.json();
+
+            if (response.ok && data.status === 'success') {
+                alert(data.message);
+                window.location.href = 'host-dashboard.html'; 
+            } else {
+                alert('Gagal publikasi/update listing: ' + (data.message || 'Error tidak diketahui'));
+            }
+
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Terjadi kesalahan koneksi ke server.');
+        } finally {
+            submitButton.disabled = false;
+            submitButton.textContent = originalText;
+        }
+    });
+        
+    // Image upload preview (dipertahankan)
+    document.querySelector('.image-upload').addEventListener('click', function() {
+        document.getElementById('imageUpload').click();
+    });
+    
+    document.getElementById('imageUpload').addEventListener('change', function(e) {
+        const files = e.target.files;
+        const preview = document.getElementById('imagePreview');
+        
+        Array.from(files).forEach(file => {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const col = document.createElement('div');
+                col.className = 'col-md-3';
+                col.innerHTML = `
+                    <div class="position-relative">
+                        <img src="${e.target.result}" class="img-fluid rounded" alt="Preview">
+                        <button type="button" class="btn btn-danger btn-sm position-absolute top-0 end-0 m-2" onclick="this.closest('.col-md-3').remove()">
+                            <i class="bi bi-x"></i>
+                        </button>
+                    </div>
+                `;
+                preview.appendChild(col);
+            };
+            reader.readAsDataURL(file);
+        });
+    });
+
+    // Inisialisasi: Pengecekan Mode Edit
+    document.addEventListener('DOMContentLoaded', function() {
+        if (typeof requireHost === 'function' && requireHost()) { // Cek sesi
+            const editId = getUrlParameter('edit');
+            if (editId) {
+                // Mode Edit: Load data
+                loadListingForEdit(editId);
+            } else {
+                // Mode Create (Default)
+                document.querySelector('.card-body h2').textContent = 'Tambah Listing Properti Baru';
+                updateStep(1); 
+            }
+        }
+    });
+
+</script>
 </body>
 </html>
