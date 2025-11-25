@@ -77,7 +77,7 @@ roomio/
 - Lokasi - Fokus hyperlocal area Jember
 - Verifikasi - Badge untuk listing terverifikasi
 
-## 🎨 Teknologi yang Digunakan
+## Teknologi yang Digunakan
 
 - HTML5 - Struktur halaman
 - Bootstrap 5.3 - Framework CSS untuk styling dan komponen

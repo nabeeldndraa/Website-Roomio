@@ -71,6 +71,7 @@
             color: white;
         }
         
+        /* CSS ini yang membuat step berganti */
         .form-section {
             display: none;
         }
@@ -112,9 +113,9 @@
             <div class="col-lg-8">
                 <div class="card shadow-sm">
                     <div class="card-body p-4 p-md-5">
-                        <h2 class="mb-4">Tambah Listing Baru</h2>
                         
-                        <!-- Step Indicator -->
+                        <h2 class="mb-4" id="formTitle">Tambah Listing Baru</h2>
+                        
                         <div class="step-indicator">
                             <div class="step active" data-step="1">
                                 <div class="step-number">1</div>
@@ -135,18 +136,20 @@
                         </div>
                         
                         <form id="listingForm">
-                            <!-- Step 1: Basic Info -->
+                            <input type="hidden" id="id_properti" name="id_properti">
+                            <input type="hidden" id="id_kamar" name="id_kamar">
+                            
                             <div class="form-section active" data-section="1">
                                 <h5 class="mb-4">Informasi Dasar</h5>
                                 
                                 <div class="mb-3">
                                     <label class="form-label">Judul Listing *</label>
-                                    <input type="text" class="form-control" id="title" required placeholder="Kos Nyaman Dekat Kampus...">
+                                    <input type="text" class="form-control" id="title" name="title" required placeholder="Kos Nyaman Dekat Kampus...">
                                 </div>
                                 
                                 <div class="mb-3">
                                     <label class="form-label">Kategori *</label>
-                                    <select class="form-select" id="category" required>
+                                    <select class="form-select" id="category" name="category" required>
                                         <option value="">Pilih kategori</option>
                                         <option value="kos-putra">Kos Putra</option>
                                         <option value="kos-putri">Kos Putri</option>
@@ -158,17 +161,17 @@
                                 <div class="row">
                                     <div class="col-md-6 mb-3">
                                         <label class="form-label">Harga per Bulan (Rp) *</label>
-                                        <input type="number" class="form-control" id="price" required placeholder="1000000">
+                                        <input type="number" class="form-control" id="price" name="price" required placeholder="1000000">
                                     </div>
                                     <div class="col-md-6 mb-3">
                                         <label class="form-label">Deposit (Rp) *</label>
-                                        <input type="number" class="form-control" id="deposit" required placeholder="1000000">
+                                        <input type="number" class="form-control" id="deposit" name="deposit" required placeholder="1000000">
                                     </div>
                                 </div>
                                 
                                 <div class="mb-3">
                                     <label class="form-label">Lokasi *</label>
-                                    <select class="form-select mb-2" id="district" required>
+                                    <select class="form-select mb-2" id="district" name="district" required>
                                         <option value="">Pilih kecamatan</option>
                                         <option value="tegalboto">Tegalboto</option>
                                         <option value="sumbersari">Sumbersari</option>
@@ -176,32 +179,31 @@
                                         <option value="kaliwates">Kaliwates</option>
                                         <option value="mangli">Mangli</option>
                                     </select>
-                                    <input type="text" class="form-control" id="address" required placeholder="Alamat lengkap...">
+                                    <input type="text" class="form-control" id="address" name="address" required placeholder="Alamat lengkap...">
                                 </div>
                             </div>
                             
-                            <!-- Step 2: Details -->
                             <div class="form-section" data-section="2">
                                 <h5 class="mb-4">Detail Properti</h5>
                                 
                                 <div class="mb-3">
                                     <label class="form-label">Deskripsi *</label>
-                                    <textarea class="form-control" id="description" rows="5" required placeholder="Deskripsikan properti Anda..."></textarea>
+                                    <textarea class="form-control" id="description" name="description" rows="5" required placeholder="Deskripsikan properti Anda..."></textarea>
                                     <small class="text-muted">Min. 100 karakter</small>
                                 </div>
                                 
                                 <div class="row">
                                     <div class="col-md-4 mb-3">
                                         <label class="form-label">Jumlah Kamar *</label>
-                                        <input type="number" class="form-control" id="rooms" required min="1" placeholder="10">
+                                        <input type="number" class="form-control" id="rooms" name="rooms" required min="1" placeholder="10">
                                     </div>
                                     <div class="col-md-4 mb-3">
                                         <label class="form-label">Kamar Tersedia *</label>
-                                        <input type="number" class="form-control" id="available" required min="0" placeholder="5">
+                                        <input type="number" class="form-control" id="available" name="available" required min="0" placeholder="5">
                                     </div>
                                     <div class="col-md-4 mb-3">
                                         <label class="form-label">Ukuran Kamar</label>
-                                        <input type="text" class="form-control" id="roomSize" placeholder="3x4 m">
+                                        <input type="text" class="form-control" id="roomSize" name="roomSize" placeholder="3x4 m">
                                     </div>
                                 </div>
                                 
@@ -249,11 +251,10 @@
                                 
                                 <div class="mb-3">
                                     <label class="form-label">Peraturan Kos</label>
-                                    <textarea class="form-control" id="rules" rows="4" placeholder="Masukkan peraturan, satu per baris&#10;Contoh:&#10;Jam malam pukul 22.00&#10;Tidak boleh membawa tamu menginap"></textarea>
+                                    <textarea class="form-control" id="rules" name="rules" rows="4" placeholder="Masukkan peraturan, satu per baris&#10;Contoh:&#10;Jam malam pukul 22.00&#10;Tidak boleh membawa tamu menginap"></textarea>
                                 </div>
                             </div>
                             
-                            <!-- Step 3: Photos -->
                             <div class="form-section" data-section="3">
                                 <h5 class="mb-4">Foto Properti</h5>
                                 <p class="text-muted">Tambahkan minimal 4 foto berkualitas tinggi</p>
@@ -266,8 +267,7 @@
                                 </div>
                                 
                                 <div id="imagePreview" class="row g-3">
-                                    <!-- Image previews will appear here -->
-                                </div>
+                                    </div>
                                 
                                 <div class="alert alert-info mt-3">
                                     <i class="bi bi-info-circle me-2"></i>
@@ -275,7 +275,6 @@
                                 </div>
                             </div>
                             
-                            <!-- Step 4: Review -->
                             <div class="form-section" data-section="4">
                                 <h5 class="mb-4">Review & Publikasi</h5>
                                 
@@ -290,8 +289,7 @@
                                 <div class="mb-3">
                                     <strong>Detail:</strong>
                                     <ul id="reviewDetails" class="mt-2">
-                                        <!-- Review details will be added here -->
-                                    </ul>
+                                        </ul>
                                 </div>
                                 
                                 <div class="alert alert-success">
@@ -300,12 +298,11 @@
                                 </div>
                             </div>
                             
-                            <!-- Navigation Buttons -->
                             <div class="d-flex justify-content-between mt-4">
-                                <button type="button" class="btn btn-outline-secondary" id="prevBtn" onclick="changeStep(-1)" style="display: none;">
+                                <button type="button" class="btn btn-outline-secondary" id="prevBtn" style="display: none;">
                                     <i class="bi bi-arrow-left me-2"></i>Sebelumnya
                                 </button>
-                                <button type="button" class="btn btn-primary ms-auto" id="nextBtn" onclick="changeStep(1)">
+                                <button type="button" class="btn btn-primary ms-auto" id="nextBtn">
                                     Selanjutnya<i class="bi bi-arrow-right ms-2"></i>
                                 </button>
                                 <button type="submit" class="btn btn-success ms-auto" id="submitBtn" style="display: none;">
@@ -323,40 +320,37 @@
     <script src="js/auth.js"></script>
     <script src="js/listings.js"></script>
     <script>
+        // FUNGSI HELPER
+        function getUrlParameter(name) {
+            name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+            var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+            var results = regex.exec(location.search);
+            return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+        }
+        
+        // =========================================================
+        // !!! LOGIKA MULTI-STEP DITARUH DI SINI UNTUK RESOLVE ERROR !!!
+        // =========================================================
+    
         let currentStep = 1;
         const totalSteps = 4;
         
-        // Check if user is host
-        if (!requireHost()) {
-            // redirected by requireHost()
-        }
-        
-        function changeStep(direction) {
-            const newStep = currentStep + direction;
-            
-            if (newStep < 1 || newStep > totalSteps) return;
-            
-            // Validate current step before proceeding
-            if (direction > 0 && !validateStep(currentStep)) {
+        function updateStep(step) {
+            // Validation
+            if (step > currentStep && !validateStep(currentStep)) {
                 return;
             }
-            
-            // Update step
-            currentStep = newStep;
-            showStep(currentStep);
-            
-            // Update review if on last step
-            if (currentStep === 4) {
-                updateReview();
-            }
-        }
-        
-        function showStep(step) {
+    
+            currentStep = step;
+    
             // Update sections
             document.querySelectorAll('.form-section').forEach(section => {
                 section.classList.remove('active');
             });
-            document.querySelector(`[data-section="${step}"]`).classList.add('active');
+            const targetSection = document.querySelector(`[data-section="${step}"]`);
+            if (targetSection) {
+                targetSection.classList.add('active');
+            }
             
             // Update indicators
             document.querySelectorAll('.step').forEach((stepEl, index) => {
@@ -368,33 +362,43 @@
                 }
             });
             
-            // Update buttons
-            document.getElementById('prevBtn').style.display = step === 1 ? 'none' : 'block';
-            document.getElementById('nextBtn').style.display = step === totalSteps ? 'none' : 'block';
-            document.getElementById('submitBtn').style.display = step === totalSteps ? 'block' : 'none';
+            // Update buttons (ditambahkan pengecekan null safety)
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+            const submitBtn = document.getElementById('submitBtn');
+    
+            if (prevBtn) prevBtn.style.display = step === 1 ? 'none' : 'block';
+            if (nextBtn) nextBtn.style.display = step === totalSteps ? 'none' : 'block';
+            if (submitBtn) submitBtn.style.display = step === totalSteps ? 'block' : 'none';
+    
+            // Update review if on last step
+            if (currentStep === 4) {
+                updateReview();
+            }
         }
         
         function validateStep(step) {
             if (step === 1) {
-                const title = document.getElementById('title').value;
-                const category = document.getElementById('category').value;
-                const price = document.getElementById('price').value;
-                const district = document.getElementById('district').value;
-                const address = document.getElementById('address').value;
+                const title = document.getElementById('title')?.value;
+                const category = document.getElementById('category')?.value;
+                const price = document.getElementById('price')?.value;
+                const deposit = document.getElementById('deposit')?.value; // Tambah validasi deposit
+                const district = document.getElementById('district')?.value;
+                const address = document.getElementById('address')?.value;
                 
-                if (!title || !category || !price || !district || !address) {
-                    alert('Mohon lengkapi semua field yang wajib diisi');
+                if (!title || !category || !price || !deposit || !district || !address) {
+                    alert('Mohon lengkapi semua field yang wajib diisi di langkah 1.');
                     return false;
                 }
             }
             
             if (step === 2) {
-                const description = document.getElementById('description').value;
-                const rooms = document.getElementById('rooms').value;
-                const available = document.getElementById('available').value;
+                const description = document.getElementById('description')?.value;
+                const rooms = document.getElementById('rooms')?.value;
+                const available = document.getElementById('available')?.value;
                 
-                if (!description || description.length < 100) {
-                    alert('Deskripsi minimal 100 karakter');
+                if (!description || description.length < 10) { 
+                    alert('Deskripsi minimal 10 karakter');
                     return false;
                 }
                 
@@ -408,14 +412,16 @@
         }
         
         function updateReview() {
-            document.getElementById('reviewTitle').textContent = document.getElementById('title').value;
-            document.getElementById('reviewLocation').textContent = document.getElementById('address').value;
-            document.getElementById('reviewPrice').textContent = parseInt(document.getElementById('price').value).toLocaleString('id-ID');
+            document.getElementById('reviewTitle').textContent = document.getElementById('title')?.value || 'N/A';
+            document.getElementById('reviewLocation').textContent = document.getElementById('address')?.value || 'N/A';
+            
+            const priceValue = document.getElementById('price')?.value;
+            document.getElementById('reviewPrice').textContent = priceValue ? parseInt(priceValue).toLocaleString('id-ID') : 'N/A';
             
             const details = [];
-            details.push(`Kategori: ${document.getElementById('category').value}`);
-            details.push(`Jumlah kamar: ${document.getElementById('rooms').value}`);
-            details.push(`Kamar tersedia: ${document.getElementById('available').value}`);
+            details.push(`Kategori: ${document.getElementById('category')?.value || 'N/A'}`);
+            details.push(`Jumlah kamar: ${document.getElementById('rooms')?.value || 'N/A'}`);
+            details.push(`Kamar tersedia: ${document.getElementById('available')?.value || 'N/A'}`);
             
             const facilities = [];
             document.querySelectorAll('[id^="fac_"]:checked').forEach(cb => {
@@ -427,44 +433,184 @@
             
             document.getElementById('reviewDetails').innerHTML = details.map(d => `<li>${d}</li>`).join('');
         }
-        
-        document.getElementById('listingForm').addEventListener('submit', function(e) {
-            e.preventDefault();
+    
+        // FUNGSI BARU: MUAT DATA UNTUK EDIT
+        async function loadListingForEdit(id) {
+            const submitButton = document.getElementById('submitBtn');
+            const h2Title = document.getElementById('formTitle');
             
-            const facilities = [];
+            try {
+                const response = await fetch(`api/get_listing_detail.php?id=${id}`);
+                const result = await response.json();
+    
+                if (result.status === 'success') {
+                    const data = result.data;
+                    
+                    // 1. Ubah Judul & Atur Status
+                    if (h2Title) h2Title.textContent = `Edit Listing: ${data.nama_properti}`;
+                    if (submitButton) submitButton.textContent = 'Simpan Perubahan';
+                    
+                    // 2. Isi Hidden Fields (PENTING!)
+                    document.getElementById('id_properti').value = id;
+                    document.getElementById('id_kamar').value = data.id_kamar;
+    
+                    // 3. Isi Data Properti (Step 1)
+                    document.getElementById('title').value = data.nama_properti || '';
+                    document.getElementById('category').value = data.tipe_properti || '';
+                    document.getElementById('price').value = data.harga || '';
+                    document.getElementById('deposit').value = data.deposit || '';
+                    document.getElementById('district').value = data.kota || '';
+                    document.getElementById('address').value = data.alamat || '';
+    
+                    // 4. Isi Data Kamar (Step 2)
+                    document.getElementById('description').value = data.deskripsi || '';
+                    document.getElementById('rooms').value = data.jumlah_kamar || '';
+                    document.getElementById('available').value = data.kamar_tersedia || '';
+                    document.getElementById('roomSize').value = data.room_size || '';
+                    
+                    // 5. Isi Fasilitas
+                    const existingFacilities = data.fasilitas_kamar ? data.fasilitas_kamar.split(',').map(f => f.trim().toLowerCase()) : [];
+                    document.querySelectorAll('input[type="checkbox"][id^="fac_"]').forEach(checkbox => {
+                        if (existingFacilities.includes(checkbox.value.toLowerCase())) {
+                            checkbox.checked = true;
+                        }
+                    });
+    
+                    // 6. Tampilkan Foto Lama 
+                    const preview = document.getElementById('imagePreview');
+                    if (preview) {
+                        preview.innerHTML = ''; // Clear preview area
+                        
+                        if (data.photos && Array.isArray(data.photos)) {
+                            data.photos.forEach(url => {
+                                const col = document.createElement('div');
+                                col.className = 'col-md-3 existing-photo';
+                                col.innerHTML = `
+                                    <div class="position-relative">
+                                        <img src="${url}" class="img-fluid rounded" alt="Foto Lama">
+                                        <p class="small text-muted text-center mt-1 mb-0">Foto Lama</p>
+                                    </div>
+                                `;
+                                preview.appendChild(col);
+                            });
+                        }
+                    }
+    
+                    updateStep(1); // Kembali ke langkah 1 setelah loading
+                } else {
+                    alert('Gagal memuat data edit: ' + result.message);
+                    window.location.href = 'host-dashboard.html';
+                }
+            } catch (error) {
+                console.error('Error saat fetching detail listing:', error);
+                alert('Terjadi kesalahan koneksi server saat memuat data edit.');
+                window.location.href = 'host-dashboard.html';
+            }
+        }
+    
+    
+        // EVENT LISTENER UNTUK TOMBOL NEXT/PREV
+        // Mengganti onclick="changeStep(1)" yang lama
+        document.getElementById('nextBtn')?.addEventListener('click', () => {
+            if (currentStep < totalSteps) {
+                updateStep(currentStep + 1);
+            }
+        });
+    
+        document.getElementById('prevBtn')?.addEventListener('click', () => {
+            if (currentStep > 1) {
+                updateStep(currentStep - 1);
+            }
+        });
+    
+    
+        // FUNGSI UTAMA UNTUK SUBMIT FORM (FINAL FIX)
+        document.getElementById('listingForm')?.addEventListener('submit', async function(e) {
+            e.preventDefault();
+    
+            // Tentukan API endpoint: Create atau Update
+            const isEditMode = document.getElementById('id_properti')?.value !== "";
+            const url = isEditMode ? 'api/update_listing.php' : 'api/create_listing.php';
+    
+            const formData = new FormData();
+            
+            // --- 1. DATA UNTUK API (MAPPING ID FORM ke PHP/DB Key) ---
+            if (isEditMode) {
+                formData.append('id_properti', document.getElementById('id_properti').value);
+                formData.append('id_kamar', document.getElementById('id_kamar').value);
+            }
+    
+            // Data Properti
+            formData.append('nama_properti', document.getElementById('title').value);
+            formData.append('tipe_properti', document.getElementById('category').value);
+            formData.append('alamat', document.getElementById('address').value);
+            formData.append('kota', document.getElementById('district').value);
+            formData.append('deskripsi', document.getElementById('description').value);
+            
+            // Tambahkan tipe_kos 
+            if (document.getElementById('category').value.startsWith('kos')) {
+                formData.append('tipe_kos', document.getElementById('category').value);
+            } else {
+                 formData.append('tipe_kos', null);
+            }
+    
+            // Data Kamar
+            formData.append('nama_kamar', document.getElementById('title').value); 
+            formData.append('harga', document.getElementById('price').value);
+            formData.append('satuan_harga', 'bulan'); 
+            formData.append('deposit', document.getElementById('deposit').value);
+            formData.append('jumlah_kamar', document.getElementById('rooms').value);
+            formData.append('kamar_tersedia', document.getElementById('available').value);
+            formData.append('room_size', document.getElementById('roomSize').value);
+    
+    
+            // Kumpulkan Fasilitas 
             document.querySelectorAll('[id^="fac_"]:checked').forEach(cb => {
-                facilities.push(cb.value);
+                formData.append('fasilitas_kamar[]', cb.value); 
             });
             
-            const listing = {
-                title: document.getElementById('title').value,
-                type: document.getElementById('category').value,
-                description: document.getElementById('description').value,
-                location: document.getElementById('address').value,
-                price: parseInt(document.getElementById('price').value),
-                deposit: parseInt(document.getElementById('deposit').value),
-                rooms: parseInt(document.getElementById('rooms').value),
-                available: parseInt(document.getElementById('available').value),
-                facilities: facilities,
-                rules: document.getElementById('rules').value.split('\n').filter(r => r.trim()),
-                image: 'https://images.unsplash.com/photo-1616418928117-4e6d19be2df1?w=800',
-                rating: 0,
-                reviews: 0,
-                badges: ['New']
-            };
+            // 2. Ambil File Foto
+            const imageInput = document.getElementById('imageUpload');
+            for (const file of imageInput.files) {
+                formData.append('images[]', file);
+            }
+    
+            // 3. Kirim ke API PHP
+            const submitButton = document.getElementById('submitBtn');
+            const originalText = submitButton.textContent;
+            submitButton.disabled = true;
+            submitButton.textContent = 'Memproses...';
+    
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    body: formData 
+                });
+    
+                const data = await response.json();
+    
+                if (response.ok && data.status === 'success') {
+                    alert(data.message);
+                    window.location.href = 'host-dashboard.html'; 
+                } else {
+                    alert('Gagal publikasi/update listing: ' + (data.message || 'Error tidak diketahui'));
+                }
+    
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Terjadi kesalahan koneksi ke server.');
+            } finally {
+                submitButton.disabled = false;
+                submitButton.textContent = originalText;
+            }
+        });
             
-            addHostListing(listing);
-            
-            alert('Listing berhasil dipublikasikan!');
-            window.location.href = 'host-dashboard.html';
+        // Image upload preview 
+        document.querySelector('.image-upload')?.addEventListener('click', function() {
+            document.getElementById('imageUpload')?.click();
         });
         
-        // Image upload preview
-        document.querySelector('.image-upload').addEventListener('click', function() {
-            document.getElementById('imageUpload').click();
-        });
-        
-        document.getElementById('imageUpload').addEventListener('change', function(e) {
+        document.getElementById('imageUpload')?.addEventListener('change', function(e) {
             const files = e.target.files;
             const preview = document.getElementById('imagePreview');
             
@@ -486,6 +632,25 @@
                 reader.readAsDataURL(file);
             });
         });
+    
+        // Inisialisasi: Pengecekan Mode Edit
+        document.addEventListener('DOMContentLoaded', function() {
+            if (typeof requireHost === 'function' && requireHost()) { 
+                const editId = getUrlParameter('edit');
+                const h2Title = document.getElementById('formTitle');
+                
+                if (editId) {
+                    // Mode Edit: Load data
+                    if (h2Title) h2Title.textContent = 'Memuat data...';
+                    loadListingForEdit(editId);
+                } else {
+                    // Mode Create (Default)
+                    if (h2Title) h2Title.textContent = 'Tambah Listing Properti Baru';
+                    updateStep(1); 
+                }
+            }
+        });
+    
     </script>
 </body>
 </html>
