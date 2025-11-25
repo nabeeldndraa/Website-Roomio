@@ -10,7 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Input } from './ui/input';
 import { Textarea } from './ui/textarea';
 import { Label } from './ui/label';
-import { ImageWithFallback } from './figma/ImageWithFallback';
+import { ImageWithFallback } from './card/ImageWithFallback';
 
 interface ListingDetailProps {
   listingId: string | null;

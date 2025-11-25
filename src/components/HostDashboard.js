@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Badge } from './ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table';
-import { ImageWithFallback } from './figma/ImageWithFallback';
+import { ImageWithFallback } from './card/ImageWithFallback';
 
 interface HostDashboardProps {
   currentUser: any;

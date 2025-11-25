@@ -8,7 +8,7 @@ import { Slider } from './ui/slider';
 import { Checkbox } from './ui/checkbox';
 import { Label } from './ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
-import { ImageWithFallback } from './figma/ImageWithFallback';
+import { ImageWithFallback } from './card/ImageWithFallback';
 import Footer from './Footer';
 
 interface SearchResultsProps {

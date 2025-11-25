@@ -149,18 +149,37 @@
         function handleLogin(event) {
             event.preventDefault();
             
-            // ... MOCKING CODE DI SINI ...
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            // Mock login - In production, this would call an API
+            const user = mockLogin(email, password, 'User Demo', 'both');
+            
+            alert('Login berhasil! Selamat datang ' + user.name);
+            window.location.href = 'index.html';
         }
         
         function handleRegister(event) {
             event.preventDefault();
             
-            // ... MOCKING CODE DI SINI ...
+            const name = document.getElementById('registerName').value;
+            const email = document.getElementById('registerEmail').value;
+            const phone = document.getElementById('registerPhone').value;
+            const password = document.getElementById('registerPassword').value;
+            const role = document.getElementById('registerRole').value;
+            
+            // Mock register - In production, this would call an API
+            const user = mockLogin(email, password, name, role);
+            
+            alert('Registrasi berhasil! Selamat datang ' + user.name);
+            window.location.href = 'index.html';
         }
         
         function socialLogin(provider) {
             // Mock social login
-            // ... MOCKING CODE DI SINI ...
+            const user = mockLogin(provider + '@demo.com', '123456', 'User ' + provider, 'user');
+            alert('Login dengan ' + provider + ' berhasil!');
+            window.location.href = 'index.html';
         }
         
         // Check if already logged in
@@ -170,23 +189,6 @@
                 window.location.href = 'index.html';
             }
         });
-    </script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="js/auth.js"></script>
-    <script>
-        // Check if already logged in (fungsi ini tetap penting!)
-        document.addEventListener('DOMContentLoaded', function() {
-            const user = getCurrentUser();
-            if (user) {
-                // Jika user sudah login, langsung arahkan ke beranda
-                window.location.href = 'index.html'; 
-            }
-        });
-
-        // Fungsi socialLogin() juga bisa dipindahkan ke auth.js
-        function socialLogin(provider) {
-            alert('Fitur login dengan ' + provider + ' belum diimplementasikan.');
-        }
     </script>
 </body>
 </html>
