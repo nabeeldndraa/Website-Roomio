@@ -2,7 +2,7 @@
 
 Platform marketplace hyperlocal untuk kos dan kontrakan di Jember yang menghubungkan pemilik properti dengan pencari tempat tinggal (mahasiswa, pekerja, korporat).
 
-## 🚀 Cara Menjalankan
+## Cara Menjalankan
 
 ### Opsi 1: Langsung Buka File HTML
 1. Download atau clone repository ini
@@ -37,7 +37,7 @@ Setelah server berjalan, buka browser dan akses:
 http://localhost:8000
 ```
 
-## 📁 Struktur File
+## Struktur File
 
 ```
 roomio/
@@ -56,36 +56,35 @@ roomio/
 └── README.md             # Dokumentasi ini
 ```
 
-## ✨ Fitur Utama
+## Fitur Utama
 
 ### Untuk Pencari Kos/Kontrakan:
-- 🔍 **Pencarian Advanced** - Filter berdasarkan kategori, lokasi, harga, fasilitas
-- ⭐ **Favorit** - Simpan properti favorit
-- 📅 **Booking** - Sistem booking langsung
-- 💬 **Chat** - Komunikasi dengan pemilik properti
-- 📱 **Responsive** - Mobile-friendly design
+- Pencarian Advanced - Filter berdasarkan kategori, lokasi, harga, fasilitas
+- Favorit - Simpan properti favorit
+- Booking - Sistem booking langsung
+- Notifikasi - Komunikasi dengan pemilik properti
+- Responsive - Mobile-friendly design
 
 ### Untuk Pemilik Properti (Host):
-- ➕ **Tambah Listing** - Form multi-step yang mudah
-- 📊 **Dashboard** - Kelola semua listing Anda
-- 📈 **Statistik** - Lihat performa listing
-- 💬 **Inbox** - Terima dan balas pertanyaan calon penyewa
+- Tambah Listing - Form multi-step yang mudah
+- Dashboard - Kelola semua listing Anda
+- Statistik - Lihat performa listing
+- Inbox - Terima dan balas pertanyaan calon penyewa
 
 ### Fitur Umum:
-- 🔐 **Autentikasi** - Login/Register dengan role (User/Host/Both)
-- 👤 **Profil** - Kelola informasi pribadi
-- 📍 **Lokasi** - Fokus hyperlocal area Jember
-- ✅ **Verifikasi** - Badge untuk listing terverifikasi
+- Autentikasi - Login/Register dengan role (User/Host/Both)
+- Profil - Kelola informasi pribadi
+- Lokasi - Fokus hyperlocal area Jember
+- Verifikasi - Badge untuk listing terverifikasi
 
 ## 🎨 Teknologi yang Digunakan
 
-- **HTML5** - Struktur halaman
-- **Bootstrap 5.3** - Framework CSS untuk styling dan komponen
-- **Bootstrap Icons** - Icon library
-- **JavaScript (Vanilla)** - Interaktivitas
-- **LocalStorage** - Penyimpanan data sementara di browser
+- HTML5 - Struktur halaman
+- Bootstrap 5.3 - Framework CSS untuk styling dan komponen
+- JavaScript (Vanilla) - Interaktivitas
+- LocalStorage - Penyimpanan data sementara di browser
 
-## 📖 Panduan Penggunaan
+## Panduan Penggunaan
 
 ### Untuk Pencari Kos:
 
@@ -129,7 +128,7 @@ roomio/
    - Edit atau hapus listing
    - Pantau statistik
 
-## 🔐 Demo Akun
+## Demo Akun
 
 Untuk testing, Anda bisa login dengan data apapun. Sistem akan otomatis membuat akun demo.
 
@@ -138,7 +137,7 @@ Untuk testing, Anda bisa login dengan data apapun. Sistem akan otomatis membuat 
 - Password: `password123`
 - Role: Pilih sesuai kebutuhan
 
-## 🌟 Fitur Mock/Demo
+## Fitur Mock/Demo
 
 Aplikasi ini menggunakan data mock untuk demonstrasi:
 
@@ -148,7 +147,7 @@ Aplikasi ini menggunakan data mock untuk demonstrasi:
 - **Chat:** Percakapan simulasi
 - **Upload Foto:** Preview lokal (tidak di-upload ke server)
 
-## 💾 Data Storage
+## Data Storage
 
 Semua data disimpan di **Browser LocalStorage**:
 - `currentUser` - Data user yang sedang login
@@ -158,7 +157,7 @@ Semua data disimpan di **Browser LocalStorage**:
 
 **Note:** Data akan hilang jika LocalStorage di-clear atau browser di-reset.
 
-## 🎯 Roadmap & Pengembangan Lebih Lanjut
+## Roadmap & Pengembangan Lebih Lanjut
 
 Untuk mengubah ini menjadi aplikasi production-ready:
 
@@ -189,30 +188,29 @@ Untuk mengubah ini menjadi aplikasi production-ready:
 
 ## 📱 Browser Support
 
-- ✅ Chrome (Recommended)
-- ✅ Firefox
-- ✅ Safari
-- ✅ Edge
-- ✅ Opera
+- Chrome (Recommended)
+- Firefox
+- Safari
+- Edge
+- Opera
 
-## 🐛 Known Issues
+## Known Issues
 
 - Upload foto hanya preview, tidak tersimpan permanen
 - Data akan hilang jika LocalStorage di-clear
 - Google Maps belum terintegrasi (placeholder)
 - Payment gateway belum diimplementasi
 
-## 📄 License
+## License
 
 Project ini dibuat untuk keperluan portfolio dan pembelajaran.
 
-## 👨‍💻 Developer
+## 👨Developer
 
-Dikembangkan dengan ❤️ menggunakan Bootstrap 5
+Dikembangkan dengan menggunakan Bootstrap 5
 
 ---
-
-## 🆘 Troubleshooting
+## Troubleshooting
 
 ### Website tidak bisa dibuka
 - Pastikan semua file dalam satu folder
@@ -233,6 +231,6 @@ Dikembangkan dengan ❤️ menggunakan Bootstrap 5
 
 ---
 
-**Selamat mencoba! 🎉**
+**Selamat mencoba!**
 
 Untuk pertanyaan atau bantuan, silakan buka GitHub Issues.
