@@ -291,64 +291,111 @@
             `).join('');
         }
         
-        function loadBookings() {
-            const bookings = getBookings();
+        async function loadBookings() {
             const container = document.getElementById('bookingsList');
             const noBookings = document.getElementById('noBookings');
             
-            if (bookings.length === 0) {
-                container.innerHTML = '';
-                noBookings.classList.remove('d-none');
-                return;
-            }
-            
-            noBookings.classList.add('d-none');
-            
-            container.innerHTML = bookings.map(booking => {
-                const statusBadge = {
-                    'pending': 'bg-warning',
-                    'confirmed': 'bg-success',
-                    'cancelled': 'bg-danger'
-                }[booking.status] || 'bg-secondary';
+            try {
+                const response = await fetch('api/get_user_bookings.php');
+                const result = await response.json();
                 
-                const statusText = {
-                    'pending': 'Menunggu',
-                    'confirmed': 'Dikonfirmasi',
-                    'cancelled': 'Dibatalkan'
-                }[booking.status] || 'Pending';
-                
-                return `
-                    <div class="col-12">
-                        <div class="card shadow-sm">
-                            <div class="card-body">
-                                <div class="row align-items-center">
-                                    <div class="col-md-3">
-                                        <img src="${booking.listing.image}" class="img-fluid rounded" alt="${booking.listing.title}">
-                                    </div>
-                                    <div class="col-md-6">
-                                        <h6 class="mb-2">${booking.listing.title}</h6>
-                                        <p class="text-muted small mb-2">
-                                            <i class="bi bi-geo-alt me-1"></i>${booking.listing.location}
-                                        </p>
-                                        <p class="mb-2">
-                                            <strong>Check-in:</strong> ${new Date(booking.checkIn).toLocaleDateString('id-ID')}<br>
-                                            <strong>Durasi:</strong> ${booking.duration} bulan
-                                        </p>
-                                        <span class="badge ${statusBadge}">${statusText}</span>
-                                    </div>
-                                    <div class="col-md-3 text-end">
-                                        <h5 class="text-primary mb-3">Rp ${(booking.listing.price * parseInt(booking.duration)).toLocaleString('id-ID')}</h5>
-                                        <a href="listing-detail.html?id=${booking.listing.id}" class="btn btn-sm btn-outline-primary d-block mb-2">Lihat Detail</a>
-                                        ${booking.status === 'pending' ? `
-                                            <button class="btn btn-sm btn-outline-danger d-block" onclick="cancelBooking('${booking.id}')">Batalkan</button>
-                                        ` : ''}
+                if (result.status === 'success') {
+                    const bookings = result.data;
+                    console.log('Bookings data:', bookings); // Debug log
+                    
+                    if (bookings.length === 0) {
+                        container.innerHTML = '';
+                        noBookings.classList.remove('d-none');
+                        return;
+                    }
+                    
+                    noBookings.classList.add('d-none');
+                    
+                    container.innerHTML = bookings.map(booking => {
+                        const statusBadge = {
+                            'pending': 'bg-warning',
+                            'terisi': 'bg-success',
+                            'selesai': 'bg-info',
+                            'dibatalkan': 'bg-danger'
+                        }[booking.status] || 'bg-secondary';
+                        
+                        const statusText = {
+                            'pending': 'Menunggu Konfirmasi',
+                            'terisi': 'Aktif',
+                            'selesai': 'Selesai',
+                            'dibatalkan': 'Dibatalkan'
+                        }[booking.status] || 'Pending';
+                        
+                        const statusBayarBadge = {
+                            'pending': 'bg-warning',
+                            'lunas': 'bg-success',
+                            'gagal': 'bg-danger'
+                        }[booking.status_bayar] || 'bg-secondary';
+                        
+                        const statusBayarText = {
+                            'pending': 'Belum Bayar',
+                            'lunas': 'Lunas',
+                            'gagal': 'Gagal'
+                        }[booking.status_bayar] || 'Pending';
+                        
+                        return `
+                            <div class="col-12">
+                                <div class="card shadow-sm">
+                                    <div class="card-body">
+                                        <div class="row align-items-center">
+                                            <div class="col-md-3">
+                                                <img src="${booking.image}" class="img-fluid rounded" alt="${booking.title}" style="height: 150px; object-fit: cover; width: 100%;">
+                                            </div>
+                                            <div class="col-md-6">
+                                                <h6 class="mb-2">${booking.title}</h6>
+                                                <p class="text-muted small mb-2">
+                                                    <i class="bi bi-geo-alt me-1"></i>${booking.location}
+                                                </p>
+                                                <p class="mb-2">
+                                                    <strong>Check-in:</strong> ${new Date(booking.checkIn).toLocaleDateString('id-ID')}<br>
+                                                    <strong>Check-out:</strong> ${new Date(booking.checkOut).toLocaleDateString('id-ID')}<br>
+                                                    <strong>Durasi:</strong> ${booking.duration} bulan
+                                                </p>
+                                                <div class="d-flex gap-2">
+                                                    <span class="badge ${statusBadge}">${statusText}</span>
+                                                    <span class="badge ${statusBayarBadge}">${statusBayarText}</span>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3 text-end">
+                                                <h5 class="text-primary mb-3">Rp ${booking.total_harga.toLocaleString('id-ID')}</h5>
+                                                <a href="listing-detail.html?id=${booking.id_properti}" class="btn btn-sm btn-outline-primary d-block mb-2">
+                                                    <i class="bi bi-eye me-1"></i>Lihat Detail
+                                                </a>
+                                                ${booking.status !== 'dibatalkan' && booking.status !== 'selesai' ? `
+                                                    <button class="btn btn-sm btn-outline-danger d-block mb-2" onclick="cancelBooking(${booking.id})">
+                                                        <i class="bi bi-x-circle me-1"></i>Batalkan
+                                                    </button>
+                                                ` : ''}
+                                                ${booking.status_bayar === 'pending' && booking.status !== 'dibatalkan' ? `
+                                                    <button class="btn btn-sm btn-success d-block" onclick="bayarBooking(${booking.id})">
+                                                        <i class="bi bi-credit-card me-1"></i>Bayar Sekarang
+                                                    </button>
+                                                ` : ''}
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    </div>
-                `;
-            }).join('');
+                        `;
+                    }).join('');
+                } else {
+                    if (response.status === 401) {
+                        window.location.href = 'login.html';
+                        return;
+                    }
+                    noBookings.classList.remove('d-none');
+                    container.innerHTML = '';
+                }
+            } catch (error) {
+                console.error('Error loading bookings:', error);
+                noBookings.classList.remove('d-none');
+                container.innerHTML = '';
+            }
         }
         
         function removeFavorite(id) {
@@ -356,11 +403,53 @@
             loadFavorites();
         }
         
-        function cancelBooking(id) {
-            if (confirm('Apakah Anda yakin ingin membatalkan booking ini?')) {
-                // In real app, this would call an API
-                alert('Booking dibatalkan');
-                loadBookings();
+        async function bayarBooking(id) {
+            alert('Fitur pembayaran akan segera tersedia!\n\nAnda akan diarahkan ke halaman pembayaran.');
+        }
+        
+        async function cancelBooking(id) {
+            if (!confirm('Apakah Anda yakin ingin membatalkan booking ini?')) {
+                return;
+            }
+            
+            // Show loading state
+            const button = event.target;
+            const originalText = button.innerHTML;
+            button.disabled = true;
+            button.innerHTML = '<i class="bi bi-hourglass-split me-1"></i>Memproses...';
+            
+            try {
+                const response = await fetch('api/cancel_booking.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ id_sewa: id })
+                });
+                
+                const result = await response.json();
+                console.log('Cancel booking response:', result); // Debug log
+                
+                if (result.status === 'success') {
+                    alert('✅ Booking berhasil dibatalkan');
+                    loadBookings();
+                } else {
+                    alert('❌ Gagal membatalkan booking:\n' + result.message);
+                    button.disabled = false;
+                    button.innerHTML = originalText;
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('❌ Terjadi kesalahan saat membatalkan booking');
+                button.disabled = false;
+                button.innerHTML = originalText;
+            }
+        }
+        
+        function logout() {
+            if (confirm('Apakah Anda yakin ingin keluar?')) {
+                localStorage.removeItem('user');
+                window.location.href = 'login.html';
             }
         }
         

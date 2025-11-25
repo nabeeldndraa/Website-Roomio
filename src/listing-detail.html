@@ -606,13 +606,64 @@
         document.getElementById("reviewsList").innerHTML = '<div class="alert alert-info">Belum ada ulasan untuk properti ini</div>';
       }
 
-      function bookNow() {
+      async function bookNow() {
         const checkIn = document.getElementById("checkInDate").value;
+        const duration = parseInt(document.getElementById("duration").value);
+        
         if (!checkIn) {
           alert("Pilih tanggal masuk terlebih dahulu");
           return;
         }
-        alert("Fitur booking akan segera tersedia!");
+        
+        // Validate date is not in the past
+        const selectedDate = new Date(checkIn);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        
+        if (selectedDate < today) {
+          alert("Tanggal masuk tidak boleh di masa lalu");
+          return;
+        }
+        
+        // Calculate total
+        const monthlyPrice = currentListing.price;
+        const deposit = currentListing.deposit;
+        const total = (monthlyPrice * duration) + deposit;
+        
+        // Confirm booking
+        if (!confirm(`Konfirmasi booking:\n\nProperti: ${currentListing.title}\nTanggal Masuk: ${checkIn}\nDurasi: ${duration} bulan\nTotal: Rp ${total.toLocaleString('id-ID')}\n\nLanjutkan booking?`)) {
+          return;
+        }
+        
+        try {
+          const response = await fetch('api/create_booking.php', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              id_properti: currentListing.id,
+              tanggal_masuk: checkIn,
+              durasi_bulan: duration,
+              total_harga: total
+            })
+          });
+          
+          const result = await response.json();
+          
+          if (result.status === 'success') {
+            alert('Booking berhasil dibuat! Silakan lakukan pembayaran.');
+            window.location.href = 'user-dashboard.html';
+          } else {
+            alert('Gagal membuat booking: ' + result.message);
+            if (response.status === 401) {
+              window.location.href = 'auth.html';
+            }
+          }
+        } catch (error) {
+          console.error('Error:', error);
+          alert('Terjadi kesalahan saat membuat booking');
+        }
       }
 
       function contactHost() {

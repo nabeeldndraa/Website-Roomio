@@ -1,5 +1,38 @@
-// Mock listings data
-function getFeaturedListings() {
+// ==================== DATABASE FETCH ====================
+let allListings = [];
+
+async function fetchListingsFromDB(filters = {}) {
+  try {
+    const params = new URLSearchParams();
+    
+    if (filters.search) params.append('search', filters.search);
+    if (filters.category) params.append('category', filters.category);
+    if (filters.location) params.append('location', filters.location);
+    if (filters.priceMin) params.append('priceMin', filters.priceMin);
+    if (filters.priceMax) params.append('priceMax', filters.priceMax);
+    
+    const response = await fetch(`api/get_listings.php?${params.toString()}`);
+    const result = await response.json();
+    
+    if (result.success) {
+      allListings = result.data;
+      return allListings;
+    } else {
+      console.error('Error fetching listings:', result.error);
+      // Fallback to mock data if database fails
+      allListings = getMockListings();
+      return allListings;
+    }
+  } catch (error) {
+    console.error('Network error:', error);
+    // Fallback to mock data if network fails
+    allListings = getMockListings();
+    return allListings;
+  }
+}
+
+// ==================== MOCK DATA (FALLBACK) ====================
+function getMockListings() {
   return [
     {
       id: "1",
@@ -112,42 +145,109 @@ function getFeaturedListings() {
   ];
 }
 
-function getListingById(id) {
-  const listings = getFeaturedListings();
-  return listings.find((l) => l.id === id);
+// ==================== MAIN FUNCTIONS ====================
+function getFeaturedListings() {
+  // Return from allListings if available, otherwise return mock data
+  if (allListings.length > 0) {
+    return allListings.slice(0, 6);
+  }
+  return getMockListings();
+}
+
+async function getListingById(id) {
+  // Try to get from database first
+  try {
+    const response = await fetch(`api/get_listing_detail.php?id=${id}`);
+    const result = await response.json();
+    
+    if (result.success) {
+      return result.data;
+    }
+  } catch (error) {
+    console.error('Error fetching listing detail:', error);
+  }
+  
+  // Fallback to mock data
+  const mockListings = getMockListings();
+  return mockListings.find((l) => l.id === id);
 }
 
 function searchListings(query, category, location, priceRange) {
-  let listings = getFeaturedListings();
+  let listings = allListings.length > 0 ? [...allListings] : getMockListings();
 
+  // Search filter
   if (query) {
     query = query.toLowerCase();
-    listings = listings.filter((l) => l.title.toLowerCase().includes(query) || l.location.toLowerCase().includes(query) || l.description.toLowerCase().includes(query));
+    listings = listings.filter(
+      (l) =>
+        l.title.toLowerCase().includes(query) ||
+        l.location.toLowerCase().includes(query) ||
+        (l.description && l.description.toLowerCase().includes(query)) ||
+        (l.address && l.address.toLowerCase().includes(query))
+    );
   }
 
+  // Category filter
   if (category) {
     listings = listings.filter((l) => {
-      if (category === "kos-mahasiswa") return l.badges.includes("Student-Friendly");
-      if (category === "kos-profesional") return l.type.includes("Kos") && !l.badges.includes("Student-Friendly");
+      if (category === "kos-mahasiswa") return l.badges && l.badges.includes("Student-Friendly");
+      if (category === "kos-profesional") return l.type.includes("Kos") && (!l.badges || !l.badges.includes("Student-Friendly"));
       if (category === "kontrakan") return l.type === "Kontrakan";
+      
+      // For specific kos types
+      const typeMap = {
+        'kos-putri': 'putri',
+        'kos-putra': 'putra',
+        'kos-campur': 'campur',
+        'kos-bebas': 'bebas'
+      };
+      const searchType = typeMap[category];
+      if (searchType) {
+        return l.type.toLowerCase().includes(searchType);
+      }
+      
       return true;
     });
   }
 
+  // Location filter
   if (location) {
     location = location.toLowerCase();
     listings = listings.filter((l) => l.location.toLowerCase().includes(location));
   }
 
+  // Price range filter
   if (priceRange) {
     const [min, max] = priceRange.split("-").map(Number);
     listings = listings.filter((l) => l.price >= min && l.price <= max);
   }
 
+  // Facility filters
+  const facilities = [];
+  const acCheck = document.getElementById('acCheck');
+  const kipasCheck = document.getElementById('kipasCheck');
+  const kmDalamCheck = document.getElementById('kmDalamCheck');
+  const kmLuarCheck = document.getElementById('kmLuarCheck');
+  
+  if (acCheck && acCheck.checked) facilities.push('AC');
+  if (kipasCheck && kipasCheck.checked) facilities.push('Kipas Angin');
+  if (kmDalamCheck && kmDalamCheck.checked) facilities.push('Kamar Mandi Dalam');
+  if (kmLuarCheck && kmLuarCheck.checked) facilities.push('Kamar Mandi Luar');
+  
+  if (facilities.length > 0) {
+    listings = listings.filter(listing => 
+      facilities.every(facility => 
+        listing.facilities && listing.facilities.some(f => 
+          f.toLowerCase().includes(facility.toLowerCase())
+        )
+      )
+    );
+  }
+
   return listings;
 }
 
-// Favorites management
+// ==================== FAVORITES MANAGEMENT ====================
 function getFavorites() {
   const favStr = localStorage.getItem("favorites");
   return favStr ? JSON.parse(favStr) : [];
@@ -172,7 +272,7 @@ function isFavorite(listingId) {
   return favorites.includes(listingId);
 }
 
-// Bookings management
+// ==================== BOOKINGS MANAGEMENT ====================
 function getBookings() {
   const bookingsStr = localStorage.getItem("bookings");
   return bookingsStr ? JSON.parse(bookingsStr) : [];
@@ -194,7 +294,24 @@ function addBooking(listing, checkIn, duration) {
   return booking;
 }
 
-// Host listings management
+function updateBookingStatus(bookingId, status) {
+  let bookings = getBookings();
+  const index = bookings.findIndex(b => b.id === bookingId);
+  if (index !== -1) {
+    bookings[index].status = status;
+    localStorage.setItem('bookings', JSON.stringify(bookings));
+    return bookings[index];
+  }
+  return null;
+}
+
+function deleteBooking(bookingId) {
+  let bookings = getBookings();
+  bookings = bookings.filter(b => b.id !== bookingId);
+  localStorage.setItem('bookings', JSON.stringify(bookings));
+}
+
+// ==================== HOST LISTINGS MANAGEMENT ====================
 function getHostListings() {
   const listingsStr = localStorage.getItem("hostListings");
   return listingsStr ? JSON.parse(listingsStr) : [];
@@ -225,3 +342,9 @@ function deleteHostListing(id) {
   listings = listings.filter((l) => l.id !== id);
   localStorage.setItem("hostListings", JSON.stringify(listings));
 }
+
+// ==================== INITIALIZATION ====================
+// Auto-load data from database when page loads
+window.addEventListener('DOMContentLoaded', () => {
+  fetchListingsFromDB();
+});
