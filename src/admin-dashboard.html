@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Roomio</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    
+    <style>
+        :root {
+            --primary-color: #2563eb;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #f9fafb;
+        }
+        
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            width: 260px;
+            background: white;
+            border-right: 1px solid #e5e7eb;
+            z-index: 1000;
+            transition: transform 0.3s ease;
+        }
+        
+        @media (max-width: 991px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            .sidebar.show {
+                transform: translateX(0);
+            }
+        }
+        
+        .main-content {
+            margin-left: 260px;
+            min-height: 100vh;
+        }
+        
+        @media (max-width: 991px) {
+            .main-content {
+                margin-left: 0;
+            }
+        }
+        
+        .stat-card {
+            border-radius: 0.75rem;
+            border: 1px solid #e5e7eb;
+            transition: all 0.3s;
+        }
+        
+        .stat-card:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transform: translateY(-2px);
+        }
+        
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        
+        .status-pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        
+        .status-approved {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        
+        .status-rejected {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        
+        .listing-card {
+            border: 1px solid #e5e7eb;
+            border-radius: 0.5rem;
+            transition: all 0.3s;
+        }
+        
+        .listing-card:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="p-4 border-bottom">
+            <div class="d-flex align-items-center">
+                <i class="bi bi-shield-check text-danger fs-2 me-2"></i>
+                <div>
+                    <h5 class="mb-0 text-danger">Admin Panel</h5>
+                    <small class="text-muted">Roomio</small>
+                </div>
+            </div>
+        </div>
+        
+        <nav class="px-3 py-3">
+            <a href="#dashboard" class="nav-link active mb-2" onclick="showSection('dashboard')">
+                <i class="bi bi-speedometer2 me-2"></i>
+                Dashboard
+            </a>
+            <a href="#pending" class="nav-link mb-2" onclick="showSection('pending')">
+                <i class="bi bi-clock-history me-2"></i>
+                Listing Pending
+                <span class="badge bg-warning ms-auto" id="pendingCount">0</span>
+            </a>
+            <a href="#listings" class="nav-link mb-2" onclick="showSection('listings')">
+                <i class="bi bi-building me-2"></i>
+                Semua Listing
+            </a>
+            <a href="#users" class="nav-link mb-2" onclick="showSection('users')">
+                <i class="bi bi-people me-2"></i>
+                Pengguna
+            </a>
+        </nav>
+        
+        <div class="position-absolute bottom-0 start-0 end-0 p-3 border-top">
+            <a href="index.html" class="btn btn-outline-secondary w-100 mb-2">
+                <i class="bi bi-arrow-left me-2"></i>
+                Ke Website
+            </a>
+            <button class="btn btn-danger w-100" onclick="logout()">
+                <i class="bi bi-box-arrow-right me-2"></i>
+                Keluar
+            </button>
+        </div>
+    </aside>
+    
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Mobile Header -->
+        <div class="d-lg-none bg-white border-bottom p-3">
+            <div class="d-flex align-items-center justify-content-between">
+                <button class="btn btn-link" onclick="toggleSidebar()">
+                    <i class="bi bi-list fs-4"></i>
+                </button>
+                <h5 class="mb-0">Admin Panel</h5>
+                <div style="width: 40px;"></div>
+            </div>
+        </div>
+        
+        <!-- Dashboard Section -->
+        <div id="dashboardSection" class="section-content">
+            <div class="p-4">
+                <h2 class="mb-4">Dashboard Admin</h2>
+                
+                <!-- Stats Cards -->
+                <div class="row g-4 mb-5">
+                    <div class="col-md-3">
+                        <div class="stat-card bg-primary bg-gradient text-white p-4">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div>
+                                    <div class="text-white-50 small mb-1">Total Pengguna</div>
+                                    <h3 class="mb-0" id="statUsers">0</h3>
+                                </div>
+                                <i class="bi bi-people fs-1 opacity-50"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-3">
+                        <div class="stat-card bg-warning bg-gradient text-white p-4">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div>
+                                    <div class="text-white-50 small mb-1">Pending</div>
+                                    <h3 class="mb-0" id="statPending">0</h3>
+                                </div>
+                                <i class="bi bi-clock-history fs-1 opacity-50"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-3">
+                        <div class="stat-card bg-success bg-gradient text-white p-4">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div>
+                                    <div class="text-white-50 small mb-1">Disetujui</div>
+                                    <h3 class="mb-0" id="statApproved">0</h3>
+                                </div>
+                                <i class="bi bi-check-circle fs-1 opacity-50"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-3">
+                        <div class="stat-card bg-danger bg-gradient text-white p-4">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div>
+                                    <div class="text-white-50 small mb-1">Ditolak</div>
+                                    <h3 class="mb-0" id="statRejected">0</h3>
+                                </div>
+                                <i class="bi bi-x-circle fs-1 opacity-50"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Recent Activity -->
+                <div class="card">
+                    <div class="card-header bg-white">
+                        <h5 class="mb-0">Aktivitas Terbaru</h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="text-muted">Fitur aktivitas akan segera ditambahkan</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Pending Listings Section -->
+        <div id="pendingSection" class="section-content d-none">
+            <div class="p-4">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2 class="mb-0">Listing Pending</h2>
+                    <button class="btn btn-outline-secondary" onclick="loadPendingListings()">
+                        <i class="bi bi-arrow-clockwise me-2"></i>
+                        Refresh
+                    </button>
+                </div>
+                
+                <div id="pendingListingsContainer">
+                    <!-- Pending listings will be loaded here -->
+                </div>
+            </div>
+        </div>
+        
+        <!-- All Listings Section -->
+        <div id="listingsSection" class="section-content d-none">
+            <div class="p-4">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2 class="mb-0">Semua Listing</h2>
+                    <div class="btn-group">
+                        <button class="btn btn-outline-secondary" onclick="filterListings('')">Semua</button>
+                        <button class="btn btn-outline-warning" onclick="filterListings('pending')">Pending</button>
+                        <button class="btn btn-outline-success" onclick="filterListings('approved')">Disetujui</button>
+                        <button class="btn btn-outline-danger" onclick="filterListings('rejected')">Ditolak</button>
+                    </div>
+                </div>
+                
+                <div id="allListingsContainer">
+                    <!-- All listings will be loaded here -->
+                </div>
+            </div>
+        </div>
+        
+        <!-- Users Section -->
+        <div id="usersSection" class="section-content d-none">
+            <div class="p-4">
+                <h2 class="mb-4">Manajemen Pengguna</h2>
+                
+                <div class="card">
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover" id="usersTable">
+                                <thead>
+                                    <tr>
+                                        <th>Nama</th>
+                                        <th>Email</th>
+                                        <th>Role</th>
+                                        <th>Status</th>
+                                        <th>Bergabung</th>
+                                        <th>Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="usersTableBody">
+                                    <!-- Users will be loaded here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <!-- Approval Modal -->
+    <div class="modal fade" id="approvalModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Konfirmasi Persetujuan</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Apakah Anda yakin ingin menyetujui listing ini?</p>
+                    <p class="text-muted small">Listing akan langsung muncul di pencarian setelah disetujui.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="button" class="btn btn-success" onclick="confirmApprove()">
+                        <i class="bi bi-check-circle me-2"></i>
+                        Setujui
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Rejection Modal -->
+    <div class="modal fade" id="rejectionModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Tolak Listing</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Alasan Penolakan *</label>
+                        <textarea class="form-control" id="rejectionReason" rows="4" 
+                                  placeholder="Masukkan alasan penolakan yang jelas..."></textarea>
+                    </div>
+                    <p class="text-muted small">
+                        <i class="bi bi-info-circle me-1"></i>
+                        Alasan akan dikirim ke pemilik listing melalui notifikasi.
+                    </p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="button" class="btn btn-danger" onclick="confirmReject()">
+                        <i class="bi bi-x-circle me-2"></i>
+                        Tolak Listing
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/notifications.js"></script>
+    
+    <script>
+        let currentListingId = null;
+        let approvalModal, rejectionModal;
+        
+        // Check if user is admin
+        const user = getCurrentUser();
+        if (!user || user.role !== 'admin') {
+            notify.error('Anda harus login sebagai admin untuk mengakses halaman ini', 'Akses Ditolak');
+            setTimeout(() => {
+                window.location.href = 'index.html';
+            }, 2000);
+        }
+        
+        // Initialize modals
+        document.addEventListener('DOMContentLoaded', function() {
+            approvalModal = new bootstrap.Modal(document.getElementById('approvalModal'));
+            rejectionModal = new bootstrap.Modal(document.getElementById('rejectionModal'));
+            
+            loadDashboardStats();
+            loadPendingListings();
+        });
+        
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('show');
+        }
+        
+        function showSection(section) {
+            // Hide all sections
+            document.querySelectorAll('.section-content').forEach(s => s.classList.add('d-none'));
+            
+            // Show selected section
+            document.getElementById(section + 'Section').classList.remove('d-none');
+            
+            // Update nav active state
+            document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
+            event.target.closest('.nav-link').classList.add('active');
+            
+            // Load data based on section
+            if (section === 'pending') {
+                loadPendingListings();
+            } else if (section === 'listings') {
+                filterListings('');
+            } else if (section === 'users') {
+                loadUsers();
+            }
+        }
+        
+        // Load dashboard statistics
+        function loadDashboardStats() {
+            // Mock data - replace with actual API call
+            const stats = {
+                total_users: 145,
+                listings: {
+                    pending: 8,
+                    approved: 42,
+                    rejected: 3,
+                    archived: 2
+                }
+            };
+            
+            document.getElementById('statUsers').textContent = stats.total_users;
+            document.getElementById('statPending').textContent = stats.listings.pending;
+            document.getElementById('statApproved').textContent = stats.listings.approved;
+            document.getElementById('statRejected').textContent = stats.listings.rejected;
+            document.getElementById('pendingCount').textContent = stats.listings.pending;
+        }
+        
+        // Load pending listings
+        function loadPendingListings() {
+            const container = document.getElementById('pendingListingsContainer');
+            
+            // Mock data - replace with actual API call to api/admin.php?action=pending
+            const pendingListings = [
+                {
+                    id: '101',
+                    title: 'Kos Modern Strategis di Pusat Kota',
+                    owner_name: 'Budi Santoso',
+                    owner_email: 'budi@example.com',
+                    category: 'kos-putra',
+                    price: 1500000,
+                    address: 'Jl. Sudirman No. 45, Kaliwates',
+                    created_at: '2024-11-18 10:30:00',
+                    image: 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=400'
+                }
+            ];
+            
+            if (pendingListings.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-5">
+                        <i class="bi bi-check-circle text-success fs-1 mb-3"></i>
+                        <h5>Tidak Ada Listing Pending</h5>
+                        <p class="text-muted">Semua listing sudah diproses</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            container.innerHTML = pendingListings.map(listing => `
+                <div class="listing-card mb-3">
+                    <div class="row g-0">
+                        <div class="col-md-3">
+                            <img src="${listing.image}" class="img-fluid rounded-start h-100 object-fit-cover" alt="${listing.title}">
+                        </div>
+                        <div class="col-md-9">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <div>
+                                        <h5 class="card-title mb-1">${listing.title}</h5>
+                                        <p class="text-muted small mb-2">
+                                            <i class="bi bi-person me-1"></i> ${listing.owner_name}
+                                            <span class="mx-2">•</span>
+                                            <i class="bi bi-envelope me-1"></i> ${listing.owner_email}
+                                        </p>
+                                    </div>
+                                    <span class="status-badge status-pending">
+                                        <i class="bi bi-clock-history me-1"></i>
+                                        Pending
+                                    </span>
+                                </div>
+                                
+                                <div class="row g-3 mb-3">
+                                    <div class="col-md-6">
+                                        <small class="text-muted d-block">Kategori</small>
+                                        <span class="badge bg-light text-dark">${listing.category}</span>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <small class="text-muted d-block">Harga</small>
+                                        <strong class="text-primary">Rp ${listing.price.toLocaleString('id-ID')}</strong>/bulan
+                                    </div>
+                                </div>
+                                
+                                <p class="small text-muted mb-3">
+                                    <i class="bi bi-geo-alt me-1"></i>
+                                    ${listing.address}
+                                </p>
+                                
+                                <div class="d-flex gap-2">
+                                    <button class="btn btn-success btn-sm" onclick="showApprovalModal('${listing.id}')">
+                                        <i class="bi bi-check-circle me-1"></i>
+                                        Setujui
+                                    </button>
+                                    <button class="btn btn-danger btn-sm" onclick="showRejectionModal('${listing.id}')">
+                                        <i class="bi bi-x-circle me-1"></i>
+                                        Tolak
+                                    </button>
+                                    <a href="listing-detail.html?id=${listing.id}" class="btn btn-outline-primary btn-sm" target="_blank">
+                                        <i class="bi bi-eye me-1"></i>
+                                        Lihat Detail
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        // Show approval modal
+        function showApprovalModal(listingId) {
+            currentListingId = listingId;
+            approvalModal.show();
+        }
+        
+        // Show rejection modal
+        function showRejectionModal(listingId) {
+            currentListingId = listingId;
+            document.getElementById('rejectionReason').value = '';
+            rejectionModal.show();
+        }
+        
+        // Confirm approve
+        function confirmApprove() {
+            if (!currentListingId) return;
+            
+            // Mock approval - replace with actual API call
+            console.log('Approving listing:', currentListingId);
+            
+            notify.success('Listing berhasil disetujui!', 'Berhasil!');
+            approvalModal.hide();
+            
+            setTimeout(() => {
+                loadDashboardStats();
+                loadPendingListings();
+            }, 500);
+        }
+        
+        // Confirm reject
+        function confirmReject() {
+            const reason = document.getElementById('rejectionReason').value;
+            
+            if (!reason.trim()) {
+                notify.warning('Mohon masukkan alasan penolakan', 'Alasan Diperlukan');
+                return;
+            }
+            
+            if (!currentListingId) return;
+            
+            // Mock rejection - replace with actual API call
+            console.log('Rejecting listing:', currentListingId, 'Reason:', reason);
+            
+            notify.success('Listing berhasil ditolak', 'Berhasil!');
+            rejectionModal.hide();
+            
+            setTimeout(() => {
+                loadDashboardStats();
+                loadPendingListings();
+            }, 500);
+        }
+        
+        // Filter listings
+        function filterListings(status) {
+            const container = document.getElementById('allListingsContainer');
+            container.innerHTML = '<p class="text-center py-5">Loading...</p>';
+            
+            // Mock - replace with actual API call
+            setTimeout(() => {
+                container.innerHTML = '<p class="text-muted">Data akan dimuat dari API</p>';
+            }, 500);
+        }
+        
+        // Load users
+        function loadUsers() {
+            const tbody = document.getElementById('usersTableBody');
+            
+            // Mock data - replace with actual API call
+            const users = [
+                {
+                    id: '1',
+                    name: 'John Doe',
+                    email: 'john@example.com',
+                    role: 'user',
+                    verified: 1,
+                    created_at: '2024-01-15'
+                },
+                {
+                    id: '2',
+                    name: 'Jane Smith',
+                    email: 'jane@example.com',
+                    role: 'host',
+                    verified: 0,
+                    created_at: '2024-02-20'
+                }
+            ];
+            
+            tbody.innerHTML = users.map(user => `
+                <tr>
+                    <td>${user.name}</td>
+                    <td>${user.email}</td>
+                    <td><span class="badge bg-${user.role === 'host' ? 'primary' : 'secondary'}">${user.role}</span></td>
+                    <td>
+                        ${user.verified 
+                            ? '<span class="badge bg-success">Terverifikasi</span>' 
+                            : '<span class="badge bg-warning">Belum Verifikasi</span>'}
+                    </td>
+                    <td>${new Date(user.created_at).toLocaleDateString('id-ID')}</td>
+                    <td>
+                        ${!user.verified 
+                            ? `<button class="btn btn-sm btn-success" onclick="verifyUser('${user.id}')">Verifikasi</button>`
+                            : '<small class="text-muted">-</small>'}
+                    </td>
+                </tr>
+            `).join('');
+        }
+        
+        // Verify user
+        function verifyUser(userId) {
+            if (confirm('Verifikasi user ini?')) {
+                notify.success('User berhasil diverifikasi', 'Berhasil!');
+                loadUsers();
+            }
+        }
+        
+        function logout() {
+            localStorage.removeItem('currentUser');
+            window.location.href = 'index.html';
+        }
+    </script>
+</body>
+</html>
