@@ -3,6 +3,8 @@ function getFeaturedListings() {
     return [
         {
             id: '1',
+            hostId: '1',
+            host: { id: '1', name: 'Budi Santoso' },
             title: 'Kos Nyaman Dekat Kampus POLIJE',
             type: 'Kos Putri',
             location: 'Tegalboto, Jember',
@@ -21,6 +23,8 @@ function getFeaturedListings() {
         },
         {
             id: '2',
+            hostId: '2',
+            host: { id: '2', name: 'Ibu Siti' },
             title: 'Kontrakan Premium 2 Kamar',
             type: 'Kontrakan',
             location: 'Sumbersari, Jember',
@@ -39,6 +43,8 @@ function getFeaturedListings() {
         },
         {
             id: '3',
+            hostId: '2',
+            host: { id: '2', name: 'Ibu Siti' },
             title: 'Kos Eksklusif untuk Pekerja',
             type: 'Kos Putra',
             location: 'Patrang, Jember',
@@ -57,6 +63,8 @@ function getFeaturedListings() {
         },
         {
             id: '4',
+            hostId: '1',
+            host: { id: '1', name: 'Budi Santoso' },
             title: 'Kos Modern Dekat Alun-Alun',
             type: 'Kos Campur',
             location: 'Kaliwates, Jember',
@@ -75,6 +83,8 @@ function getFeaturedListings() {
         },
         {
             id: '5',
+            hostId: '3',
+            host: { id: '3', name: 'Ayu Lestari' },
             title: 'Kontrakan Minimalis 1 Kamar',
             type: 'Kontrakan',
             location: 'Mangli, Jember',
@@ -93,6 +103,8 @@ function getFeaturedListings() {
         },
         {
             id: '6',
+            hostId: '3',
+            host: { id: '3', name: 'Ayu Lestari' },
             title: 'Kos Nyaman untuk Mahasiswi',
             type: 'Kos Putri',
             location: 'Jember Lor, Jember',
