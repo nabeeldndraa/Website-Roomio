@@ -69,6 +69,18 @@ function updateAuthUI() {
     }
 }
 
+// Simple users mock store - used by profile pages and demo flows
+function getUserById(id) {
+    // In production this should call your backend (e.g. /api/users/:id)
+    const mockUsers = [
+        { id: '1', name: 'Budi Santoso', email: 'budi@example.com', role: 'pemilik', phone: '081234567890', bio: 'Pemilik kos berpengalaman, ramah, respon cepat', joined: '2022' },
+        { id: '2', name: 'Ibu Siti', email: 'siti@example.com', role: 'pemilik', phone: '081298765432', bio: 'Menyewakan beberapa properti dekat kampus', joined: '2021' },
+        { id: '3', name: 'Ayu Lestari', email: 'ayu@example.com', role: 'penyewa', phone: '08135551234', bio: 'Mahasiswi yang sedang mencari kos nyaman', joined: '2023' }
+    ];
+
+    return mockUsers.find(u => String(u.id) === String(id)) || null;
+}
+
 // ---------------------------------
 // BAGIAN 2: Aksi ke API (Gabungan)
 // ---------------------------------

@@ -17,6 +17,7 @@
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
             background: #f9fafb;
         }
+        .mobile-spacer { width: 40px; }
         
         .sidebar {
             position: fixed;
@@ -106,24 +107,31 @@
                 </div>
             </div>
         </div>
+
+        <!-- Transactions placeholder (moved to main content so it shows) -->
         
         <nav class="px-3 py-3">
-            <a href="#dashboard" class="nav-link active mb-2" onclick="showSection('dashboard')">
+            <a href="#dashboard" class="nav-link active mb-2" onclick="showSection('dashboard', event)">
                 <i class="bi bi-speedometer2 me-2"></i>
                 Dashboard
             </a>
-            <a href="#pending" class="nav-link mb-2" onclick="showSection('pending')">
+            <a href="#pending" class="nav-link mb-2" onclick="showSection('pending', event)">
                 <i class="bi bi-clock-history me-2"></i>
                 Listing Pending
                 <span class="badge bg-warning ms-auto" id="pendingCount">0</span>
             </a>
-            <a href="#listings" class="nav-link mb-2" onclick="showSection('listings')">
+            <a href="#listings" class="nav-link mb-2" onclick="showSection('listings', event)">
                 <i class="bi bi-building me-2"></i>
                 Semua Listing
             </a>
-            <a href="#users" class="nav-link mb-2" onclick="showSection('users')">
+            <a href="#users" class="nav-link mb-2" onclick="showSection('users', event)">
                 <i class="bi bi-people me-2"></i>
                 Pengguna
+            </a>
+            <a href="#transactions" class="nav-link mb-2" onclick="showSection('transactions', event)">
+                <i class="bi bi-receipt me-2"></i>
+                Transaksi
+                <span class="badge bg-info ms-auto" id="txnPendingCount">0</span>
             </a>
         </nav>
         
@@ -144,11 +152,11 @@
         <!-- Mobile Header -->
         <div class="d-lg-none bg-white border-bottom p-3">
             <div class="d-flex align-items-center justify-content-between">
-                <button class="btn btn-link" onclick="toggleSidebar()">
+                <button class="btn btn-link" aria-label="Toggle navigation" onclick="toggleSidebar()">
                     <i class="bi bi-list fs-4"></i>
                 </button>
                 <h5 class="mb-0">Admin Panel</h5>
-                <div style="width: 40px;"></div>
+                <div class="mobile-spacer"></div>
             </div>
         </div>
         
@@ -208,6 +216,37 @@
                     </div>
                 </div>
                 
+                <!-- Chart Visualization -->
+                    <div class="card mb-4">
+                <div class="card-header bg-white">
+                     <h5 class="mb-0">Visualisasi Status Listing</h5>
+            </div>
+            <div class="card-body">
+        <canvas id="listingChart" height="120"></canvas>
+    </div>
+</div>
+
+<!-- Container Bar Chart -->
+<div class="card mb-4">
+<div class="card-header bg-white">
+<h5 class="mb-0">Statistik Listing per Kategori</h5>
+</div>
+<div class="card-body">
+<canvas id="barChart" height="120"></canvas>
+</div>
+</div>
+
+
+<!-- Container Map -->
+<div class="card mb-4">
+<div class="card-header bg-white">
+<h5 class="mb-0">Peta Lokasi Properti</h5>
+</div>
+<div class="card-body">
+<div id="map" style="height: 350px; width: 100%; border-radius: 10px;"></div>
+</div>
+</div>
+
                 <!-- Recent Activity -->
                 <div class="card">
                     <div class="card-header bg-white">
@@ -284,6 +323,49 @@
                 </div>
             </div>
         </div>
+
+        <!-- Transactions Section (moved from sidebar so it appears in main content) -->
+        <div id="transactionsSection" class="section-content d-none">
+            <div class="p-4">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2 class="mb-0">Transaksi</h2>
+                    <div>
+                        <button class="btn btn-outline-secondary me-2" onclick="loadTransactions()">
+                            <i class="bi bi-arrow-clockwise me-2"></i>
+                            Refresh
+                        </button>
+                        <button class="btn btn-outline-primary" onclick="openFeeSettings()">
+                            <i class="bi bi-gear me-1"></i>
+                            Pengaturan Fee
+                        </button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover" id="transactionsTable">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Penyewa</th>
+                                        <th>Pemilik</th>
+                                        <th>Listing</th>
+                                        <th>Jumlah</th>
+                                        <th>Fee Admin</th>
+                                        <th>Status</th>
+                                        <th>Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="transactionsTableBody">
+                                    <!-- Transactions will be loaded here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </main>
     
     <!-- Approval Modal -->
@@ -292,7 +374,7 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">Konfirmasi Persetujuan</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <button type="button" class="btn-close" aria-label="Close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
                     <p>Apakah Anda yakin ingin menyetujui listing ini?</p>
@@ -315,7 +397,7 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">Tolak Listing</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <button type="button" class="btn-close" aria-label="Close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
                     <div class="mb-3">
@@ -338,14 +420,114 @@
             </div>
         </div>
     </div>
-    
+
+    <!-- CDN Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!-- CDN Leaflet Map -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script>
+// ================= BAR CHART =====================
+function loadBarChart() {
+    const ctx = document.getElementById('barChart').getContext('2d');
+
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['Kos Putra', 'Kos Putri', 'Kos Campur', 'Kontrakan'],
+            datasets: [{
+                label: 'Jumlah Listing',
+                data: [12, 20, 8, 5], // contoh data
+                backgroundColor: ['#3b82f6', '#10b981', '#facc15', '#ef4444']
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: { beginAtZero: true }
+            }
+        }
+    });
+}
+// ================= BAR CHART =====================
+function loadBarChart() {
+const ctx = document.getElementById('barChart').getContext('2d');
+
+
+new Chart(ctx, {
+type: 'bar',
+data: {
+labels: ['Kos Putra', 'Kos Putri', 'Kos Campur', 'Kontrakan'],
+datasets: [{
+label: 'Jumlah Listing',
+data: [12, 20, 8, 5], // contoh data
+backgroundColor: ['#3b82f6', '#10b981', '#facc15', '#ef4444']
+}]
+},
+options: {
+responsive: true,
+scales: {
+y: { beginAtZero: true }
+}
+}
+});
+}
+
+
+// ================= MAP LEAFLET ====================
+function loadMap() {
+// Set posisi awal peta (contoh: Jakarta)
+const map = L.map('map').setView([-6.200000, 106.816666], 11);
+
+
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+maxZoom: 18,
+}).addTo(map);
+
+
+// Contoh titik properti
+const properties = [
+{ name: 'Kos Putra Harmoni', lat: -6.203, lng: 106.820 },
+{ name: 'Kos Putri Mawar', lat: -6.190, lng: 106.830 },
+{ name: 'Kontrakan Bunga', lat: -6.210, lng: 106.810 }
+];
+
+
+properties.forEach(p => {
+L.marker([p.lat, p.lng]).addTo(map)
+.bindPopup(`<b>${p.name}</b>`);
+});
+}
+
+
+// Panggil fungsi ketika halaman load
+window.onload = function() {
+loadBarChart();
+loadMap();
+};
+
+</script>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="js/auth.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="js/notifications.js"></script>
     
     <script>
         let currentListingId = null;
-        let approvalModal, rejectionModal;
+        let approvalModal, rejectionModal, badgeModal, feeModal, txnVerifyModal;
+        let currentTxnId = null;
+
+        // Simple mock state - replace with API integration later
+        let adminFeePercent = 5; // default admin fee %
+        const listingBadges = {}; // map listingId -> { badge, highlight }
+        const listingFees = {}; // map listingId -> fee (fixed Rp)
+
+        const mockTransactions = [
+            { id: 'T-3001', renter: 'Sari', owner: 'Agus', listing: 'Kos Modern 101', amount: 1500000, fee: 75000, status: 'pending' },
+            { id: 'T-3002', renter: 'Rian', owner: 'Ika', listing: 'Apartemen A', amount: 3000000, fee: 150000, status: 'verified' }
+        ];
         
         // Check if user is admin
         const user = getCurrentUser();
@@ -360,16 +542,42 @@
         document.addEventListener('DOMContentLoaded', function() {
             approvalModal = new bootstrap.Modal(document.getElementById('approvalModal'));
             rejectionModal = new bootstrap.Modal(document.getElementById('rejectionModal'));
-            
+            badgeModal = new bootstrap.Modal(document.getElementById('badgeModal'));
+            feeModal = new bootstrap.Modal(document.getElementById('feeModal'));
+            txnVerifyModal = new bootstrap.Modal(document.getElementById('txnVerifyModal'));
+
             loadDashboardStats();
+            let listingChart = null;
+
+            function loadDashboardStats() {
+    const stats = {
+        total_users: 145,
+        listings: {
+            pending: 8,
+            approved: 42,
+            rejected: 3,
+            archived: 2
+        }
+    };
+
+    document.getElementById('statUsers').textContent = stats.total_users;
+    document.getElementById('statPending').textContent = stats.listings.pending;
+    document.getElementById('statApproved').textContent = stats.listings.approved;
+    document.getElementById('statRejected').textContent = stats.listings.rejected;
+    document.getElementById('pendingCount').textContent = stats.listings.pending;
+
+    // ⭐ Tampilkan Chart
+    renderChart(stats);
+}
             loadPendingListings();
+            loadTransactions();
         });
         
         function toggleSidebar() {
             document.getElementById('sidebar').classList.toggle('show');
         }
         
-        function showSection(section) {
+        function showSection(section, evt) {
             // Hide all sections
             document.querySelectorAll('.section-content').forEach(s => s.classList.add('d-none'));
             
@@ -378,7 +586,17 @@
             
             // Update nav active state
             document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
-            event.target.closest('.nav-link').classList.add('active');
+            // prefer the passed event (evt) and fall back to global if available
+            try {
+                const usedEvent = evt || window.event;
+                const activeEl = usedEvent && usedEvent.target ? usedEvent.target.closest('.nav-link') : null;
+                if (activeEl) activeEl.classList.add('active');
+            } catch (e) { /* ignore */ }
+
+            // On small screens, hide sidebar after navigation so user returns to content
+            if (window.innerWidth <= 991) {
+                document.getElementById('sidebar').classList.remove('show');
+            }
             
             // Load data based on section
             if (section === 'pending') {
@@ -387,6 +605,8 @@
                 filterListings('');
             } else if (section === 'users') {
                 loadUsers();
+            } else if (section === 'transactions') {
+                loadTransactions();
             }
         }
         
@@ -450,7 +670,7 @@
                             <div class="card-body">
                                 <div class="d-flex justify-content-between align-items-start mb-2">
                                     <div>
-                                        <h5 class="card-title mb-1">${listing.title}</h5>
+                                        <h5 class="card-title mb-1">${listing.title} ${listingBadges[listing.id] ? (`<span class="badge bg-info ms-2 text-dark">${listingBadges[listing.id].badge.replace('_',' ')}</span>`) : ''}</h5>
                                         <p class="text-muted small mb-2">
                                             <i class="bi bi-person me-1"></i> ${listing.owner_name}
                                             <span class="mx-2">•</span>
@@ -471,6 +691,7 @@
                                     <div class="col-md-6">
                                         <small class="text-muted d-block">Harga</small>
                                         <strong class="text-primary">Rp ${listing.price.toLocaleString('id-ID')}</strong>/bulan
+                                        <div class="small text-muted mt-1">Fee admin: ${adminFeePercent}% ${listingFees[listing.id] ? `• Fee listing: Rp ${listingFees[listing.id].toLocaleString('id-ID')}` : ''}</div>
                                     </div>
                                 </div>
                                 
@@ -487,6 +708,14 @@
                                     <button class="btn btn-danger btn-sm" onclick="showRejectionModal('${listing.id}')">
                                         <i class="bi bi-x-circle me-1"></i>
                                         Tolak
+                                    </button>
+                                    <button class="btn btn-outline-secondary btn-sm" onclick="showBadgeModal('${listing.id}')">
+                                        <i class="bi bi-award me-1"></i>
+                                        Tambah Badge
+                                    </button>
+                                    <button class="btn btn-outline-warning btn-sm" onclick="showFeeModal('${listing.id}')">
+                                        <i class="bi bi-cash-stack me-1"></i>
+                                        Set Fee
                                     </button>
                                     <a href="listing-detail.html?id=${listing.id}" class="btn btn-outline-primary btn-sm" target="_blank">
                                         <i class="bi bi-eye me-1"></i>
@@ -551,15 +780,167 @@
                 loadPendingListings();
             }, 500);
         }
+
+        // Show badge modal for specific listing
+        function showBadgeModal(listingId) {
+            currentListingId = listingId;
+            // prefill if already exists
+            const b = listingBadges[listingId];
+            document.getElementById('badgeSelect').value = b ? b.badge : '';
+            document.getElementById('badgeHighlight').checked = b ? !!b.highlight : true;
+            badgeModal.show();
+        }
+
+        function assignBadge() {
+            const badge = document.getElementById('badgeSelect').value;
+            const highlight = document.getElementById('badgeHighlight').checked;
+            if (!badge) {
+                notify.warning('Pilih badge dahulu', 'Tidak ada badge');
+                return;
+            }
+            listingBadges[currentListingId] = { badge, highlight };
+            notify.success('Badge disimpan untuk listing', 'Berhasil');
+            badgeModal.hide();
+            // re-render
+            loadPendingListings();
+            filterListings('');
+        }
+
+        // Fee handling
+        function openFeeSettings() {
+            currentListingId = null; // global
+            document.getElementById('adminFeeInput').value = adminFeePercent;
+            document.getElementById('listingFeeInput').value = '';
+            feeModal.show();
+        }
+
+        function showFeeModal(listingId) {
+            currentListingId = listingId;
+            // prefill listing fee if set
+            document.getElementById('listingFeeInput').value = listingFees[listingId] || '';
+            document.getElementById('adminFeeInput').value = adminFeePercent;
+            feeModal.show();
+        }
+
+        function saveFeeSettings() {
+            const adminFee = parseFloat(document.getElementById('adminFeeInput').value || adminFeePercent);
+            const listingFee = parseFloat(document.getElementById('listingFeeInput').value || 0);
+            if (!isNaN(adminFee)) adminFeePercent = adminFee;
+
+            if (currentListingId) {
+                if (!isNaN(listingFee) && listingFee > 0) listingFees[currentListingId] = listingFee;
+                notify.success('Fee listing disimpan', 'Berhasil');
+            } else {
+                notify.success('Fee admin disimpan', 'Berhasil');
+            }
+            feeModal.hide();
+            // update UI
+            loadPendingListings();
+            loadTransactions();
+        }
+
+        // Transactions
+        function loadTransactions() {
+            const tbody = document.getElementById('transactionsTableBody');
+            const pendingCount = mockTransactions.filter(t => t.status === 'pending').length;
+            document.getElementById('txnPendingCount').textContent = pendingCount;
+
+            tbody.innerHTML = mockTransactions.map(txn => {
+                const computedFee = txn.fee ? txn.fee : Math.round(txn.amount * adminFeePercent / 100);
+                return `
+                <tr>
+                    <td>${txn.id}</td>
+                    <td>${txn.renter}</td>
+                    <td>${txn.owner}</td>
+                    <td>${txn.listing}</td>
+                    <td>Rp ${txn.amount.toLocaleString('id-ID')}</td>
+                    <td>Rp ${computedFee.toLocaleString('id-ID')}</td>
+                    <td><span class="badge bg-${txn.status === 'pending' ? 'warning' : txn.status === 'verified' ? 'success' : 'secondary'} text-dark">${txn.status}</span></td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-primary" onclick="showTxnVerifyModal('${txn.id}')">Verifikasi</button>
+                    </td>
+                </tr>
+            `; }).join('');
+        }
+
+        function showTxnVerifyModal(txnId) {
+            currentTxnId = txnId;
+            const txn = mockTransactions.find(t => t.id === txnId);
+            if (!txn) return;
+            document.getElementById('txnVerifyBody').textContent = `Transaksi ${txn.id} — ${txn.listing} (Rp ${txn.amount.toLocaleString('id-ID')})`;
+            document.getElementById('txnStatusSelect').value = txn.status;
+            txnVerifyModal.show();
+        }
+
+        function confirmVerifyTransaction() {
+            if (!currentTxnId) return;
+            const newStatus = document.getElementById('txnStatusSelect').value;
+            const txn = mockTransactions.find(t => t.id === currentTxnId);
+            if (!txn) return;
+            txn.status = newStatus;
+            notify.success('Status transaksi diperbarui', 'Berhasil');
+            txnVerifyModal.hide();
+            loadTransactions();
+        }
         
         // Filter listings
         function filterListings(status) {
             const container = document.getElementById('allListingsContainer');
             container.innerHTML = '<p class="text-center py-5">Loading...</p>';
-            
+
             // Mock - replace with actual API call
             setTimeout(() => {
-                container.innerHTML = '<p class="text-muted">Data akan dimuat dari API</p>';
+                const all = [
+                    { id: '101', title: 'Kos Modern Strategis di Pusat Kota', owner_name: 'Budi Santoso', category: 'kos-putra', price: 1500000, status: 'pending', image: 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=400' },
+                    { id: '102', title: 'Apartemen Minimalis Dekat Kampus', owner_name: 'Ika H.', category: 'apartemen', price: 2200000, status: 'approved', image: 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=400' }
+                ];
+
+                const filtered = status ? all.filter(l => l.status === status) : all;
+
+                if (filtered.length === 0) {
+                    container.innerHTML = '<p class="text-muted">Tidak ada listing untuk filter tersebut</p>';
+                    return;
+                }
+
+                container.innerHTML = filtered.map(listing => `
+                    <div class="listing-card mb-3">
+                        <div class="row g-0">
+                            <div class="col-md-3">
+                                <img src="${listing.image}" class="img-fluid rounded-start h-100 object-fit-cover" alt="${listing.title}">
+                            </div>
+                            <div class="col-md-9">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <div>
+                                            <h5 class="card-title mb-1">${listing.title} ${listingBadges[listing.id] ? (`<span class="badge bg-info ms-2 text-dark">${listingBadges[listing.id].badge.replace('_',' ')}</span>`) : ''}</h5>
+                                            <p class="text-muted small mb-2"><i class="bi bi-person me-1"></i> ${listing.owner_name}</p>
+                                        </div>
+                                        <span class="status-badge ${listing.status === 'pending' ? 'status-pending' : listing.status === 'approved' ? 'status-approved' : 'status-rejected'}">
+                                            ${listing.status}
+                                        </span>
+                                    </div>
+
+                                    <div class="row g-3 mb-3">
+                                        <div class="col-md-6">
+                                            <small class="text-muted d-block">Kategori</small>
+                                            <span class="badge bg-light text-dark">${listing.category}</span>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <small class="text-muted d-block">Harga</small>
+                                            <strong class="text-primary">Rp ${listing.price.toLocaleString('id-ID')}</strong>/bulan
+                                        </div>
+                                    </div>
+
+                                    <div class="d-flex gap-2">
+                                        <button class="btn btn-outline-secondary btn-sm" onclick="showBadgeModal('${listing.id}')">Badge</button>
+                                        <button class="btn btn-outline-warning btn-sm" onclick="showFeeModal('${listing.id}')">Set Fee</button>
+                                        <a href="listing-detail.html?id=${listing.id}" class="btn btn-outline-primary btn-sm">Lihat</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
             }, 500);
         }
         
@@ -619,6 +1000,7 @@
             localStorage.removeItem('currentUser');
             window.location.href = 'index.html';
         }
+
     </script>
 </body>
 </html>

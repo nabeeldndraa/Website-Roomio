@@ -566,7 +566,7 @@ export default function ListingDetail({ listingId, currentUser, onBack }: Listin
                   </div>
                 </div>
 
-                <Button variant="outline" className="w-full">
+                <Button variant="outline" className="w-full" onClick={() => window.location.href = `profile.html?id=${mockListing.host.id}`}>
                   Lihat Profil
                 </Button>
               </CardContent>
