@@ -7,7 +7,7 @@
     
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
-    
+   
     <style>
         :root {
             --primary-color: #2563eb;
@@ -478,8 +478,8 @@ y: { beginAtZero: true }
 
 // ================= MAP LEAFLET ====================
 function loadMap() {
-// Set posisi awal peta (contoh: Jakarta)
-const map = L.map('map').setView([-6.200000, 106.816666], 11);
+// Set posisi awal peta (contoh: Jember)
+const map = L.map('map').setView([-8.1845, 113.6681], 12);
 
 
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -708,14 +708,6 @@ loadMap();
                                     <button class="btn btn-danger btn-sm" onclick="showRejectionModal('${listing.id}')">
                                         <i class="bi bi-x-circle me-1"></i>
                                         Tolak
-                                    </button>
-                                    <button class="btn btn-outline-secondary btn-sm" onclick="showBadgeModal('${listing.id}')">
-                                        <i class="bi bi-award me-1"></i>
-                                        Tambah Badge
-                                    </button>
-                                    <button class="btn btn-outline-warning btn-sm" onclick="showFeeModal('${listing.id}')">
-                                        <i class="bi bi-cash-stack me-1"></i>
-                                        Set Fee
                                     </button>
                                     <a href="listing-detail.html?id=${listing.id}" class="btn btn-outline-primary btn-sm" target="_blank">
                                         <i class="bi bi-eye me-1"></i>
@@ -1000,6 +992,31 @@ loadMap();
             localStorage.removeItem('currentUser');
             window.location.href = 'index.html';
         }
+
+// Contoh: Load statistik dashboard
+fetch('api/admin.php?action=dashboard_stats')
+  .then(r => r.json())
+  .then(res => {
+    if(res.success){
+      document.getElementById('statUsers').textContent = res.data.total_pemilik + res.data.total_penyewa;
+      document.getElementById('statPending').textContent = res.data.pending_properti;
+      document.getElementById('statApproved').textContent = res.data.approved_properti;
+      document.getElementById('statRejected').textContent = res.data.rejected_properti;
+    }
+  });
+
+// Load peta
+fetch('api/admin.php?action=get_map_data')
+  .then(r => r.json())
+  .then(res => {
+    if(res.success){
+      res.data.forEach(item => {
+        L.marker([item.latitude, item.longitude])
+         .addTo(map)
+         .bindPopup(`<b>${item.nama_properti}</b><br>Harga: Rp ${Number(item.harga).toLocaleString()}<br>Tipe: ${item.tipe_properti}`);
+      });
+    }
+  });
 
     </script>
 </body>
