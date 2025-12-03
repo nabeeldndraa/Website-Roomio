@@ -1,4 +1,4 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import { ChevronLeft, ChevronRight, Check, Upload, MapPin, Image, Video, Home, DollarSign, FileText } from 'lucide-react';
 import { Button } from './ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
@@ -26,19 +26,19 @@ const steps = [
 export default function CreateListing({ currentUser, onComplete }: CreateListingProps) {
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState({
-    // Step 1: Basic Info
+
     title: '',
     type: '',
     address: '',
     location: { lat: 0, lng: 0 },
     description: '',
 
-    // Step 2: Media
+
     photos: [] as string[],
     videoUrl: '',
     has360: false,
 
-    // Step 3: Property Details
+
     totalRooms: '',
     availableRooms: '',
     roomSize: '',
@@ -46,7 +46,7 @@ export default function CreateListing({ currentUser, onComplete }: CreateListing
     buildingFacilities: [] as string[],
     rules: [] as string[],
 
-    // Step 4: Pricing
+
     monthlyPrice: '',
     yearlyPrice: '',
     deposit: '',
@@ -72,7 +72,7 @@ export default function CreateListing({ currentUser, onComplete }: CreateListing
     if (currentStep < steps.length) {
       setCurrentStep(currentStep + 1);
     } else {
-      // Submit form
+
       alert('Listing berhasil dibuat! (Mock submission)');
       onComplete();
     }
@@ -97,10 +97,10 @@ export default function CreateListing({ currentUser, onComplete }: CreateListing
   };
 
   const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    // Mock photo upload
+
     const mockPhotos = [
-      'https://images.unsplash.com/photo-1616418928117-4e6d19be2df1?w=400',
-      'https://images.unsplash.com/photo-1564273795917-fe399b763988?w=400',
+      'https:
+      'https:
     ];
     updateFormData('photos', [...formData.photos, ...mockPhotos]);
   };
@@ -258,7 +258,7 @@ export default function CreateListing({ currentUser, onComplete }: CreateListing
                               updateFormData('photos', newPhotos);
                             }}
                           >
-                            ×
+                            Ã—
                           </Button>
                           {idx === 0 && (
                             <Badge className="absolute bottom-2 left-2">Cover</Badge>
@@ -280,7 +280,7 @@ export default function CreateListing({ currentUser, onComplete }: CreateListing
                     <div className="flex-1">
                       <Input
                         id="videoUrl"
-                        placeholder="https://youtube.com/watch?v=..."
+                        placeholder="https:
                         value={formData.videoUrl}
                         onChange={(e) => updateFormData('videoUrl', e.target.value)}
                       />
@@ -298,7 +298,7 @@ export default function CreateListing({ currentUser, onComplete }: CreateListing
                     onCheckedChange={(checked) => updateFormData('has360', checked)}
                   />
                   <Label htmlFor="has360" className="cursor-pointer">
-                    Saya memiliki foto 360° (akan ditambahkan setelah verifikasi)
+                    Saya memiliki foto 360Â° (akan ditambahkan setelah verifikasi)
                   </Label>
                 </div>
               </>

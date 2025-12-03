@@ -1,10 +1,10 @@
-<?php
-// api/update_listing.php
+﻿<?php
+
 
 session_start();
 header('Content-Type: application/json');
 
-// 1. Cek Autentikasi dan Method
+
 if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'pemilik') {
     http_response_code(401);
     echo json_encode(['status' => 'error', 'message' => 'Akses ditolak. Silakan login sebagai Host.']);
@@ -20,7 +20,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 include 'db_connect.php'; 
 $id_user_host = $_SESSION['user_id'];
 
-// Ambil data dari POST menggunakan isset() untuk kompatibilitas yang lebih luas
+
 $id_properti = isset($_POST['id_properti']) ? $_POST['id_properti'] : null;
 $id_kamar = isset($_POST['id_kamar']) ? $_POST['id_kamar'] : null; 
 
@@ -39,14 +39,14 @@ $jumlah_kamar = (int)(isset($_POST['jumlah_kamar']) ? $_POST['jumlah_kamar'] : 0
 $kamar_tersedia = (int)(isset($_POST['kamar_tersedia']) ? $_POST['kamar_tersedia'] : 0);
 $room_size = isset($_POST['room_size']) ? $_POST['room_size'] : '';
 
-// Perubahan pada Fasilitas:
-// Cek jika fasilitas_kamar dikirim sebagai array (saat mode edit, fasilitas bisa kosong)
+
+
 $fasilitas_kamar_raw = isset($_POST['fasilitas_kamar']) ? $_POST['fasilitas_kamar'] : [];
 $fasilitas_kamar = is_array($fasilitas_kamar_raw) ? implode(', ', $fasilitas_kamar_raw) : $fasilitas_kamar_raw;
 
 
 if (!$id_properti || !$id_kamar) {
-// ... kode selanjutnya (biarkan sama)
+
     http_response_code(400);
     echo json_encode(['status' => 'error', 'message' => 'ID Properti atau ID Kamar tidak ditemukan.']);
     exit;
@@ -56,7 +56,7 @@ $koneksi->begin_transaction();
 $success = true;
 
 try {
-    // 1. UPDATE TABEL properti
+
     $sql_properti = "
         UPDATE properti SET
             nama_properti = ?,
@@ -77,7 +77,7 @@ try {
     }
     $stmt_properti->close();
 
-    // 2. UPDATE TABEL kamar
+
     $sql_kamar = "
         UPDATE kamar SET
             nama_kamar = ?,
@@ -99,17 +99,17 @@ try {
         throw new Exception("Gagal mengupdate kamar: " . $stmt_kamar->error, 500);
     }
 
-    // code images kamar
+
     $stmt_kamar->close();
     if (isset($_FILES['images'])) {
     }
     
-    // Commit transaksi jika semua berhasil
+
     $koneksi->commit();
     echo json_encode(['status' => 'success', 'message' => 'Listing berhasil diperbarui!']);
 
 } catch (Exception $e) {
-    // Rollback jika ada yang gagal
+
     $koneksi->rollback();
     http_response_code($e->getCode() === 403 ? 403 : 500);
     echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);

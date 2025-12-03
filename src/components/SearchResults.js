@@ -1,4 +1,4 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import { MapPin, Star, SlidersHorizontal, Grid, Map, Heart, Wifi, Car, Wind, Users } from 'lucide-react';
 import { Button } from './ui/button';
 import { Card, CardContent } from './ui/card';
@@ -25,7 +25,7 @@ const mockListings = [
     price: 850000,
     rating: 4.8,
     reviews: 24,
-    image: 'https://images.unsplash.com/photo-1616418928117-4e6d19be2df1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjb3p5JTIwYmVkcm9vbSUyMGludGVyaW9yfGVufDF8fHx8MTc2MTU5MTE2NXww&ixlib=rb-4.1.0&q=80&w=1080',
+    image: 'https:
     facilities: ['Wifi', 'AC', 'Kamar Mandi Dalam', 'Laundry'],
     badges: ['Student-Friendly', 'Verified'],
     available: 3,
@@ -39,7 +39,7 @@ const mockListings = [
     price: 2500000,
     rating: 4.9,
     reviews: 18,
-    image: 'https://images.unsplash.com/photo-1613575831056-0acd5da8f085?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxhcGFydG1lbnQlMjBsaXZpbmclMjByb29tfGVufDF8fHx8MTc2MTY1NDI1OXww&ixlib=rb-4.1.0&q=80&w=1080',
+    image: 'https:
     facilities: ['Wifi', 'Parkir', 'Dapur', 'AC'],
     badges: ['Inspected', 'Featured'],
     available: 1,
@@ -53,7 +53,7 @@ const mockListings = [
     price: 1200000,
     rating: 4.7,
     reviews: 32,
-    image: 'https://images.unsplash.com/photo-1564273795917-fe399b763988?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxzdHVkZW50JTIwZG9ybWl0b3J5JTIwcm9vbXxlbnwxfHx8fDE3NjE2MzA2NzV8MA&ixlib=rb-4.1.0&q=80&w=1080',
+    image: 'https:
     facilities: ['Wifi', 'AC', 'Laundry', 'Keamanan 24 jam'],
     badges: ['Verified'],
     available: 5,
@@ -67,7 +67,7 @@ const mockListings = [
     price: 650000,
     rating: 4.5,
     reviews: 15,
-    image: 'https://images.unsplash.com/photo-1616418928117-4e6d19be2df1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjb3p5JTIwYmVkcm9vbSUyMGludGVyaW9yfGVufDF8fHx8MTc2MTU5MTE2NXww&ixlib=rb-4.1.0&q=80&w=1080',
+    image: 'https:
     facilities: ['Wifi', 'Kamar Mandi Luar'],
     badges: ['Verified'],
     available: 7,
@@ -81,7 +81,7 @@ const mockListings = [
     price: 3500000,
     rating: 4.8,
     reviews: 12,
-    image: 'https://images.unsplash.com/photo-1613575831056-0acd5da8f085?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxhcGFydG1lbnQlMjBsaXZpbmclMjByb29tfGVufDF8fHx8MTc2MTY1NDI1OXww&ixlib=rb-4.1.0&q=80&w=1080',
+    image: 'https:
     facilities: ['Wifi', 'Parkir', 'Dapur', 'Taman'],
     badges: ['Featured'],
     available: 2,
@@ -95,7 +95,7 @@ const mockListings = [
     price: 1500000,
     rating: 4.9,
     reviews: 28,
-    image: 'https://images.unsplash.com/photo-1564273795917-fe399b763988?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxzdHVkZW50JTIwZG9ybWl0b3J5JTIwcm9vbXxlbnwxfHx8fDE3NjE2MzA2NzV8MA&ixlib=rb-4.1.0&q=80&w=1080',
+    image: 'https:
     facilities: ['Wifi', 'AC', 'Kamar Mandi Dalam', 'Smart TV'],
     badges: ['Inspected', 'Student-Friendly'],
     available: 2,
@@ -109,7 +109,7 @@ export default function SearchResults({ searchParams, onViewListing }: SearchRes
   const [sortBy, setSortBy] = useState('recommended');
   const [favorites, setFavorites] = useState<string[]>([]);
   
-  // Filters
+
   const [selectedType, setSelectedType] = useState<string[]>([]);
   const [selectedFacilities, setSelectedFacilities] = useState<string[]>([]);
 
