@@ -1,99 +1,14 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard - Roomio</title>
     
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
-    
-    <style>
-        :root {
-            --primary-color: #2563eb;
-        }
-        
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background: #f9fafb;
-        }
-        .mobile-spacer { width: 40px; }
-        
-        .sidebar {
-            position: fixed;
-            top: 0;
-            left: 0;
-            height: 100vh;
-            width: 260px;
-            background: white;
-            border-right: 1px solid #e5e7eb;
-            z-index: 1000;
-            transition: transform 0.3s ease;
-        }
-        
-        @media (max-width: 991px) {
-            .sidebar {
-                transform: translateX(-100%);
-            }
-            .sidebar.show {
-                transform: translateX(0);
-            }
-        }
-        
-        .main-content {
-            margin-left: 260px;
-            min-height: 100vh;
-        }
-        
-        @media (max-width: 991px) {
-            .main-content {
-                margin-left: 0;
-            }
-        }
-        
-        .stat-card {
-            border-radius: 0.75rem;
-            border: 1px solid #e5e7eb;
-            transition: all 0.3s;
-        }
-        
-        .stat-card:hover {
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            transform: translateY(-2px);
-        }
-        
-        .status-badge {
-            padding: 0.25rem 0.75rem;
-            border-radius: 9999px;
-            font-size: 0.75rem;
-            font-weight: 600;
-        }
-        
-        .status-pending {
-            background: #fef3c7;
-            color: #92400e;
-        }
-        
-        .status-approved {
-            background: #d1fae5;
-            color: #065f46;
-        }
-        
-        .status-rejected {
-            background: #fee2e2;
-            color: #991b1b;
-        }
-        
-        .listing-card {
-            border: 1px solid #e5e7eb;
-            border-radius: 0.5rem;
-            transition: all 0.3s;
-        }
-        
-        .listing-card:hover {
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-        }
-    </style>
+    <link href="https:
+    <link rel="stylesheet" href="https:
+    <link rel="stylesheet" href="styles/site.css">
+    <link rel="stylesheet" href="styles/admin-dashboard.css">
 </head>
 <body>
     <!-- Sidebar -->
@@ -469,7 +384,7 @@
         </div>
     </div>
     
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https:
     <script src="js/auth.js"></script>
     <script src="js/notifications.js"></script>
     
@@ -478,17 +393,17 @@
         let approvalModal, rejectionModal, badgeModal, feeModal, txnVerifyModal;
         let currentTxnId = null;
 
-        // Simple mock state - replace with API integration later
-        let adminFeePercent = 5; // default admin fee %
-        const listingBadges = {}; // map listingId -> { badge, highlight }
-        const listingFees = {}; // map listingId -> fee (fixed Rp)
+
+        let adminFeePercent = 5;
+        const listingBadges = {};
+        const listingFees = {};
 
         const mockTransactions = [
             { id: 'T-3001', renter: 'Sari', owner: 'Agus', listing: 'Kos Modern 101', amount: 1500000, fee: 75000, status: 'pending' },
             { id: 'T-3002', renter: 'Rian', owner: 'Ika', listing: 'Apartemen A', amount: 3000000, fee: 150000, status: 'verified' }
         ];
         
-        // Check if user is admin
+
         const user = getCurrentUser();
         if (!user || user.role !== 'admin') {
             notify.error('Anda harus login sebagai admin untuk mengakses halaman ini', 'Akses Ditolak');
@@ -497,7 +412,7 @@
             }, 2000);
         }
         
-        // Initialize modals
+
         document.addEventListener('DOMContentLoaded', function() {
             approvalModal = new bootstrap.Modal(document.getElementById('approvalModal'));
             rejectionModal = new bootstrap.Modal(document.getElementById('rejectionModal'));
@@ -515,27 +430,27 @@
         }
         
         function showSection(section, evt) {
-            // Hide all sections
+
             document.querySelectorAll('.section-content').forEach(s => s.classList.add('d-none'));
             
-            // Show selected section
+
             document.getElementById(section + 'Section').classList.remove('d-none');
             
-            // Update nav active state
+
             document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
-            // prefer the passed event (evt) and fall back to global if available
+
             try {
                 const usedEvent = evt || window.event;
                 const activeEl = usedEvent && usedEvent.target ? usedEvent.target.closest('.nav-link') : null;
                 if (activeEl) activeEl.classList.add('active');
             } catch (e) { /* ignore */ }
 
-            // On small screens, hide sidebar after navigation so user returns to content
+
             if (window.innerWidth <= 991) {
                 document.getElementById('sidebar').classList.remove('show');
             }
             
-            // Load data based on section
+
             if (section === 'pending') {
                 loadPendingListings();
             } else if (section === 'listings') {
@@ -547,9 +462,9 @@
             }
         }
         
-        // Load dashboard statistics
+
         function loadDashboardStats() {
-            // Mock data - replace with actual API call
+
             const stats = {
                 total_users: 145,
                 listings: {
@@ -567,11 +482,11 @@
             document.getElementById('pendingCount').textContent = stats.listings.pending;
         }
         
-        // Load pending listings
+
         function loadPendingListings() {
             const container = document.getElementById('pendingListingsContainer');
             
-            // Mock data - replace with actual API call to api/admin.php?action=pending
+
             const pendingListings = [
                 {
                     id: '101',
@@ -582,7 +497,7 @@
                     price: 1500000,
                     address: 'Jl. Sudirman No. 45, Kaliwates',
                     created_at: '2024-11-18 10:30:00',
-                    image: 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=400'
+                    image: 'https:
                 }
             ];
             
@@ -610,7 +525,7 @@
                                         <h5 class="card-title mb-1">${listing.title} ${listingBadges[listing.id] ? (`<span class="badge bg-info ms-2 text-dark">${listingBadges[listing.id].badge.replace('_',' ')}</span>`) : ''}</h5>
                                         <p class="text-muted small mb-2">
                                             <i class="bi bi-person me-1"></i> ${listing.owner_name}
-                                            <span class="mx-2">•</span>
+                                            <span class="mx-2">â€¢</span>
                                             <i class="bi bi-envelope me-1"></i> ${listing.owner_email}
                                         </p>
                                     </div>
@@ -628,7 +543,7 @@
                                     <div class="col-md-6">
                                         <small class="text-muted d-block">Harga</small>
                                         <strong class="text-primary">Rp ${listing.price.toLocaleString('id-ID')}</strong>/bulan
-                                        <div class="small text-muted mt-1">Fee admin: ${adminFeePercent}% ${listingFees[listing.id] ? `• Fee listing: Rp ${listingFees[listing.id].toLocaleString('id-ID')}` : ''}</div>
+                                        <div class="small text-muted mt-1">Fee admin: ${adminFeePercent}% ${listingFees[listing.id] ? `â€¢ Fee listing: Rp ${listingFees[listing.id].toLocaleString('id-ID')}` : ''}</div>
                                     </div>
                                 </div>
                                 
@@ -666,24 +581,24 @@
             `).join('');
         }
         
-        // Show approval modal
+
         function showApprovalModal(listingId) {
             currentListingId = listingId;
             approvalModal.show();
         }
         
-        // Show rejection modal
+
         function showRejectionModal(listingId) {
             currentListingId = listingId;
             document.getElementById('rejectionReason').value = '';
             rejectionModal.show();
         }
         
-        // Confirm approve
+
         function confirmApprove() {
             if (!currentListingId) return;
             
-            // Mock approval - replace with actual API call
+
             console.log('Approving listing:', currentListingId);
             
             notify.success('Listing berhasil disetujui!', 'Berhasil!');
@@ -695,7 +610,7 @@
             }, 500);
         }
         
-        // Confirm reject
+
         function confirmReject() {
             const reason = document.getElementById('rejectionReason').value;
             
@@ -706,7 +621,7 @@
             
             if (!currentListingId) return;
             
-            // Mock rejection - replace with actual API call
+
             console.log('Rejecting listing:', currentListingId, 'Reason:', reason);
             
             notify.success('Listing berhasil ditolak', 'Berhasil!');
@@ -718,10 +633,10 @@
             }, 500);
         }
 
-        // Show badge modal for specific listing
+
         function showBadgeModal(listingId) {
             currentListingId = listingId;
-            // prefill if already exists
+
             const b = listingBadges[listingId];
             document.getElementById('badgeSelect').value = b ? b.badge : '';
             document.getElementById('badgeHighlight').checked = b ? !!b.highlight : true;
@@ -738,14 +653,14 @@
             listingBadges[currentListingId] = { badge, highlight };
             notify.success('Badge disimpan untuk listing', 'Berhasil');
             badgeModal.hide();
-            // re-render
+
             loadPendingListings();
             filterListings('');
         }
 
-        // Fee handling
+
         function openFeeSettings() {
-            currentListingId = null; // global
+            currentListingId = null;
             document.getElementById('adminFeeInput').value = adminFeePercent;
             document.getElementById('listingFeeInput').value = '';
             feeModal.show();
@@ -753,7 +668,7 @@
 
         function showFeeModal(listingId) {
             currentListingId = listingId;
-            // prefill listing fee if set
+
             document.getElementById('listingFeeInput').value = listingFees[listingId] || '';
             document.getElementById('adminFeeInput').value = adminFeePercent;
             feeModal.show();
@@ -771,12 +686,12 @@
                 notify.success('Fee admin disimpan', 'Berhasil');
             }
             feeModal.hide();
-            // update UI
+
             loadPendingListings();
             loadTransactions();
         }
 
-        // Transactions
+
         function loadTransactions() {
             const tbody = document.getElementById('transactionsTableBody');
             const pendingCount = mockTransactions.filter(t => t.status === 'pending').length;
@@ -804,7 +719,7 @@
             currentTxnId = txnId;
             const txn = mockTransactions.find(t => t.id === txnId);
             if (!txn) return;
-            document.getElementById('txnVerifyBody').textContent = `Transaksi ${txn.id} — ${txn.listing} (Rp ${txn.amount.toLocaleString('id-ID')})`;
+            document.getElementById('txnVerifyBody').textContent = `Transaksi ${txn.id} â€” ${txn.listing} (Rp ${txn.amount.toLocaleString('id-ID')})`;
             document.getElementById('txnStatusSelect').value = txn.status;
             txnVerifyModal.show();
         }
@@ -820,16 +735,16 @@
             loadTransactions();
         }
         
-        // Filter listings
+
         function filterListings(status) {
             const container = document.getElementById('allListingsContainer');
             container.innerHTML = '<p class="text-center py-5">Loading...</p>';
 
-            // Mock - replace with actual API call
+
             setTimeout(() => {
                 const all = [
-                    { id: '101', title: 'Kos Modern Strategis di Pusat Kota', owner_name: 'Budi Santoso', category: 'kos-putra', price: 1500000, status: 'pending', image: 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=400' },
-                    { id: '102', title: 'Apartemen Minimalis Dekat Kampus', owner_name: 'Ika H.', category: 'apartemen', price: 2200000, status: 'approved', image: 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=400' }
+                    { id: '101', title: 'Kos Modern Strategis di Pusat Kota', owner_name: 'Budi Santoso', category: 'kos-putra', price: 1500000, status: 'pending', image: 'https:
+                    { id: '102', title: 'Apartemen Minimalis Dekat Kampus', owner_name: 'Ika H.', category: 'apartemen', price: 2200000, status: 'approved', image: 'https:
                 ];
 
                 const filtered = status ? all.filter(l => l.status === status) : all;
@@ -881,11 +796,11 @@
             }, 500);
         }
         
-        // Load users
+
         function loadUsers() {
             const tbody = document.getElementById('usersTableBody');
             
-            // Mock data - replace with actual API call
+
             const users = [
                 {
                     id: '1',
@@ -925,7 +840,7 @@
             `).join('');
         }
         
-        // Verify user
+
         function verifyUser(userId) {
             if (confirm('Verifikasi user ini?')) {
                 notify.success('User berhasil diverifikasi', 'Berhasil!');

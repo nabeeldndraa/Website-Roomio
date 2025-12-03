@@ -1,9 +1,9 @@
-<?php
-// FILE: api/test_db.php
-// Tujuannya hanya untuk menguji koneksi
+﻿<?php
+
+
 
 include 'db_connect.php'; 
 
-// Jika kode di atas berhasil dijalankan, koneksi sukses.
-echo "✅ KONEKSI DATABASE BERHASIL! Database 'db_roomio' ditemukan.";
+
+echo "âœ… KONEKSI DATABASE BERHASIL! Database 'db_roomio' ditemukan.";
 ?>

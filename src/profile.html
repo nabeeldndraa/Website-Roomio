@@ -1,146 +1,14 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Profile - Roomio</title>
     
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link href="https:
+    <link rel="stylesheet" href="https:
     <link rel="stylesheet" href="styles/site.css">
-    
-    <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background: #f9fafb;
-        }
-        
-        .sidebar {
-            position: fixed;
-            top: 0;
-            left: 0;
-            height: 100vh;
-            width: 260px;
-            background: white;
-            border-right: 1px solid #e5e7eb;
-            z-index: 1000;
-            transition: transform 0.3s ease;
-        }
-        
-        @media (max-width: 991px) {
-            .sidebar {
-                transform: translateX(-100%);
-            }
-            .sidebar.show {
-                transform: translateX(0);
-            }
-        }
-        
-        .sidebar-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 999;
-        }
-        
-        .sidebar-overlay.show {
-            display: block;
-        }
-        
-        .main-content {
-            margin-left: 260px;
-            min-height: 100vh;
-        }
-        
-        @media (max-width: 991px) {
-            .main-content {
-                margin-left: 0;
-            }
-        }
-        
-        .nav-link-custom {
-            display: flex;
-            align-items: center;
-            padding: 0.75rem 1rem;
-            color: #6b7280;
-            text-decoration: none;
-            border-radius: 0.5rem;
-            margin-bottom: 0.25rem;
-            transition: all 0.2s;
-        }
-        
-        .nav-link-custom:hover {
-            background: #f3f4f6;
-            color: #1f2937;
-        }
-        
-        .nav-link-custom.active {
-            background: #e5e7eb;
-            color: #1f2937;
-        }
-        
-        .nav-link-custom i {
-            margin-right: 0.75rem;
-            width: 20px;
-        }
-        
-        .mobile-header {
-            display: none;
-            position: sticky;
-            top: 0;
-            z-index: 998;
-            background: white;
-            border-bottom: 1px solid #e5e7eb;
-            padding: 1rem;
-        }
-        
-        @media (max-width: 991px) {
-            .mobile-header {
-                display: flex;
-            }
-        }
-        
-        .avatar-upload {
-            position: relative;
-            width: 120px;
-            height: 120px;
-            cursor: pointer;
-        }
-        
-        .avatar-preview {
-            width: 120px;
-            height: 120px;
-            border-radius: 50%;
-            background: #2563eb;
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 3rem;
-        }
-        
-        .avatar-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            border-radius: 50%;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            color: white;
-        }
-        
-        .avatar-upload:hover .avatar-overlay {
-            display: flex;
-        }
-    </style>
+    <link rel="stylesheet" href="styles/profile.css">
 </head>
 <body>
     <div class="sidebar-overlay" id="sidebarOverlay"></div>
@@ -325,16 +193,16 @@
         </div>
     </main>
     
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https:
     <script src="js/auth.js"></script>
     <script>
-        // Allow public read-only viewing: only require auth when no 'id' query param (i.e. viewing own profile)
+
         (function checkAuthForOwnProfile() {
             const urlParams = new URLSearchParams(window.location.search);
             const viewId = urlParams.get('id');
             if (!viewId) {
                 if (!requireAuth()) {
-                    // redirected by requireAuth()
+
                 }
             }
         })();
@@ -353,7 +221,7 @@
             const viewId = urlParams.get('id');
             const currentUser = getCurrentUser();
 
-            // If we are viewing another user's profile (public), display read-only view
+
             if (viewId && (!currentUser || String(viewId) !== String(currentUser.id))) {
                 const user = getUserById(viewId);
                 if (!user) {
@@ -362,7 +230,7 @@
                     return;
                 }
 
-                // Fill UI with owner data (read-only)
+
                 document.getElementById('profileName').value = user.name;
                 document.getElementById('profileEmail').value = user.email;
                 document.getElementById('profileRole').value = user.role;
@@ -372,29 +240,29 @@
                 document.getElementById('profileAddress').value = user.address || '';
                 document.getElementById('profileBio').value = user.bio || '';
 
-                // Make read-only: disable form inputs, hide actions and delete
+
                 document.querySelectorAll('#profileForm input, #profileForm select, #profileForm textarea').forEach(el => el.setAttribute('disabled', 'disabled'));
                 document.getElementById('profileActions').classList.add('d-none');
                 document.getElementById('dangerZone').classList.add('d-none');
-                // Hide avatar upload overlay and disable file input
+
                 const overlay = document.querySelector('.avatar-overlay');
                 if (overlay) overlay.style.display = 'none';
                 const avatarInput = document.getElementById('avatarInput');
                 if (avatarInput) avatarInput.disabled = true;
 
-                // Show notice
+
                 const notice = document.getElementById('viewOnlyNotice');
                 if (notice) notice.classList.remove('d-none');
 
-                // Update heading/title
+
                 const heading = document.querySelector('h2');
                 if (heading) heading.textContent = `Profil ${user.name}`;
 
-                // Add a contact button when viewing as guest or other user
+
                 if (currentUser) {
-                    // Already logged in - show message or chat link
+
                 } else {
-                    // If guest - show small hint to login to contact
+
                 }
 
                 return;
@@ -406,7 +274,7 @@
             document.getElementById('avatarInitial').textContent = user.name.charAt(0);
             document.getElementById('sidebarUserName').textContent = user.name;
             
-            // Mock data for own profile
+
             document.getElementById('profilePhone').value = '081234567890';
             document.getElementById('profileAddress').value = 'Jember, Jawa Timur';
             document.getElementById('profileBio').value = 'Saya adalah pengguna Roomio yang mencari kos nyaman di Jember.';
@@ -423,7 +291,7 @@
             
             setCurrentUser(user);
             
-            // Check if password is being changed
+
             const newPassword = document.getElementById('newPassword').value;
             const confirmPassword = document.getElementById('confirmPassword').value;
             
@@ -443,7 +311,7 @@
             window.location.reload();
         }
         
-        // Avatar upload
+
         document.querySelector('.avatar-upload').addEventListener('click', function() {
             document.getElementById('avatarInput').click();
         });

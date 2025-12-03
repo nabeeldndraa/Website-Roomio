@@ -1,4 +1,4 @@
-// Mock listings data
+﻿
 function getFeaturedListings() {
     return [
         {
@@ -31,7 +31,7 @@ function getFeaturedListings() {
             price: 2500000,
             rating: 4.9,
             reviews: 18,
-            image: 'https://images.unsplash.com/photo-1613575831056-0acd5da8f085?w=800',
+            image: 'https:
             facilities: ['Wifi', 'Parkir', 'Dapur'],
             badges: ['Inspected', 'Featured'],
             description: 'Kontrakan premium dengan 2 kamar tidur, cocok untuk keluarga kecil',
@@ -51,7 +51,7 @@ function getFeaturedListings() {
             price: 1200000,
             rating: 4.7,
             reviews: 32,
-            image: 'https://images.unsplash.com/photo-1564273795917-fe399b763988?w=800',
+            image: 'https:
             facilities: ['Wifi', 'AC', 'Laundry'],
             badges: ['Verified'],
             description: 'Kos eksklusif dengan fasilitas premium untuk pekerja profesional',
@@ -71,7 +71,7 @@ function getFeaturedListings() {
             price: 950000,
             rating: 4.6,
             reviews: 15,
-            image: 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800',
+            image: 'https:
             facilities: ['Wifi', 'AC', 'Kasur', 'Lemari'],
             badges: ['New', 'Verified'],
             description: 'Kos modern di lokasi strategis dekat pusat kota',
@@ -91,7 +91,7 @@ function getFeaturedListings() {
             price: 1500000,
             rating: 4.5,
             reviews: 12,
-            image: 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800',
+            image: 'https:
             facilities: ['Wifi', 'Dapur', 'Parkir Motor'],
             badges: ['Budget-Friendly'],
             description: 'Kontrakan minimalis cocok untuk pasangan muda atau single',
@@ -111,7 +111,7 @@ function getFeaturedListings() {
             price: 750000,
             rating: 4.8,
             reviews: 28,
-            image: 'https://images.unsplash.com/photo-1595526114035-0d45ed16cfbf?w=800',
+            image: 'https:
             facilities: ['Wifi', 'Kasur', 'Meja Belajar'],
             badges: ['Student-Friendly', 'Safe'],
             description: 'Kos khusus putri dengan keamanan 24 jam',
@@ -163,7 +163,7 @@ function searchListings(query, category, location, priceRange) {
     return listings;
 }
 
-// Favorites management
+
 function getFavorites() {
     const favStr = localStorage.getItem('favorites');
     return favStr ? JSON.parse(favStr) : [];
@@ -188,7 +188,7 @@ function isFavorite(listingId) {
     return favorites.includes(listingId);
 }
 
-// Bookings management
+
 function getBookings() {
     const bookingsStr = localStorage.getItem('bookings');
     return bookingsStr ? JSON.parse(bookingsStr) : [];
@@ -210,7 +210,7 @@ function addBooking(listing, checkIn, duration) {
     return booking;
 }
 
-// Host listings management
+
 function getHostListings() {
     const listingsStr = localStorage.getItem('hostListings');
     return listingsStr ? JSON.parse(listingsStr) : [];

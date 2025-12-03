@@ -1,113 +1,14 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard Host - Roomio</title>
     
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link href="https:
+    <link rel="stylesheet" href="https:
     <link rel="stylesheet" href="styles/site.css">
-    
-    <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background: #f9fafb;
-        }
-        
-        .sidebar {
-            position: fixed;
-            top: 0;
-            left: 0;
-            height: 100vh;
-            width: 260px;
-            background: white;
-            border-right: 1px solid #e5e7eb;
-            z-index: 1000;
-            transition: transform 0.3s ease;
-        }
-        
-        @media (max-width: 991px) {
-            .sidebar {
-                transform: translateX(-100%);
-            }
-            .sidebar.show {
-                transform: translateX(0);
-            }
-        }
-        
-        .sidebar-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 999;
-        }
-        
-        .sidebar-overlay.show {
-            display: block;
-        }
-        
-        .main-content {
-            margin-left: 260px;
-            min-height: 100vh;
-        }
-        
-        @media (max-width: 991px) {
-            .main-content {
-                margin-left: 0;
-            }
-        }
-        
-        .nav-link-custom {
-            display: flex;
-            align-items: center;
-            padding: 0.75rem 1rem;
-            color: #6b7280;
-            text-decoration: none;
-            border-radius: 0.5rem;
-            margin-bottom: 0.25rem;
-            transition: all 0.2s;
-        }
-        
-        .nav-link-custom:hover {
-            background: #f3f4f6;
-            color: #1f2937;
-        }
-        
-        .nav-link-custom.active {
-            background: #e5e7eb;
-            color: #1f2937;
-        }
-        
-        .nav-link-custom i {
-            margin-right: 0.75rem;
-            width: 20px;
-        }
-        
-        .mobile-header {
-            display: none;
-            position: sticky;
-            top: 0;
-            z-index: 998;
-            background: white;
-            border-bottom: 1px solid #e5e7eb;
-            padding: 1rem;
-        }
-        
-        @media (max-width: 991px) {
-            .mobile-header {
-                display: flex;
-            }
-        }
-        
-        .stat-card {
-            border-left: 4px solid;
-        }
-    </style>
+    <link rel="stylesheet" href="styles/host-dashboard.css">
 </head>
 <body>
     <div class="sidebar-overlay" id="sidebarOverlay"></div>
@@ -298,21 +199,21 @@
         </div>
     </main>
     
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https:
     <script src="js/auth.js"></script>    <script src="js/dashboard.js"></script> <script>
-        // FUNGSI HELPER
+
         function formatRupiah(angka) {
             if (isNaN(angka) || angka === null || angka === 0) return 'Rp 0';
-            // Format angka menjadi Rp X.XXX.XXX
+
             return 'Rp ' + parseFloat(angka).toFixed(0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
         }
         
-        // FUNGSI BARU: MEMUAT LISTING DARI API
+
         async function loadHostListings() {
             const listingContainer = document.getElementById('listingsContainer');
             const noListingsMessage = document.getElementById('noListings');
 
-            // Tampilkan loader sementara
+
             listingContainer.innerHTML = '<div class="col-12 text-center text-muted py-5">Memuat data listing...</div>';
 
             try {
@@ -321,18 +222,18 @@
 
                 if (result.status === 'success') {
                     const listings = result.data;
-                    listingContainer.innerHTML = ''; // Kosongkan loader
+                    listingContainer.innerHTML = '';
 
                     if (listings.length === 0) {
-                        // Jika tidak ada listing, tampilkan pesan
+
                         if (noListingsMessage) noListingsMessage.classList.remove('d-none');
                         return;
                     }
 
-                    // Sembunyikan pesan "Belum ada listing" jika ada data
+
                     if (noListingsMessage) noListingsMessage.classList.add('d-none');
 
-                    // Render Listing ke HTML
+
                     const htmlContent = listings.map(listing => `
                         <div class="col-12 mb-3">
                             <div class="card shadow-sm border-0">
@@ -376,7 +277,7 @@
         }
 
 
-        // FUNGSI BAWAAN DARI HTML ANDA
+
         function toggleSidebar() {
             const sidebar = document.getElementById('sidebar');
             const overlay = document.getElementById('sidebarOverlay');
@@ -396,17 +297,17 @@
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ id_properti: id_properti }) // Kirim ID yang akan dihapus
+            body: JSON.stringify({ id_properti: id_properti })
         });
 
         const data = await response.json();
 
         if (response.ok && data.status === 'success') {
             alert('Listing berhasil dihapus!');
-            // Panggil kembali fungsi untuk memuat daftar listing (refresh)
+
             loadHostListings(); 
         } else {
-            // Tampilkan error dari server (misal: "Akses ditolak" atau "Gagal menghapus")
+
             alert('Gagal menghapus listing: ' + (data.message || 'Error tidak diketahui.'));
         }
     } catch (error) {
@@ -416,7 +317,7 @@
 }
 
 
-// GANTI FUNGSI deleteListing(id) yang lama dengan yang ini:
+
 function deleteListing(id) {
     if (confirm('Apakah Anda yakin ingin menghapus listing ini? Tindakan ini tidak bisa dibatalkan.')) {
         deleteHostListing(id);
@@ -424,15 +325,15 @@ function deleteListing(id) {
 }
 
 
-        // --- EVENT LISTENER UTAMA ---
-        if (requireHost()) { // Pengecekan sesi
+
+        if (requireHost()) {
             document.addEventListener('DOMContentLoaded', function() {
                 updateAuthUI();
-                // Memanggil loadDashboardData() (asumsi ada di js/dashboard.js)
+
                 if (typeof loadDashboardData === 'function') {
                     loadDashboardData(); 
                 }
-                loadHostListings(); // Muat daftar listing
+                loadHostListings();
             });
         }
 

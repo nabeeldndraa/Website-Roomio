@@ -1,128 +1,14 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Video Tour - Roomio</title>
     
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link href="https:
+    <link rel="stylesheet" href="https:
     <link rel="stylesheet" href="styles/site.css">
-    
-    <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background: #ffffff;
-            color: #fff;
-        }
-        
-        .video-container {
-            position: relative;
-            width: 100%;
-            max-width: 1200px;
-            margin: 0 auto;
-            aspect-ratio: 16/9;
-            background: #ffffff;
-        }
-        
-        .video-player {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-        }
-        
-        .video-controls {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: linear-gradient(to top, rgba(30, 86, 198, 0.8), transparent);
-            padding: 2rem 1rem 1rem;
-            opacity: 0;
-            transition: opacity 0.3s;
-        }
-        
-        .video-container:hover .video-controls {
-            opacity: 1;
-        }
-        
-        .progress-bar-video {
-            height: 5px;
-            background: rgba(255,255,255,0.3);
-            border-radius: 3px;
-            overflow: hidden;
-            cursor: pointer;
-            margin-bottom: 1rem;
-        }
-        
-        .progress-bar-fill {
-            height: 100%;
-            background: #2563eb;
-            width: 0%;
-            transition: width 0.1s;
-        }
-        
-        .video-info {
-            background: #868686;
-            border-radius: 0.5rem;
-            padding: 1.5rem;
-            margin-top: 1rem;
-        }
-        
-        .thumbnail-gallery {
-            display: flex;
-            gap: 1rem;
-            overflow-x: auto;
-            padding: 1rem 0;
-        }
-        
-        .thumbnail {
-            min-width: 150px;
-            height: 100px;
-            border-radius: 0.5rem;
-            overflow: hidden;
-            cursor: pointer;
-            border: 2px solid transparent;
-            transition: all 0.3s;
-        }
-        
-        .thumbnail:hover {
-            border-color: #2563eb;
-            transform: scale(1.05);
-        }
-        
-        .thumbnail.active {
-            border-color: #2563eb;
-        }
-        
-        .thumbnail img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-        
-        .close-btn {
-            position: absolute;
-            top: 1rem;
-            right: 1rem;
-            z-index: 10;
-            background: rgba(65, 63, 63, 0.5);
-            border: none;
-            color: white;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: background 0.3s;
-        }
-        
-        .close-btn:hover {
-            background: rgba(0, 0, 0, 0.8);
-        }
-    </style>
+    <link rel="stylesheet" href="styles/video-tour.css">
 </head>
 <body>
     <div class="container-fluid p-0">
@@ -194,7 +80,7 @@
         </div>
     </div>
     
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https:
     <script>
         const video = document.getElementById('videoPlayer');
         const playIcon = document.getElementById('playIcon');
@@ -203,13 +89,13 @@
         const durationEl = document.getElementById('duration');
         const volumeIcon = document.getElementById('volumeIcon');
         
-        // Get listing ID from URL
+
         const urlParams = new URLSearchParams(window.location.search);
         const listingId = urlParams.get('id');
         
-        // Load listing data
+
         function loadListingData() {
-            // In real app, fetch from API
+
             const listing = getListingById(listingId);
             
             if (listing) {
@@ -220,17 +106,17 @@
                 document.getElementById('videoRooms').textContent = `${listing.available}/${listing.rooms} kamar tersedia`;
                 document.getElementById('detailLink').href = `listing-detail.html?id=${listing.id}`;
                 
-                // Load video (if exists)
+
                 if (listing.video_tour_url) {
                     document.getElementById('videoSource').src = listing.video_tour_url;
                     video.load();
                 } else {
-                    // Demo video
-                    document.getElementById('videoSource').src = 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4';
+
+                    document.getElementById('videoSource').src = 'https:
                     video.load();
                 }
                 
-                // Load thumbnails
+
                 loadThumbnails(listing);
             }
         }
@@ -239,9 +125,9 @@
             const gallery = document.getElementById('thumbnailGallery');
             const images = [
                 listing.image,
-                'https://images.unsplash.com/photo-1616418928117-4e6d19be2df1?w=400',
-                'https://images.unsplash.com/photo-1613575831056-0acd5da8f085?w=400',
-                'https://images.unsplash.com/photo-1564273795917-fe399b763988?w=400'
+                'https:
+                'https:
+                'https:
             ];
             
             gallery.innerHTML = images.map((img, index) => `
@@ -312,7 +198,7 @@
             window.history.back();
         }
         
-        // Mock function - replace with actual API call
+
         function getListingById(id) {
             return {
                 id: id,
@@ -322,7 +208,7 @@
                 price: 850000,
                 rooms: 10,
                 available: 3,
-                image: 'https://images.unsplash.com/photo-1616418928117-4e6d19be2df1?w=800',
+                image: 'https:
                 video_tour_url: null
             };
         }
