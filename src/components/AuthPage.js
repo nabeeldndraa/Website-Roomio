@@ -1,4 +1,4 @@
-﻿import { useState } from 'react';
+import { useState } from 'react';
 import { Building2, Mail, Lock, User, Phone } from 'lucide-react';
 import { Button } from './ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from './ui/card';
@@ -29,12 +29,12 @@ export default function AuthPage({ onLogin }: AuthPageProps) {
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-
+    // Mock login
     const mockUser = {
       id: '1',
       name: 'John Doe',
       email: loginData.email,
-      role: 'both',
+      role: 'both', // user, host, or both
       avatar: '',
       verified: true,
     };
@@ -51,7 +51,7 @@ export default function AuthPage({ onLogin }: AuthPageProps) {
       alert('Anda harus menyetujui syarat dan ketentuan');
       return;
     }
-
+    // Mock register
     const mockUser = {
       id: '1',
       name: registerData.name,
@@ -113,7 +113,7 @@ export default function AuthPage({ onLogin }: AuthPageProps) {
                       <Input
                         id="login-password"
                         type="password"
-                        placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
+                        placeholder="••••••••"
                         className="pl-10"
                         value={loginData.password}
                         onChange={(e) => setLoginData({ ...loginData, password: e.target.value })}
@@ -197,7 +197,7 @@ export default function AuthPage({ onLogin }: AuthPageProps) {
                       <Input
                         id="register-password"
                         type="password"
-                        placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
+                        placeholder="••••••••"
                         className="pl-10"
                         value={registerData.password}
                         onChange={(e) => setRegisterData({ ...registerData, password: e.target.value })}
@@ -213,7 +213,7 @@ export default function AuthPage({ onLogin }: AuthPageProps) {
                       <Input
                         id="register-confirm-password"
                         type="password"
-                        placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
+                        placeholder="••••••••"
                         className="pl-10"
                         value={registerData.confirmPassword}
                         onChange={(e) => setRegisterData({ ...registerData, confirmPassword: e.target.value })}
@@ -271,7 +271,7 @@ export default function AuthPage({ onLogin }: AuthPageProps) {
 
         {/* Footer */}
         <div className="text-center mt-6 text-blue-100 text-sm">
-          <p>Â© 2025 Roomio. Platform Kos & Kontrakan Jember</p>
+          <p>© 2025 Roomio. Platform Kos & Kontrakan Jember</p>
         </div>
       </div>
     </div>

@@ -1,9 +1,6 @@
 <?php
-// Tiga baris debug (HAPUS SETELAH BERHASIL)
 error_reporting(E_ALL); 
 ini_set('display_errors', 1);
-// --- END DEBUG ---
-
 session_start();
 header('Content-Type: application/json');
 
