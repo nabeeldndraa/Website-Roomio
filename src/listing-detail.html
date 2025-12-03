@@ -1,20 +1,78 @@
 ﻿<!DOCTYPE html>
 <html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Detail Listing - Roomio</title>
     
     <link href="https:
     <link rel="stylesheet" href="https:
     <link rel="stylesheet" href="styles/site.css">
-    <link rel="stylesheet" href="styles/listing-detail.css">
+    
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        }
+        
+        .image-gallery-main {
+            height: 400px;
+            overflow: hidden;
+            border-radius: 0.5rem;
+        }
+        
+        .gallery-thumbnail {
+            height: 100px;
+            cursor: pointer;
+            border-radius: 0.375rem;
+            overflow: hidden;
+            border: 2px solid transparent;
+            transition: border 0.3s;
+        }
+        
+        .gallery-thumbnail:hover, .gallery-thumbnail.active {
+            border-color: #2563eb;
+        }
+        
+        .facility-badge {
+            background: #f3f4f6;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .booking-card {
+            position: sticky;
+            top: 20px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        
+        .review-stars {
+            color: #fbbf24;
+        }
+        
+        .back-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1000;
+            background: white;
+            border-radius: 50%;
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+    </style>
 </head>
 <body>
     <a href="search.html" class="back-button btn btn-light">
-        <i class="bi bi-arrow-left fs-5"></i>
+      <i class="bi bi-arrow-left fs-5"></i>
     </a>
-    
+
     <div class="container py-5 mt-5">
         <div class="row g-4">
             <!-- Left Column -->
@@ -307,7 +365,7 @@
                     <div class="card-body text-center">
                         <i class="bi bi-camera-video fs-1 text-primary mb-2"></i>
                         <h6 class="mb-2">Video Tour Tersedia</h6>
-                        <p class="small text-muted mb-3">Lihat video tour 360Â° dari properti ini</p>
+                        <p class="small text-muted mb-3">Lihat video tour 360° dari properti ini</p>
                         <button class="btn btn-outline-primary btn-sm">
                             <i class="bi bi-play-circle me-1"></i>Tonton Video
                         </button>
@@ -317,7 +375,7 @@
         </div>
     </div>
     
-    <script src="https:
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="js/auth.js"></script>
     <script src="js/listings.js"></script>
     <script>
@@ -341,7 +399,7 @@
                 return;
             }
             
-
+            // Load basic info
             document.getElementById('listingTitle').textContent = currentListing.title;
             document.getElementById('listingType').textContent = currentListing.type;
             document.getElementById('rating').textContent = currentListing.rating;
@@ -358,20 +416,20 @@
             document.getElementById('deposit').textContent = 'Rp ' + currentListing.price.toLocaleString('id-ID');
             document.getElementById('fullAddress').textContent = currentListing.address || currentListing.location;
             
-
+            // Host info
             const hostId = currentListing.hostId || (currentListing.host && currentListing.host.id) || '';
             const hostName = (currentListing.host && currentListing.host.name) || 'Pemilik';
             document.getElementById('hostName').textContent = hostName;
             document.getElementById('hostJoinDate').textContent = 'Bergabung sejak 2022';
             document.getElementById('responseTime').textContent = '< 1 jam';
             document.getElementById('hostProperties').textContent = '3';
-
+            // attach profile link
             const hostProfileLink = document.getElementById('hostProfileLink');
             if (hostProfileLink) {
                 hostProfileLink.href = 'profile.html?id=' + encodeURIComponent(hostId);
             }
             
-
+            // Load images
             const images = [currentListing.image, currentListing.image, currentListing.image, currentListing.image];
             document.getElementById('mainImage').src = images[0];
             
@@ -384,21 +442,21 @@
                 </div>
             `).join('');
             
-
+            // Load badges
             if (currentListing.badges) {
                 document.getElementById('badges').innerHTML = currentListing.badges.map(badge => 
                     `<span class="badge bg-light text-dark border">${badge}</span>`
                 ).join('');
             }
             
-
+            // Load rules
             if (currentListing.rules) {
                 document.getElementById('rules').innerHTML = currentListing.rules.map(rule =>
                     `<li class="mb-2"><i class="bi bi-check-circle text-success me-2"></i>${rule}</li>`
                 ).join('');
             }
             
-
+            // Load facilities
             if (currentListing.facilities) {
                 const roomFacilities = currentListing.facilities;
                 document.getElementById('roomFacilities').innerHTML = roomFacilities.map(f =>
@@ -412,7 +470,7 @@
                 ).join('');
             }
             
-
+            // Load nearby places
             if (currentListing.nearbyPlaces) {
                 document.getElementById('nearbyPlaces').innerHTML = currentListing.nearbyPlaces.map(place =>
                     `<div class="list-group-item d-flex justify-content-between align-items-center">
@@ -424,13 +482,13 @@
                 ).join('');
             }
             
-
+            // Load reviews
             loadReviews();
             
-
+            // Update favorite icon
             updateFavoriteIcon();
             
-
+            // Calculate total price
             calculateTotalPrice();
         }
         
@@ -475,80 +533,70 @@
             });
         }
         
-        function calculateTotalPrice() {
-            const duration = parseInt(document.getElementById('duration').value);
-            const monthlyPrice = currentListing.price;
-            const deposit = currentListing.price;
-            const total = (monthlyPrice * duration) + deposit;
-            
-            document.getElementById('durationText').textContent = duration;
-            document.getElementById('totalPrice').textContent = 'Rp ' + total.toLocaleString('id-ID');
+        // Calculate total
+        const monthlyPrice = currentListing.price;
+        const deposit = currentListing.deposit;
+        const total = (monthlyPrice * duration) + deposit;
+        
+        // Confirm booking
+        if (!confirm(`Konfirmasi booking:\n\nProperti: ${currentListing.title}\nTanggal Masuk: ${checkIn}\nDurasi: ${duration} bulan\nTotal: Rp ${total.toLocaleString('id-ID')}\n\nLanjutkan booking?`)) {
+          return;
         }
         
-        function toggleFavoriteDetail() {
-            const listingId = currentListing.id;
-            if (isFavorite(listingId)) {
-                removeFromFavorites(listingId);
-            } else {
-                addToFavorites(listingId);
-            }
-            updateFavoriteIcon();
-        }
-        
-        function updateFavoriteIcon() {
-            const icon = document.getElementById('favoriteIcon');
-            const text = document.getElementById('favoriteText');
-            if (isFavorite(currentListing.id)) {
-                icon.className = 'bi bi-heart-fill';
-                text.textContent = 'Tersimpan';
-            } else {
-                icon.className = 'bi bi-heart';
-                text.textContent = 'Simpan';
-            }
-        }
-        
-        function shareLink() {
-            const url = window.location.href;
-            if (navigator.share) {
-                navigator.share({ title: currentListing.title, url: url });
-            } else {
-                navigator.clipboard.writeText(url);
-                alert('Link disalin ke clipboard!');
-            }
-        }
-        
-        function bookNow() {
-            const checkIn = document.getElementById('checkInDate').value;
-            const duration = document.getElementById('duration').value;
-            
-            if (!checkIn) {
-                alert('Pilih tanggal masuk terlebih dahulu');
-                return;
-            }
-            
-            const user = getCurrentUser();
-            if (!user) {
-                window.location.href = 'auth.html';
-                return;
-            }
-            
-            addBooking(currentListing, checkIn, duration);
-            alert('Booking berhasil! Lihat di dashboard Anda.');
+        try {
+          const response = await fetch('api/create_booking.php', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              id_properti: currentListing.id,
+              tanggal_masuk: checkIn,
+              durasi_bulan: duration,
+              total_harga: total
+            })
+          });
+          
+          const result = await response.json();
+          
+          if (result.status === 'success') {
+            alert('Booking berhasil dibuat! Silakan lakukan pembayaran.');
             window.location.href = 'user-dashboard.html';
-        }
-        
-        function contactHost() {
-            const user = getCurrentUser();
-            if (!user) {
-                window.location.href = 'auth.html';
-                return;
+          } else {
+            alert('Gagal membuat booking: ' + result.message);
+            if (response.status === 401) {
+              window.location.href = 'auth.html';
             }
-            window.location.href = 'inbox.html';
+          }
+        } catch (error) {
+          console.error('Error:', error);
+          alert('Terjadi kesalahan saat membuat booking');
         }
-        
-        document.getElementById('duration').addEventListener('change', calculateTotalPrice);
-        
-        document.addEventListener('DOMContentLoaded', loadListingDetail);
+      }
+
+      function contactHost() {
+        alert("Fitur chat dengan pemilik akan segera tersedia!");
+      }
+
+      function toggleFavoriteDetail() {
+        alert("Fitur favorit akan segera tersedia!");
+      }
+
+      function shareLink() {
+        const url = window.location.href;
+        if (navigator.share) {
+          navigator.share({ title: currentListing.title, url: url });
+        } else {
+          navigator.clipboard.writeText(url);
+          alert("Link berhasil disalin!");
+        }
+      }
+
+      document.getElementById("duration").addEventListener("change", calculateTotalPrice);
+
+      document.addEventListener("DOMContentLoaded", function () {
+        loadListingDetail();
+      });
     </script>
-</body>
+  </body>
 </html>
