@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="id">
   <head>
     <meta charset="UTF-8" />
@@ -9,94 +9,187 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <link rel="stylesheet" href="styles/site.css">
     
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" />
+
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
     <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background: #f9fafb;
-        }
-        
-        .step-indicator {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 2rem;
-        }
-        
-        .step {
-            flex: 1;
-            text-align: center;
-            padding: 1rem;
-            position: relative;
-        }
-        
-        .step::before {
-            content: '';
-            position: absolute;
-            top: 20px;
-            left: 0;
-            right: 0;
-            height: 2px;
-            background: #e5e7eb;
-            z-index: 0;
-        }
-        
-        .step:first-child::before {
-            left: 50%;
-        }
-        
-        .step:last-child::before {
-            right: 50%;
-        }
-        
-        .step-number {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: #e5e7eb;
-            color: #6b7280;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            position: relative;
-            z-index: 1;
-            margin-bottom: 0.5rem;
-        }
-        
-        .step.active .step-number {
-            background: #2563eb;
-            color: white;
-        }
-        
-        .step.completed .step-number {
-            background: #10b981;
-            color: white;
-        }
-        
-        /* CSS ini yang membuat step berganti */
-        .form-section {
-            display: none;
-        }
-        
-        .form-section.active {
-            display: block;
-        }
-        
-        .image-upload {
-            border: 2px dashed #d1d5db;
-            border-radius: 0.5rem;
-            padding: 2rem;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        
-        .image-upload:hover {
-            border-color: #2563eb;
-            background: #eff6ff;
-        }
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        background: #f9fafb;
+      }
+
+      .step-indicator {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 2rem;
+      }
+
+      .step {
+        flex: 1;
+        text-align: center;
+        padding: 1rem;
+        position: relative;
+      }
+
+      .step::before {
+        content: "";
+        position: absolute;
+        top: 20px;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: #e5e7eb;
+        z-index: 0;
+      }
+
+      .step:first-child::before {
+        left: 50%;
+      }
+
+      .step:last-child::before {
+        right: 50%;
+      }
+
+      .step-number {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: #e5e7eb;
+        color: #6b7280;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        position: relative;
+        z-index: 1;
+        margin-bottom: 0.5rem;
+      }
+
+      .step.active .step-number {
+        background: #2563eb;
+        color: white;
+      }
+
+      .step.completed .step-number {
+        background: #10b981;
+        color: white;
+      }
+
+      .form-section {
+        display: none;
+      }
+
+      .form-section.active {
+        display: block;
+      }
+
+      .image-upload {
+        border: 2px dashed #d1d5db;
+        border-radius: 0.5rem;
+        padding: 2rem;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s;
+      }
+
+      .image-upload:hover {
+        border-color: #2563eb;
+        background: #eff6ff;
+      }
+
+      /* Map Modal Styles */
+      .map-modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.6);
+        z-index: 9999;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+      }
+
+      .map-modal.show {
+        display: flex;
+      }
+
+      .map-modal-content {
+        background: white;
+        border-radius: 1rem;
+        width: 100%;
+        max-width: 900px;
+        max-height: 90vh;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+      }
+
+      .map-header {
+        padding: 1.25rem;
+        border-bottom: 1px solid #e5e7eb;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .map-search-box {
+        padding: 1rem;
+        border-bottom: 1px solid #e5e7eb;
+        background: #f9fafb;
+      }
+
+      #mapCanvas {
+        width: 100%;
+        height: 450px;
+        min-height: 450px;
+        flex: 1;
+        position: relative;
+        z-index: 1;
+      }
+
+      /* Fix leaflet container */
+      .leaflet-container {
+        height: 100%;
+        width: 100%;
+      }
+
+      .map-footer {
+        padding: 1rem;
+        border-top: 1px solid #e5e7eb;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: #f9fafb;
+      }
+
+      .coordinates-display {
+        background: #dbeafe;
+        border: 1px solid #3b82f6;
+        padding: 0.75rem 1rem;
+        border-radius: 0.5rem;
+        margin-top: 0.75rem;
+        font-size: 0.875rem;
+      }
+
+      .coordinates-display i {
+        color: #3b82f6;
+      }
+
+      #tempCoords {
+        font-family: "Courier New", monospace;
+        color: #374151;
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <nav class="navbar navbar-light bg-white border-bottom">
       <div class="container">
         <a class="navbar-brand" href="index.html">

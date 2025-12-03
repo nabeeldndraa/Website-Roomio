@@ -1,14 +1,20 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="id">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Detail Listing - Roomio</title>
     
-    <link href="https:
-    <link rel="stylesheet" href="https:
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <link rel="stylesheet" href="styles/site.css">
     
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" />
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
     <style>
       body {
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
@@ -79,471 +85,555 @@
         z-index: 1;
       }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <a href="search.html" class="back-button btn btn-light">
       <i class="bi bi-arrow-left fs-5"></i>
     </a>
 
     <div class="container py-5 mt-5">
-        <div class="row g-4">
-            <!-- Left Column -->
-            <div class="col-lg-8">
-                <!-- Image Gallery -->
-                <div class="mb-4">
-                    <div class="image-gallery-main mb-3">
-                        <img id="mainImage" src="" class="w-100 h-100 object-fit-cover" alt="Listing">
-                    </div>
-                    <div class="row g-2" id="thumbnails">
-                        <!-- Thumbnails will be loaded here -->
-                    </div>
+      <div class="row g-4">
+        <!-- Left Column -->
+        <div class="col-lg-8">
+          <!-- Image Gallery -->
+          <div class="mb-4">
+            <div class="image-gallery-main mb-3">
+              <img id="mainImage" src="" class="w-100 h-100 object-fit-cover" alt="Listing" />
+            </div>
+            <div class="row g-2" id="thumbnails">
+              <!-- Thumbnails will be loaded here -->
+            </div>
+          </div>
+
+          <!-- Title and Basic Info -->
+          <div class="mb-4">
+            <div class="d-flex justify-content-between align-items-start mb-3">
+              <div>
+                <span class="badge bg-primary me-2" id="listingType">Kos</span>
+                <span class="badge bg-success" id="verifiedBadge">Verified</span>
+              </div>
+              <div class="d-flex gap-2">
+                <button class="btn btn-outline-secondary btn-sm" onclick="shareLink()"><i class="bi bi-share"></i> Share</button>
+                <button class="btn btn-outline-danger btn-sm" onclick="toggleFavoriteDetail()">
+                  <i class="bi bi-heart" id="favoriteIcon"></i>
+                  <span id="favoriteText">Simpan</span>
+                </button>
+              </div>
+            </div>
+
+            <h2 id="listingTitle" class="mb-2">Loading...</h2>
+            <div class="d-flex align-items-center gap-3 text-muted mb-3">
+              <div class="d-flex align-items-center">
+                <i class="bi bi-star-fill text-warning me-1"></i>
+                <span id="rating">-</span>
+                <span class="ms-1">(<span id="reviewCount">0</span> ulasan)</span>
+              </div>
+              <div class="d-flex align-items-center">
+                <i class="bi bi-geo-alt me-1"></i>
+                <span id="location">-</span>
+              </div>
+            </div>
+
+            <div class="d-flex flex-wrap gap-2 mb-3" id="badges">
+              <!-- Badges will be loaded here -->
+            </div>
+          </div>
+
+          <!-- Tabs -->
+          <ul class="nav nav-tabs mb-4" role="tablist">
+            <li class="nav-item">
+              <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#overview">Ringkasan</button>
+            </li>
+            <li class="nav-item">
+              <button class="nav-link" data-bs-toggle="tab" data-bs-target="#facilities">Fasilitas</button>
+            </li>
+            <li class="nav-item">
+              <button class="nav-link" data-bs-toggle="tab" data-bs-target="#location-tab">Lokasi</button>
+            </li>
+            <li class="nav-item">
+              <button class="nav-link" data-bs-toggle="tab" data-bs-target="#reviews">Ulasan</button>
+            </li>
+          </ul>
+
+          <div class="tab-content">
+            <!-- Overview Tab -->
+            <div class="tab-pane fade show active" id="overview">
+              <div class="card mb-4">
+                <div class="card-body">
+                  <h5 class="card-title mb-3">Deskripsi</h5>
+                  <p id="description" class="text-muted">Loading...</p>
                 </div>
-                
-                <!-- Title and Basic Info -->
-                <div class="mb-4">
-                    <div class="d-flex justify-content-between align-items-start mb-3">
+              </div>
+
+              <div class="card mb-4">
+                <div class="card-body">
+                  <h5 class="card-title mb-3">Detail Kamar</h5>
+                  <div class="row g-3">
+                    <div class="col-md-6">
+                      <div class="d-flex align-items-center">
+                        <i class="bi bi-rulers text-primary me-2"></i>
                         <div>
-                            <span class="badge bg-primary me-2" id="listingType">Kos</span>
-                            <span class="badge bg-success" id="verifiedBadge">Verified</span>
+                          <small class="text-muted d-block">Ukuran Kamar</small>
+                          <span id="roomSize">-</span>
                         </div>
-                        <div class="d-flex gap-2">
-                            <button class="btn btn-outline-secondary btn-sm" onclick="shareLink()">
-                                <i class="bi bi-share"></i> Share
-                            </button>
-                            <button class="btn btn-outline-danger btn-sm" onclick="toggleFavoriteDetail()">
-                                <i class="bi bi-heart" id="favoriteIcon"></i> <span id="favoriteText">Simpan</span>
-                            </button>
-                        </div>
+                      </div>
                     </div>
-                    
-                    <h2 id="listingTitle" class="mb-2">Loading...</h2>
-                    <div class="d-flex align-items-center gap-3 text-muted mb-3">
-                        <div class="d-flex align-items-center">
-                            <i class="bi bi-star-fill text-warning me-1"></i>
-                            <span id="rating">-</span>
-                            <span class="ms-1">(<span id="reviewCount">0</span> ulasan)</span>
+                    <div class="col-md-6">
+                      <div class="d-flex align-items-center">
+                        <i class="bi bi-door-open text-primary me-2"></i>
+                        <div>
+                          <small class="text-muted d-block">Ketersediaan</small>
+                          <span><span id="available">0</span> dari <span id="totalRooms">0</span> kamar</span>
                         </div>
-                        <div class="d-flex align-items-center">
-                            <i class="bi bi-geo-alt me-1"></i>
-                            <span id="location">-</span>
+                      </div>
+                    </div>
+                    <div class="col-md-6">
+                      <div class="d-flex align-items-center">
+                        <i class="bi bi-clock text-primary me-2"></i>
+                        <div>
+                          <small class="text-muted d-block">Minimum Sewa</small>
+                          <span id="minimumStay">-</span>
                         </div>
+                      </div>
                     </div>
-                    
-                    <div class="d-flex flex-wrap gap-2 mb-3" id="badges">
-                        <!-- Badges will be loaded here -->
+                    <div class="col-md-6">
+                      <div class="d-flex align-items-center">
+                        <i class="bi bi-wallet text-primary me-2"></i>
+                        <div>
+                          <small class="text-muted d-block">Deposit</small>
+                          <span id="deposit">-</span>
+                        </div>
+                      </div>
                     </div>
+                  </div>
                 </div>
-                
-                <!-- Tabs -->
-                <ul class="nav nav-tabs mb-4" role="tablist">
-                    <li class="nav-item">
-                        <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#overview">Ringkasan</button>
-                    </li>
-                    <li class="nav-item">
-                        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#facilities">Fasilitas</button>
-                    </li>
-                    <li class="nav-item">
-                        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#location-tab">Lokasi</button>
-                    </li>
-                    <li class="nav-item">
-                        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#reviews">Ulasan</button>
-                    </li>
-                </ul>
-                
-                <div class="tab-content">
-                    <!-- Overview Tab -->
-                    <div class="tab-pane fade show active" id="overview">
-                        <div class="card mb-4">
-                            <div class="card-body">
-                                <h5 class="card-title mb-3">Deskripsi</h5>
-                                <p id="description" class="text-muted">Loading...</p>
-                            </div>
-                        </div>
-                        
-                        <div class="card mb-4">
-                            <div class="card-body">
-                                <h5 class="card-title mb-3">Detail Kamar</h5>
-                                <div class="row g-3">
-                                    <div class="col-md-6">
-                                        <div class="d-flex align-items-center">
-                                            <i class="bi bi-rulers text-primary me-2"></i>
-                                            <div>
-                                                <small class="text-muted d-block">Ukuran Kamar</small>
-                                                <span id="roomSize">-</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="d-flex align-items-center">
-                                            <i class="bi bi-door-open text-primary me-2"></i>
-                                            <div>
-                                                <small class="text-muted d-block">Ketersediaan</small>
-                                                <span><span id="available">0</span> dari <span id="totalRooms">0</span> kamar</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="d-flex align-items-center">
-                                            <i class="bi bi-clock text-primary me-2"></i>
-                                            <div>
-                                                <small class="text-muted d-block">Minimum Sewa</small>
-                                                <span id="minimumStay">-</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="d-flex align-items-center">
-                                            <i class="bi bi-wallet text-primary me-2"></i>
-                                            <div>
-                                                <small class="text-muted d-block">Deposit</small>
-                                                <span id="deposit">-</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="card mb-4">
-                            <div class="card-body">
-                                <h5 class="card-title mb-3">Peraturan Kos</h5>
-                                <ul id="rules" class="mb-0">
-                                    <!-- Rules will be loaded here -->
-                                </ul>
-                            </div>
-                        </div>
-                        
-                        <div class="card">
-                            <div class="card-body">
-                                <h5 class="card-title mb-3">Tentang Pemilik</h5>
-                                <div class="d-flex align-items-center mb-3">
-                                    <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3" 
-                                         style="width: 64px; height: 64px;">
-                                        <i class="bi bi-person fs-3"></i>
-                                    </div>
-                                    <div>
-                                        <h6 class="mb-1" id="hostName">-</h6>
-                                        <small class="text-muted" id="hostJoinDate">-</small>
-                                        <div class="mt-1">
-                                                <span class="badge bg-success">Verified</span>
-                                            </div>
-                                    </div>
-                                    <div class="mt-3">
-                                        <a id="hostProfileLink" class="btn btn-outline-primary btn-sm" href="#">Lihat Profil Pemilik</a>
-                                    </div>
-                                </div>
-                                <div class="row g-3 small">
-                                    <div class="col-6">
-                                        <i class="bi bi-clock text-muted me-1"></i> Response: <strong id="responseTime">-</strong>
-                                    </div>
-                                    <div class="col-6">
-                                        <i class="bi bi-building text-muted me-1"></i> Properti: <strong id="hostProperties">-</strong>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Facilities Tab -->
-                    <div class="tab-pane fade" id="facilities">
-                        <div class="card mb-4">
-                            <div class="card-body">
-                                <h5 class="card-title mb-3">Fasilitas Kamar</h5>
-                                <div class="d-flex flex-wrap gap-2" id="roomFacilities">
-                                    <!-- Room facilities will be loaded here -->
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="card">
-                            <div class="card-body">
-                                <h5 class="card-title mb-3">Fasilitas Bangunan</h5>
-                                <div class="d-flex flex-wrap gap-2" id="buildingFacilities">
-                                    <!-- Building facilities will be loaded here -->
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Location Tab -->
-                    <div class="tab-pane fade" id="location-tab">
-                        <div class="card mb-4">
-                            <div class="card-body">
-                                <h5 class="card-title mb-3">Lokasi</h5>
-                                <div class="bg-light rounded p-4 text-center mb-3" style="height: 300px;">
-                                    <i class="bi bi-geo-alt fs-1 text-primary mb-2"></i>
-                                    <p class="text-muted">Google Maps akan terintegrasi di sini</p>
-                                    <p class="small text-muted" id="fullAddress">-</p>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="card">
-                            <div class="card-body">
-                                <h5 class="card-title mb-3">Tempat Terdekat</h5>
-                                <div class="list-group list-group-flush" id="nearbyPlaces">
-                                    <!-- Nearby places will be loaded here -->
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Reviews Tab -->
-                    <div class="tab-pane fade" id="reviews">
-                        <div class="card mb-4">
-                            <div class="card-body">
-                                <h5 class="card-title mb-3">Rating & Ulasan</h5>
-                                <div class="row align-items-center mb-4">
-                                    <div class="col-md-4 text-center">
-                                        <h1 class="display-3 mb-0" id="avgRating">-</h1>
-                                        <div class="text-warning mb-2">
-                                            <i class="bi bi-star-fill"></i>
-                                            <i class="bi bi-star-fill"></i>
-                                            <i class="bi bi-star-fill"></i>
-                                            <i class="bi bi-star-fill"></i>
-                                            <i class="bi bi-star-fill"></i>
-                                        </div>
-                                        <p class="text-muted">Dari <span id="totalReviews">0</span> ulasan</p>
-                                    </div>
-                                    <div class="col-md-8" id="ratingBars">
-                                        <!-- Rating bars will be here -->
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div id="reviewsList">
-                            <!-- Reviews will be loaded here -->
-                        </div>
-                    </div>
+              </div>
+
+              <div class="card mb-4">
+                <div class="card-body">
+                  <h5 class="card-title mb-3">Peraturan Kos</h5>
+                  <ul id="rules" class="mb-0">
+                    <!-- Rules will be loaded here -->
+                  </ul>
                 </div>
+              </div>
+
+              <div class="card">
+                <div class="card-body">
+                  <h5 class="card-title mb-3">Tentang Pemilik</h5>
+                  <div class="d-flex align-items-center mb-3">
+                    <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 64px; height: 64px">
+                      <i class="bi bi-person fs-3"></i>
+                    </div>
+                    <div>
+                      <h6 class="mb-1" id="hostName">-</h6>
+                      <small class="text-muted" id="hostJoinDate">-</small>
+                      <div class="mt-1">
+                        <span class="badge bg-success">Verified</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="row g-3 small">
+                    <div class="col-6"><i class="bi bi-clock text-muted me-1"></i> Response: <strong id="responseTime">-</strong></div>
+                    <div class="col-6"><i class="bi bi-building text-muted me-1"></i> Properti: <strong id="hostProperties">-</strong></div>
+                  </div>
+                </div>
+              </div>
             </div>
-            
-            <!-- Right Column - Booking Card -->
-            <div class="col-lg-4">
-                <div class="card booking-card">
-                    <div class="card-body">
-                        <div class="mb-4">
-                            <h3 class="text-primary mb-0">Rp <span id="price">-</span></h3>
-                            <small class="text-muted">per bulan</small>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label class="form-label">Tanggal Masuk</label>
-                            <input type="date" class="form-control" id="checkInDate">
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label class="form-label">Durasi Sewa</label>
-                            <select class="form-select" id="duration">
-                                <option value="1">1 Bulan</option>
-                                <option value="3">3 Bulan</option>
-                                <option value="6">6 Bulan</option>
-                                <option value="12">12 Bulan</option>
-                            </select>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <div class="d-flex justify-content-between mb-2">
-                                <span>Harga per bulan</span>
-                                <span id="monthlyPrice">Rp -</span>
-                            </div>
-                            <div class="d-flex justify-content-between mb-2">
-                                <span>Durasi</span>
-                                <span><span id="durationText">1</span> bulan</span>
-                            </div>
-                            <div class="d-flex justify-content-between mb-2">
-                                <span>Deposit</span>
-                                <span id="depositAmount">Rp -</span>
-                            </div>
-                            <hr>
-                            <div class="d-flex justify-content-between">
-                                <strong>Total</strong>
-                                <strong class="text-primary" id="totalPrice">Rp -</strong>
-                            </div>
-                        </div>
-                        
-                        <button class="btn btn-primary w-100 mb-2" onclick="bookNow()">
-                            <i class="bi bi-calendar-check me-2"></i>Booking Sekarang
-                        </button>
-                        <button class="btn btn-outline-primary w-100" onclick="contactHost()">
-                            <i class="bi bi-chat-dots me-2"></i>Hubungi Pemilik
-                        </button>
-                    </div>
+
+            <!-- Facilities Tab -->
+            <div class="tab-pane fade" id="facilities">
+              <div class="card mb-4">
+                <div class="card-body">
+                  <h5 class="card-title mb-3">Fasilitas Kamar</h5>
+                  <div class="d-flex flex-wrap gap-2" id="roomFacilities">
+                    <!-- Room facilities will be loaded here -->
+                  </div>
                 </div>
-                
-                <!-- Virtual Tour -->
-                <div class="card mt-3">
-                    <div class="card-body text-center">
-                        <i class="bi bi-camera-video fs-1 text-primary mb-2"></i>
-                        <h6 class="mb-2">Video Tour Tersedia</h6>
-                        <p class="small text-muted mb-3">Lihat video tour 360° dari properti ini</p>
-                        <button class="btn btn-outline-primary btn-sm">
-                            <i class="bi bi-play-circle me-1"></i>Tonton Video
-                        </button>
-                    </div>
+              </div>
+
+              <div class="card">
+                <div class="card-body">
+                  <h5 class="card-title mb-3">Fasilitas Bangunan</h5>
+                  <div class="d-flex flex-wrap gap-2" id="buildingFacilities">
+                    <!-- Building facilities will be loaded here -->
+                  </div>
                 </div>
+              </div>
             </div>
+
+            <!-- Location Tab -->
+            <div class="tab-pane fade" id="location-tab">
+              <div class="card mb-4">
+                <div class="card-body">
+                  <h5 class="card-title mb-3">
+                    <i class="bi bi-geo-alt-fill text-primary me-2"></i>
+                    Lokasi Properti
+                  </h5>
+                  <p class="small text-muted mb-3" id="fullAddress">-</p>
+
+                  <!-- Leaflet Map -->
+                  <div id="detailMap"></div>
+
+                  <div class="mt-3 d-flex gap-2">
+                    <button class="btn btn-outline-primary btn-sm" onclick="openInGoogleMaps()">
+                      <i class="bi bi-map me-1"></i>
+                      Buka di Google Maps
+                    </button>
+                    <button class="btn btn-outline-secondary btn-sm" onclick="getDirections()">
+                      <i class="bi bi-signpost me-1"></i>
+                      Dapatkan Arah
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="card">
+                <div class="card-body">
+                  <h5 class="card-title mb-3">Tempat Terdekat</h5>
+                  <div class="list-group list-group-flush" id="nearbyPlaces">
+                    <!-- Nearby places will be loaded here -->
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Reviews Tab -->
+            <div class="tab-pane fade" id="reviews">
+              <div class="card mb-4">
+                <div class="card-body">
+                  <h5 class="card-title mb-3">Rating & Ulasan</h5>
+                  <div class="row align-items-center mb-4">
+                    <div class="col-md-4 text-center">
+                      <h1 class="display-3 mb-0" id="avgRating">-</h1>
+                      <div class="text-warning mb-2">
+                        <i class="bi bi-star-fill"></i>
+                        <i class="bi bi-star-fill"></i>
+                        <i class="bi bi-star-fill"></i>
+                        <i class="bi bi-star-fill"></i>
+                        <i class="bi bi-star-fill"></i>
+                      </div>
+                      <p class="text-muted">Dari <span id="totalReviews">0</span> ulasan</p>
+                    </div>
+                    <div class="col-md-8" id="ratingBars">
+                      <!-- Rating bars will be here -->
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div id="reviewsList">
+                <!-- Reviews will be loaded here -->
+              </div>
+            </div>
+          </div>
         </div>
+
+        <!-- Right Column - Booking Card -->
+        <div class="col-lg-4">
+          <div class="sidebar-sticky">
+          <div class="card booking-card">
+            <div class="card-body">
+              <div class="mb-4">
+                <h3 class="text-primary mb-0">Rp <span id="price">-</span></h3>
+                <small class="text-muted">per bulan</small>
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label">Tanggal Masuk</label>
+                <input type="date" class="form-control" id="checkInDate" />
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label">Durasi Sewa</label>
+                <select class="form-select" id="duration">
+                  <option value="1">1 Bulan</option>
+                  <option value="3">3 Bulan</option>
+                  <option value="6">6 Bulan</option>
+                  <option value="12">12 Bulan</option>
+                </select>
+              </div>
+
+              <div class="mb-3">
+                <div class="d-flex justify-content-between mb-2">
+                  <span>Harga per bulan</span>
+                  <span id="monthlyPrice">Rp -</span>
+                </div>
+                <div class="d-flex justify-content-between mb-2">
+                  <span>Durasi</span>
+                  <span><span id="durationText">1</span> bulan</span>
+                </div>
+                <div class="d-flex justify-content-between mb-2">
+                  <span>Deposit</span>
+                  <span id="depositAmount">Rp -</span>
+                </div>
+                <hr />
+                <div class="d-flex justify-content-between">
+                  <strong>Total</strong>
+                  <strong class="text-primary" id="totalPrice">Rp -</strong>
+                </div>
+              </div>
+
+              <button class="btn btn-primary w-100 mb-2" onclick="bookNow()"><i class="bi bi-calendar-check me-2"></i>Booking Sekarang</button>
+              <button class="btn btn-outline-primary w-100" onclick="contactHost()"><i class="bi bi-chat-dots me-2"></i>Hubungi Pemilik</button>
+            </div>
+          </div>
+
+          <!-- Virtual Tour -->
+          <div class="card mt-3">
+            <div class="card-body text-center">
+              <i class="bi bi-camera-video fs-1 text-primary mb-2"></i>
+              <h6 class="mb-2">Video Tour Tersedia</h6>
+              <p class="small text-muted mb-3">Lihat video tour 360° dari properti ini</p>
+              <button class="btn btn-outline-primary btn-sm"><i class="bi bi-play-circle me-1"></i>Tonton Video</button>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="js/auth.js"></script>
-    <script src="js/listings.js"></script>
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
     <script>
-        let currentListing = null;
-        
-        function loadListingDetail() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const listingId = urlParams.get('id');
-            
-            if (!listingId) {
-                alert('Listing tidak ditemukan');
-                window.location.href = 'search.html';
-                return;
-            }
-            
-            currentListing = getListingById(listingId);
-            
-            if (!currentListing) {
-                alert('Listing tidak ditemukan');
-                window.location.href = 'search.html';
-                return;
-            }
-            
-            // Load basic info
-            document.getElementById('listingTitle').textContent = currentListing.title;
-            document.getElementById('listingType').textContent = currentListing.type;
-            document.getElementById('rating').textContent = currentListing.rating;
-            document.getElementById('reviewCount').textContent = currentListing.reviews;
-            document.getElementById('location').textContent = currentListing.location.split(',').slice(0, 2).join(',');
-            document.getElementById('description').textContent = currentListing.description;
-            document.getElementById('price').textContent = currentListing.price.toLocaleString('id-ID');
-            document.getElementById('monthlyPrice').textContent = 'Rp ' + currentListing.price.toLocaleString('id-ID');
-            document.getElementById('depositAmount').textContent = 'Rp ' + currentListing.price.toLocaleString('id-ID');
-            document.getElementById('roomSize').textContent = '3x4 m';
-            document.getElementById('available').textContent = currentListing.available;
-            document.getElementById('totalRooms').textContent = currentListing.rooms;
-            document.getElementById('minimumStay').textContent = '1 bulan';
-            document.getElementById('deposit').textContent = 'Rp ' + currentListing.price.toLocaleString('id-ID');
-            document.getElementById('fullAddress').textContent = currentListing.address || currentListing.location;
-            
-            // Host info
-            const hostId = currentListing.hostId || (currentListing.host && currentListing.host.id) || '';
-            const hostName = (currentListing.host && currentListing.host.name) || 'Pemilik';
-            document.getElementById('hostName').textContent = hostName;
-            document.getElementById('hostJoinDate').textContent = 'Bergabung sejak 2022';
-            document.getElementById('responseTime').textContent = '< 1 jam';
-            document.getElementById('hostProperties').textContent = '3';
-            // attach profile link
-            const hostProfileLink = document.getElementById('hostProfileLink');
-            if (hostProfileLink) {
-                hostProfileLink.href = 'profile.html?id=' + encodeURIComponent(hostId);
-            }
-            
-            // Load images
-            const images = [currentListing.image, currentListing.image, currentListing.image, currentListing.image];
-            document.getElementById('mainImage').src = images[0];
-            
-            const thumbnailsContainer = document.getElementById('thumbnails');
-            thumbnailsContainer.innerHTML = images.map((img, idx) => `
-                <div class="col-3">
-                    <div class="gallery-thumbnail ${idx === 0 ? 'active' : ''}" onclick="changeImage('${img}', ${idx})">
-                        <img src="${img}" class="w-100 h-100 object-fit-cover" alt="Thumbnail ${idx + 1}">
-                    </div>
+      let currentListing = null;
+      let detailMap = null;
+      let detailMarker = null;
+
+      // Fetch data dari API
+      async function getListingById(id) {
+        try {
+          const response = await fetch(`api/get_listing_detail.php?id=${id}`);
+          const result = await response.json();
+
+          console.log("API Response:", result);
+
+          if (result.status === "success") {
+            return result.data;
+          } else {
+            console.error("API Error:", result.message);
+            return null;
+          }
+        } catch (error) {
+          console.error("Fetch error:", error);
+          return null;
+        }
+      }
+
+      function initDetailMap(lat, lng, title, address) {
+        console.log("Initializing map with coordinates:", { lat, lng });
+
+        detailMap = L.map("detailMap").setView([lat, lng], 16);
+
+        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+          attribution: "© OpenStreetMap contributors",
+          maxZoom: 19,
+        }).addTo(detailMap);
+
+        detailMarker = L.marker([lat, lng], {
+          icon: L.icon({
+            iconUrl: "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png",
+            shadowUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png",
+            iconSize: [25, 41],
+            iconAnchor: [12, 41],
+            popupAnchor: [1, -34],
+            shadowSize: [41, 41],
+          }),
+        }).addTo(detailMap);
+
+        detailMarker
+          .bindPopup(
+            `
+            <div class="text-center">
+              <strong>${title}</strong><br>
+              <small class="text-muted">${address}</small>
+            </div>
+          `
+          )
+          .openPopup();
+
+        console.log("Map initialized successfully");
+      }
+
+      function openInGoogleMaps() {
+        if (currentListing && currentListing.latitude && currentListing.longitude) {
+          const url = `https://www.google.com/maps?q=${currentListing.latitude},${currentListing.longitude}`;
+          window.open(url, "_blank");
+        }
+      }
+
+      function getDirections() {
+        if (currentListing && currentListing.latitude && currentListing.longitude) {
+          const url = `https://www.google.com/maps/dir/?api=1&destination=${currentListing.latitude},${currentListing.longitude}`;
+          window.open(url, "_blank");
+        }
+      }
+
+      async function loadListingDetail() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const listingId = urlParams.get("id");
+
+        if (!listingId) {
+          alert("Listing tidak ditemukan");
+          window.location.href = "search.html";
+          return;
+        }
+
+        document.getElementById("listingTitle").textContent = "Memuat data...";
+
+        currentListing = await getListingById(listingId);
+
+        if (!currentListing) {
+          alert("Listing tidak ditemukan atau terjadi kesalahan");
+          window.location.href = "search.html";
+          return;
+        }
+
+        console.log("Loaded listing:", currentListing);
+
+        document.getElementById("listingTitle").textContent = currentListing.title;
+        document.getElementById("listingType").textContent = currentListing.type;
+        document.getElementById("rating").textContent = currentListing.rating || "-";
+        document.getElementById("reviewCount").textContent = currentListing.reviews || 0;
+        document.getElementById("location").textContent = currentListing.location;
+        document.getElementById("description").textContent = currentListing.description || "Tidak ada deskripsi";
+        document.getElementById("price").textContent = currentListing.price.toLocaleString("id-ID");
+        document.getElementById("monthlyPrice").textContent = "Rp " + currentListing.price.toLocaleString("id-ID");
+        document.getElementById("depositAmount").textContent = "Rp " + currentListing.deposit.toLocaleString("id-ID");
+        document.getElementById("roomSize").textContent = currentListing.roomSize || "-";
+        document.getElementById("available").textContent = currentListing.available;
+        document.getElementById("totalRooms").textContent = currentListing.rooms;
+        document.getElementById("minimumStay").textContent = "1 bulan";
+        document.getElementById("deposit").textContent = "Rp " + currentListing.deposit.toLocaleString("id-ID");
+        document.getElementById("fullAddress").textContent = currentListing.address;
+
+        document.getElementById("hostName").textContent = currentListing.host_name || "Pemilik";
+        document.getElementById("hostJoinDate").textContent = "Bergabung sejak 2024";
+        document.getElementById("responseTime").textContent = "< 1 jam";
+        document.getElementById("hostProperties").textContent = "1+";
+
+        if (currentListing.images && currentListing.images.length > 0) {
+          const images = currentListing.images;
+          document.getElementById("mainImage").src = images[0];
+
+          const thumbnailsContainer = document.getElementById("thumbnails");
+          thumbnailsContainer.innerHTML = images
+            .map(
+              (img, idx) => `
+              <div class="col-3">
+                <div class="gallery-thumbnail ${idx === 0 ? "active" : ""}" onclick="changeImage('${img}', ${idx})">
+                  <img src="${img}" class="w-100 h-100 object-fit-cover" alt="Thumbnail ${idx + 1}">
                 </div>
-            `).join('');
-            
-            // Load badges
-            if (currentListing.badges) {
-                document.getElementById('badges').innerHTML = currentListing.badges.map(badge => 
-                    `<span class="badge bg-light text-dark border">${badge}</span>`
-                ).join('');
+              </div>
+            `
+            )
+            .join("");
+        } else {
+          document.getElementById("mainImage").src = "assets/placeholder.jpg";
+        }
+
+        document.getElementById("badges").innerHTML = `
+          <span class="badge bg-light text-dark border">Verified</span>
+        `;
+
+        if (currentListing.rules && currentListing.rules.length > 0) {
+          document.getElementById("rules").innerHTML = currentListing.rules
+            .filter((rule) => rule.trim() !== "")
+            .map((rule) => `<li class="mb-2"><i class="bi bi-check-circle text-success me-2"></i>${rule}</li>`)
+            .join("");
+        } else {
+          document.getElementById("rules").innerHTML = '<li class="text-muted">Tidak ada peraturan khusus</li>';
+        }
+
+        if (currentListing.facilities && currentListing.facilities.length > 0) {
+          document.getElementById("roomFacilities").innerHTML = currentListing.facilities.map((f) => `<span class="facility-badge"><i class="bi bi-check-circle text-success"></i>${f}</span>`).join("");
+        } else {
+          document.getElementById("roomFacilities").innerHTML = '<span class="text-muted">Tidak ada fasilitas</span>';
+        }
+
+        document.getElementById("buildingFacilities").innerHTML = `
+          <span class="facility-badge"><i class="bi bi-check-circle text-success"></i>Area Parkir</span>
+          <span class="facility-badge"><i class="bi bi-check-circle text-success"></i>Keamanan 24 Jam</span>
+        `;
+
+        document.getElementById("nearbyPlaces").innerHTML = `
+          <div class="list-group-item d-flex justify-content-between align-items-center">
+            <div>
+              <i class="bi bi-geo-alt text-primary me-2"></i>
+              <strong>Universitas Jember - 500m</strong>
+            </div>
+          </div>
+          <div class="list-group-item d-flex justify-content-between align-items-center">
+            <div>
+              <i class="bi bi-geo-alt text-primary me-2"></i>
+              <strong>Minimarket - 200m</strong>
+            </div>
+          </div>
+        `;
+
+        if (currentListing.latitude && currentListing.longitude) {
+          console.log("Property has coordinates:", currentListing.latitude, currentListing.longitude);
+
+          const locationTab = document.querySelector('button[data-bs-target="#location-tab"]');
+          locationTab.addEventListener("shown.bs.tab", function () {
+            if (!detailMap) {
+              setTimeout(() => {
+                initDetailMap(currentListing.latitude, currentListing.longitude, currentListing.title, currentListing.address);
+              }, 100);
             }
-            
-            // Load rules
-            if (currentListing.rules) {
-                document.getElementById('rules').innerHTML = currentListing.rules.map(rule =>
-                    `<li class="mb-2"><i class="bi bi-check-circle text-success me-2"></i>${rule}</li>`
-                ).join('');
-            }
-            
-            // Load facilities
-            if (currentListing.facilities) {
-                const roomFacilities = currentListing.facilities;
-                document.getElementById('roomFacilities').innerHTML = roomFacilities.map(f =>
-                    `<span class="facility-badge"><i class="bi bi-check-circle text-success"></i>${f}</span>`
-                ).join('');
-                
-                document.getElementById('buildingFacilities').innerHTML = [
-                    'Wifi 100 Mbps', 'Laundry', 'Dapur Bersama', 'R. Tamu', 'CCTV', 'Keamanan 24 Jam'
-                ].map(f =>
-                    `<span class="facility-badge"><i class="bi bi-check-circle text-success"></i>${f}</span>`
-                ).join('');
-            }
-            
-            // Load nearby places
-            if (currentListing.nearbyPlaces) {
-                document.getElementById('nearbyPlaces').innerHTML = currentListing.nearbyPlaces.map(place =>
-                    `<div class="list-group-item d-flex justify-content-between align-items-center">
-                        <div>
-                            <i class="bi bi-geo-alt text-primary me-2"></i>
-                            <strong>${place}</strong>
-                        </div>
-                    </div>`
-                ).join('');
-            }
-            
-            // Load reviews
-            loadReviews();
-            
-            // Update favorite icon
-            updateFavoriteIcon();
-            
-            // Calculate total price
-            calculateTotalPrice();
+          });
+        } else {
+          console.warn("Property has no coordinates");
+          document.getElementById("detailMap").innerHTML = '<div class="alert alert-warning">Koordinat lokasi tidak tersedia</div>';
+        }
+
+        loadReviews();
+        calculateTotalPrice();
+      }
+
+      function changeImage(src, idx) {
+        document.getElementById("mainImage").src = src;
+        document.querySelectorAll(".gallery-thumbnail").forEach((thumb, i) => {
+          thumb.classList.toggle("active", i === idx);
+        });
+      }
+
+      function calculateTotalPrice() {
+        const duration = parseInt(document.getElementById("duration").value);
+        const monthlyPrice = currentListing.price;
+        const deposit = currentListing.deposit;
+        const total = monthlyPrice * duration + deposit;
+
+        document.getElementById("durationText").textContent = duration;
+        document.getElementById("totalPrice").textContent = "Rp " + total.toLocaleString("id-ID");
+      }
+
+      function loadReviews() {
+        document.getElementById("avgRating").textContent = currentListing.rating || "-";
+        document.getElementById("totalReviews").textContent = currentListing.reviews || 0;
+
+        document.getElementById("reviewsList").innerHTML = '<div class="alert alert-info">Belum ada ulasan untuk properti ini</div>';
+      }
+
+      async function bookNow() {
+        const checkIn = document.getElementById("checkInDate").value;
+        const duration = parseInt(document.getElementById("duration").value);
+        
+        if (!checkIn) {
+          alert("Pilih tanggal masuk terlebih dahulu");
+          return;
         }
         
-        function loadReviews() {
-            document.getElementById('avgRating').textContent = currentListing.rating;
-            document.getElementById('totalReviews').textContent = currentListing.reviews;
-            
-            const mockReviews = [
-                { name: 'Ayu Lestari', rating: 5, date: '2 minggu lalu', comment: 'Kos yang sangat nyaman dan bersih! Pemilik ramah dan responsif. Lokasi strategis dekat kampus. Recommended!' },
-                { name: 'Dewi Putri', rating: 4, date: '1 bulan lalu', comment: 'Tempatnya bagus, fasilitasnya lengkap. Wifi cepat cocok untuk kuliah online.' },
-                { name: 'Rina Maharani', rating: 5, date: '2 bulan lalu', comment: 'Sudah 6 bulan tinggal disini, sangat puas. Keamanan terjamin, suasana tenang untuk belajar.' }
-            ];
-            
-            document.getElementById('reviewsList').innerHTML = mockReviews.map(review => `
-                <div class="card mb-3">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between mb-2">
-                            <div class="d-flex align-items-center">
-                                <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3" 
-                                     style="width: 40px; height: 40px;">
-                                    <span>${review.name.charAt(0)}</span>
-                                </div>
-                                <div>
-                                    <strong>${review.name}</strong>
-                                    <div class="small text-muted">${review.date}</div>
-                                </div>
-                            </div>
-                            <div class="text-warning">
-                                ${'<i class="bi bi-star-fill"></i>'.repeat(review.rating)}
-                            </div>
-                        </div>
-                        <p class="mb-0">${review.comment}</p>
-                    </div>
-                </div>
-            `).join('');
-        }
+        // Validate date is not in the past
+        const selectedDate = new Date(checkIn);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
         
-        function changeImage(src, idx) {
-            document.getElementById('mainImage').src = src;
-            document.querySelectorAll('.gallery-thumbnail').forEach((thumb, i) => {
-                thumb.classList.toggle('active', i === idx);
-            });
+        if (selectedDate < today) {
+          alert("Tanggal masuk tidak boleh di masa lalu");
+          return;
         }
         
         // Calculate total
