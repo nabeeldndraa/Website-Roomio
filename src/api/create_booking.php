@@ -69,7 +69,7 @@ try {
     
     if ($result_penyewa->num_rows === 0) {
         // Create penyewa record if doesn't exist
-        $sql_insert_penyewa = "INSERT INTO penyewa (id_user, status) VALUES (?, 'Umum')";
+        $sql_insert_penyewa = "INSERT INTO penyewa (id_user, status) VALUES (?, 'Mahasiswa')";
         $stmt_insert_penyewa = $koneksi->prepare($sql_insert_penyewa);
         $stmt_insert_penyewa->bind_param("i", $id_user);
         $stmt_insert_penyewa->execute();

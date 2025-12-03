@@ -79,21 +79,22 @@
             
             <!-- Tabs -->
             <ul class="nav nav-tabs mb-4" role="tablist">
+                
                 <li class="nav-item">
-                    <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#favorites">
-                        <i class="bi bi-heart me-2"></i>Favorit
+                    <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#bookings">
+                        <i class="bi bi-calendar-check me-2"></i>Booking Saya
                     </button>
                 </li>
                 <li class="nav-item">
-                    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#bookings">
-                        <i class="bi bi-calendar-check me-2"></i>Booking Saya
+                    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#favorites">
+                        <i class="bi bi-heart me-2"></i>Favorit
                     </button>
                 </li>
             </ul>
             
             <div class="tab-content">
                 <!-- Favorites Tab -->
-                <div class="tab-pane fade show active" id="favorites">
+                <div class="tab-pane fade" id="favorites">
                     <div class="row g-4" id="favoritesList">
                         <!-- Favorites will be loaded here -->
                     </div>
@@ -106,7 +107,7 @@
                 </div>
                 
                 <!-- Bookings Tab -->
-                <div class="tab-pane fade" id="bookings">
+                <div class="tab-pane fade show active" id="bookings">
                     <div class="row g-4" id="bookingsList">
                         <!-- Bookings will be loaded here -->
                     </div>
@@ -299,11 +300,54 @@
             loadFavorites();
         }
         
-        function cancelBooking(id) {
-            if (confirm('Apakah Anda yakin ingin membatalkan booking ini?')) {
-                // In real app, this would call an API
-                alert('Booking dibatalkan');
-                loadBookings();
+        async function bayarBooking(id) {
+            alert('Anda akan diarahkan ke halaman pembayaran.'); 
+            window.location.href = 'payment.html?id_sewa=' + id;
+        }
+        
+        async function cancelBooking(id) {
+            if (!confirm('Apakah Anda yakin ingin membatalkan booking ini?')) {
+                return;
+            }
+            
+            // Show loading state
+            const button = event.target;
+            const originalText = button.innerHTML;
+            button.disabled = true;
+            button.innerHTML = '<i class="bi bi-hourglass-split me-1"></i>Memproses...';
+            
+            try {
+                const response = await fetch('api/cancel_booking.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ id_sewa: id })
+                });
+                
+                const result = await response.json();
+                console.log('Cancel booking response:', result); // Debug log
+                
+                if (result.status === 'success') {
+                    alert('✅ Booking berhasil dibatalkan');
+                    loadBookings();
+                } else {
+                    alert('❌ Gagal membatalkan booking:\n' + result.message);
+                    button.disabled = false;
+                    button.innerHTML = originalText;
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('❌ Terjadi kesalahan saat membatalkan booking');
+                button.disabled = false;
+                button.innerHTML = originalText;
+            }
+        }
+        
+        function logout() {
+            if (confirm('Apakah Anda yakin ingin keluar?')) {
+                localStorage.removeItem('user');
+                window.location.href = 'auth.html';
             }
         }
         

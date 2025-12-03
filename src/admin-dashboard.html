@@ -131,6 +131,37 @@
                     </div>
                 </div>
                 
+                <!-- Chart Visualization -->
+                    <div class="card mb-4">
+                <div class="card-header bg-white">
+                     <h5 class="mb-0">Visualisasi Status Listing</h5>
+            </div>
+            <div class="card-body">
+        <canvas id="listingChart" height="120"></canvas>
+    </div>
+</div>
+
+<!-- Container Bar Chart -->
+<div class="card mb-4">
+<div class="card-header bg-white">
+<h5 class="mb-0">Statistik Listing per Kategori</h5>
+</div>
+<div class="card-body">
+<canvas id="barChart" height="120"></canvas>
+</div>
+</div>
+
+
+<!-- Container Map -->
+<div class="card mb-4">
+<div class="card-header bg-white">
+<h5 class="mb-0">Peta Lokasi Properti</h5>
+</div>
+<div class="card-body">
+<div id="map" style="height: 350px; width: 100%; border-radius: 10px;"></div>
+</div>
+</div>
+
                 <!-- Recent Activity -->
                 <div class="card">
                     <div class="card-header bg-white">
@@ -305,57 +336,94 @@
         </div>
     </div>
 
-    <!-- Badge Modal -->
-    <div class="modal fade" id="badgeModal" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Tambahkan Badge pada Listing</h5>
-                    <button type="button" class="btn-close" aria-label="Close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <p>Pilih badge untuk listing ini</p>
-                    <select id="badgeSelect" class="form-select mb-3" aria-label="Pilih badge untuk listing">
-                        <option value="">-- Pilih badge --</option>
-                        <option value="featured">Featured</option>
-                        <option value="verified_host">Verified Host</option>
-                        <option value="top_rated">Top Rated</option>
-                    </select>
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" value="1" id="badgeHighlight" checked>
-                        <label class="form-check-label" for="badgeHighlight">Tandai sebagai highlight</label>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                    <button type="button" class="btn btn-primary" onclick="assignBadge()">Simpan Badge</button>
-                </div>
-            </div>
-        </div>
-    </div>
+    <!-- CDN Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-    <!-- Fee Modal -->
-    <div class="modal fade" id="feeModal" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Atur Fee Admin</h5>
-                    <button type="button" class="btn-close" aria-label="Close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <label class="form-label">Persentase Fee Admin (%)</label>
-                    <input type="number" id="adminFeeInput" class="form-control mb-2" placeholder="Contoh 5 untuk 5%">
-                    <small class="text-muted d-block mb-2">Atur fee yang akan dipotong dari setiap transaksi.</small>
-                    <label class="form-label">Fee untuk listing saat ini (Rp)</label>
-                    <input type="number" id="listingFeeInput" class="form-control" placeholder="Masukkan fee tetap untuk listing ini (opsional)">
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                    <button type="button" class="btn btn-primary" onclick="saveFeeSettings()">Simpan</button>
-                </div>
-            </div>
-        </div>
-    </div>
+<!-- CDN Leaflet Map -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script>
+// ================= BAR CHART =====================
+function loadBarChart() {
+    const ctx = document.getElementById('barChart').getContext('2d');
+
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['Kos Putra', 'Kos Putri', 'Kos Campur', 'Kontrakan'],
+            datasets: [{
+                label: 'Jumlah Listing',
+                data: [12, 20, 8, 5], // contoh data
+                backgroundColor: ['#3b82f6', '#10b981', '#facc15', '#ef4444']
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: { beginAtZero: true }
+            }
+        }
+    });
+}
+// ================= BAR CHART =====================
+function loadBarChart() {
+const ctx = document.getElementById('barChart').getContext('2d');
+
+
+new Chart(ctx, {
+type: 'bar',
+data: {
+labels: ['Kos Putra', 'Kos Putri', 'Kos Campur', 'Kontrakan'],
+datasets: [{
+label: 'Jumlah Listing',
+data: [12, 20, 8, 5], // contoh data
+backgroundColor: ['#3b82f6', '#10b981', '#facc15', '#ef4444']
+}]
+},
+options: {
+responsive: true,
+scales: {
+y: { beginAtZero: true }
+}
+}
+});
+}
+
+
+// ================= MAP LEAFLET ====================
+function loadMap() {
+// Set posisi awal peta (contoh: Jakarta)
+const map = L.map('map').setView([-6.200000, 106.816666], 11);
+
+
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+maxZoom: 18,
+}).addTo(map);
+
+
+// Contoh titik properti
+const properties = [
+{ name: 'Kos Putra Harmoni', lat: -6.203, lng: 106.820 },
+{ name: 'Kos Putri Mawar', lat: -6.190, lng: 106.830 },
+{ name: 'Kontrakan Bunga', lat: -6.210, lng: 106.810 }
+];
+
+
+properties.forEach(p => {
+L.marker([p.lat, p.lng]).addTo(map)
+.bindPopup(`<b>${p.name}</b>`);
+});
+}
+
+
+// Panggil fungsi ketika halaman load
+window.onload = function() {
+loadBarChart();
+loadMap();
+};
+
+</script>
 
     <!-- Transaction Verify Modal -->
     <div class="modal fade" id="txnVerifyModal" tabindex="-1">
@@ -421,6 +489,28 @@
             txnVerifyModal = new bootstrap.Modal(document.getElementById('txnVerifyModal'));
 
             loadDashboardStats();
+            let listingChart = null;
+
+            function loadDashboardStats() {
+    const stats = {
+        total_users: 145,
+        listings: {
+            pending: 8,
+            approved: 42,
+            rejected: 3,
+            archived: 2
+        }
+    };
+
+    document.getElementById('statUsers').textContent = stats.total_users;
+    document.getElementById('statPending').textContent = stats.listings.pending;
+    document.getElementById('statApproved').textContent = stats.listings.approved;
+    document.getElementById('statRejected').textContent = stats.listings.rejected;
+    document.getElementById('pendingCount').textContent = stats.listings.pending;
+
+    // ⭐ Tampilkan Chart
+    renderChart(stats);
+}
             loadPendingListings();
             loadTransactions();
         });
@@ -852,6 +942,7 @@
             localStorage.removeItem('currentUser');
             window.location.href = 'index.html';
         }
+
     </script>
 </body>
 </html>
