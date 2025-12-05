@@ -1,119 +1,133 @@
 <?php
-header('Content-Type: application/json');
+// Pastikan nama file ini sesuai dengan yang dipanggil di JavaScript
+header('Access-Control-Allow-Origin: *');
+header('Content-Type: application/json; charset=utf-8');
+
+// Debugging: Tampilkan error jika ada
 error_reporting(E_ALL);
-ini_set('display_errors', 1);
+ini_set('display_errors', 1); // Ubah ke 1 jika ingin melihat error di browser
 
-include 'db_connect.php';
+// 1. KONEKSI DATABASE
+$host = 'localhost';
+$user = 'root';
+$pass = '';
+$db   = 'db_roomio'; // <--- JANGAN LUPA GANTI INI
 
-$id_properti = $_GET['id'] ?? null;
-
-if (!$id_properti) {
-    http_response_code(400);
-    echo json_encode(['status' => 'error', 'message' => 'ID properti tidak ditemukan']);
-    exit;
+$conn = new mysqli($host, $user, $pass, $db);
+if ($conn->connect_error) {
+    die(json_encode(['status' => 'error', 'message' => 'DB Connection Error']));
 }
 
-try {
-    $sql = "SELECT 
-                p.id_properti,
-                p.nama_properti,
-                p.tipe_properti,
-                p.tipe_kos,
-                p.alamat,
-                p.kecamatan,
-                p.deskripsi,
-                p.rules,
-                p.latitude,
-                p.longitude,
-                k.harga,
-                k.deposit,
-                k.jumlah_kamar,
-                k.kamar_tersedia,
-                k.room_size,
-                k.fasilitas_kamar,
-                u.username as host_name
-            FROM properti p
-            LEFT JOIN kamar k ON p.id_properti = k.id_properti
-            LEFT JOIN users u ON p.id_user = u.id_user
-            WHERE p.id_properti = ?
-            LIMIT 1";
+// 2. AMBIL ID DARI PARAMETER URL
+$id_kamar = 0;
+
+if (isset($_GET['id'])) {
+    $id_kamar = (int)$_GET['id'];
+} elseif (isset($_GET['id_kamar'])) {
+    $id_kamar = (int)$_GET['id_kamar'];
+}
+
+// Cek lagi apakah ID berhasil didapat
+if ($id_kamar == 0) {
+    // Debugging: Kasih tau user apa yang sebenarnya diterima PHP
+    $input_yang_diterima = json_encode($_GET);
+    die(json_encode([
+        'status' => 'error', 
+        'message' => 'ID Kamar tidak valid atau Kosong. Data yang diterima server: ' . $input_yang_diterima
+    ]));
+}
+
+// 3. QUERY DATA UTAMA (JOIN PROPERTI + KAMAR)
+// Sesuaikan nama kolom dengan database kamu yang tadi
+$sql = "SELECT 
+            p.id_properti,
+            p.nama_properti,
+            p.alamat,
+            p.tipe_properti,
+            p.deskripsi,
+            p.fasilitas_umum,
+            p.rules,
+            p.latitude,
+            p.longitude,
+            p.jumlah_views AS views,
+            
+            k.id_kamar,
+            k.nama_kamar,
+            k.tipe_kamar,
+            k.harga,
+            k.deposit,
+            k.jumlah_kamar,
+            k.kamar_tersedia,
+            k.room_size,
+            k.satuan_harga,
+            k.status,
+            k.fasilitas_kamar,
+            k.total_views AS kamar_views
+            
+        FROM properti p
+        JOIN kamar k ON p.id_properti = k.id_properti
+        WHERE k.id_kamar = $id_kamar
+        LIMIT 1";
+
+$result = $conn->query($sql);
+
+if ($result && $result->num_rows > 0) {
+    $row = $result->fetch_assoc();
     
-    $stmt = $koneksi->prepare($sql);
-    $stmt->bind_param("i", $id_properti);
-    $stmt->execute();
-    $result = $stmt->get_result();
+    // 4. QUERY AMBIL GALERI FOTO (Dari tabel foto_properti)
+    $id_properti = $row['id_properti'];
     
-    if ($result->num_rows === 0) {
-        http_response_code(404);
-        echo json_encode(['status' => 'error', 'message' => 'Properti tidak ditemukan']);
-        exit;
+    // Ganti 'nama_file' dengan nama kolom gambar asli di tabel foto_properti kamu
+    // (misal: 'url_foto', 'gambar', 'file')
+    $sql_foto = "SELECT url_foto FROM foto_properti WHERE id_properti = $id_properti"; 
+    $res_foto = $conn->query($sql_foto);
+    
+    $gallery = [];
+    if ($res_foto) {
+        while($f = $res_foto->fetch_assoc()) {
+            $gallery[] = $f['url_foto']; 
+        }
     }
     
-    $data = $result->fetch_assoc();
-    
-    // Ambil foto
-    $sql_foto = "SELECT url_foto FROM foto_properti WHERE id_properti = ? ORDER BY id_foto LIMIT 4";
-    $stmt_foto = $koneksi->prepare($sql_foto);
-    $stmt_foto->bind_param("i", $id_properti);
-    $stmt_foto->execute();
-    $result_foto = $stmt_foto->get_result();
-    
-    $fotos = [];
-    while ($foto = $result_foto->fetch_assoc()) {
-        $fotos[] = $foto['url_foto'];
+    // Jika tidak ada foto, kasih default
+    if (empty($gallery)) {
+        $gallery[] = "https://via.placeholder.com/600x400?text=No+Image";
     }
-    
-    // Default image jika tidak ada foto
-    if (empty($fotos)) {
-        $fotos[] = 'assets/placeholder.jpg';
-    }
-    
-    // Parse fasilitas
-    $fasilitas = [];
-    if (!empty($data['fasilitas_kamar'])) {
-        $fasilitas = json_decode($data['fasilitas_kamar'], true) ?? [];
-    }
-    
-    // Format tipe
-    $type_display = $data['tipe_properti'];
-    if ($data['tipe_properti'] === 'Kos' && $data['tipe_kos']) {
-        $type_display = 'Kos ' . $data['tipe_kos'];
-    }
-    
-    $response = [
+
+    // Bersihkan data fasilitas
+    $fasilitas = !empty($row['fasilitas_kamar']) ? explode(',', $row['fasilitas_kamar']) : [];
+
+    // Format Data JSON
+    $data = [
         'status' => 'success',
         'data' => [
-            'id' => $data['id_properti'],
-            'title' => $data['nama_properti'],
-            'type' => $type_display,
-            'location' => $data['kecamatan'] . ', Jember',
-            'address' => $data['alamat'],
-            'price' => (int)$data['harga'],
-            'deposit' => (int)($data['deposit'] ?? $data['harga']),
-            'description' => $data['deskripsi'] ?? '',
-            'rules' => $data['rules'] ? array_filter(explode("\n", trim($data['rules']))) : [],
-            'rooms' => (int)$data['jumlah_kamar'],
-            'available' => (int)$data['kamar_tersedia'],
-            'roomSize' => $data['room_size'] ?? '-',
-            'facilities' => $fasilitas,
-            'images' => $fotos,
-            'latitude' => (float)$data['latitude'],
-            'longitude' => (float)$data['longitude'],
-            'host_name' => $data['host_name'] ?? 'Pemilik',
-            'rating' => 4.5,
-            'reviews' => 0
+            'id' => $row['id_kamar'],
+            'title' => $row['nama_properti'] . ' - ' . $row['nama_kamar'], // Ubah biar match JS
+            'description' => $row['deskripsi'] ?? 'Fasilitas lengkap, lokasi strategis.',
+            'location' => $row['alamat'],
+            'price' => (int)$row['harga'],
+            'deposit' => (int)$row['deposit'] ?? 0,
+            'category' => $row['tipe_properti'],
+            'type' => $row['tipe_kamar'], // Buat JS
+            'roomSize' => $row['room_size'] ?? '3x4 m',
+            'available' => (int)$row['kamar_tersedia'] ?? 0,
+            'rooms' => (int)$row['jumlah_kamar'] ?? 0,
+            'latitude' => (float)$row['latitude'] ?? 0,
+            'longitude' => (float)$row['longitude'] ?? 0,
+            'views' => (int)$row['views'] ?? 0,
+            'facilities' => !empty($row['fasilitas_kamar']) ? explode(',', $row['fasilitas_kamar']) : [],
+            'buildingFacilities' => !empty($row['fasilitas_umum']) ? explode(',', $row['fasilitas_umum']) : [],
+            'rules' => !empty($row['rules']) ? explode(',', $row['rules']) : [],
+            'main_image' => $gallery[0],
+            'gallery' => $gallery,
+            'rating' => 4.8,
+            'reviews' => 12
         ]
     ];
-    
-    echo json_encode($response);
-    
-} catch (Exception $e) {
-    http_response_code(500);
-    echo json_encode([
-        'status' => 'error', 
-        'message' => 'Error: ' . $e->getMessage()
-    ]);
-}
+    echo json_encode($data);
 
-$koneksi->close();
+} else {
+    echo json_encode(['status' => 'error', 'message' => 'Data tidak ditemukan']);
+}
+$conn->close();
 ?>
