@@ -527,10 +527,20 @@ export default function ListingDetail({ listingId, currentUser, onBack }: Listin
                   </DialogContent>
                 </Dialog>
 
-                <Button variant="outline" className="w-full">
-                  <MessageSquare className="w-4 h-4 mr-2" />
-                  Chat Pemilik
-                </Button>
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={() => {
+                const phone = "6285230994262"; 
+                const text = "Halo, saya ingin bertanya mengenai properti ini. Apakah masih tersedia?";
+                const url = `https://api.whatsapp.com/send?phone=${phone}&text=${encodeURIComponent(text)}`;
+                window.open(url, "_blank");
+              }}
+            >
+              <MessageSquare className="w-4 h-4 mr-2" />
+              Chat Pemilik
+            </Button>
+
               </CardContent>
             </Card>
 
