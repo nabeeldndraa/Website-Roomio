@@ -13,7 +13,6 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" />
 
-    <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 
     <style>
@@ -36,13 +35,13 @@
       }
 
       .step::before {
-        content: "";
+        content: none;
         position: absolute;
         top: 20px;
         left: 0;
         right: 0;
         height: 2px;
-        background: #e5e7eb;
+        background: #ababab;
         z-index: 0;
       }
 
@@ -59,7 +58,7 @@
         height: 40px;
         border-radius: 50%;
         background: #e5e7eb;
-        color: #6b7280;
+        color: #344d80;
         display: inline-flex;
         align-items: center;
         justify-content: center;
@@ -187,6 +186,14 @@
         font-family: "Courier New", monospace;
         color: #374151;
       }
+
+      .hidden {
+        display: none;
+      }
+
+      .nav-button-hidden {
+        display: none;
+      }
     </style>
   </head>
   <body>
@@ -196,7 +203,7 @@
           <i class="bi bi-building text-primary fs-4 me-2"></i>
           <span class="text-primary fs-5">Roomio</span>
         </a>
-        <a href="host-dashboard.html" class="btn btn-link">
+        <a href="host-dashboard.html" class="btn btn-link" title="Tutup">
           <i class="bi bi-x-lg"></i>
         </a>
       </div>
@@ -234,7 +241,6 @@
                 <input type="hidden" id="latitude" name="latitude" />
                 <input type="hidden" id="longitude" name="longitude" />
 
-                <!-- STEP 1: INFO DASAR -->
                 <div class="form-section active" data-section="1">
                   <h5 class="mb-4">Informasi Dasar</h5>
 
@@ -244,8 +250,8 @@
                   </div>
 
                   <div class="mb-3">
-                    <label class="form-label">Kategori *</label>
-                    <select class="form-select" id="category" name="category" required>
+                    <label class="form-label" for="category">Kategori *</label>
+                    <select class="form-select" id="category" name="category" required aria-labelledby="category">
                       <option value="">Pilih kategori</option>
                       <option value="kos-putra">Kos Putra</option>
                       <option value="kos-putri">Kos Putri</option>
@@ -266,8 +272,8 @@
                   </div>
 
                   <div class="mb-3">
-                    <label class="form-label">Lokasi *</label>
-                    <select class="form-select mb-2" id="district" name="district" required>
+                    <label class="form-label" for="district">Lokasi *</label>
+                    <select class="form-select mb-2" id="district" name="district" required aria-labelledby="district">
                       <option value="">Pilih kecamatan</option>
                       <option value="tegalboto">Tegalboto</option>
                       <option value="sumbersari">Sumbersari</option>
@@ -278,27 +284,21 @@
                     <input type="text" class="form-control" id="address" name="address" required placeholder="Alamat lengkap..." />
                   </div>
 
-                  <!-- MAPS PICKER BUTTON -->
                   <div class="mb-3">
                     <label class="form-label">Pin Lokasi di Maps *</label>
                     <button type="button" class="btn btn-outline-primary w-100" id="openMapBtn"><i class="bi bi-geo-alt-fill me-2"></i>Pilih Lokasi di Peta</button>
                     <small class="text-muted d-block mt-1">
-                      <i class="bi bi-info-circle me-1"></i>
-                      Klik untuk menandai lokasi properti Anda di peta
-                    </small>
-
-                    <!-- Coordinates Display -->
-                    <div id="coordinatesDisplay" class="coordinates-display" style="display: none">
+                    <div id="coordinatesDisplay" class="coordinates-display hidden">
                       <i class="bi bi-check-circle-fill me-2"></i>
                       <strong>Lokasi Berhasil Dipilih</strong><br />
-                      <small>Latitude: <span id="displayLat" class="fw-bold">-</span></small
-                      ><br />
+                      <small>Latitude: <span id="displayLat" class="fw-bold">-</span></small><br />
                       <small>Longitude: <span id="displayLng" class="fw-bold">-</span></small>
+                    </div>
+                      
                     </div>
                   </div>
                 </div>
 
-                <!-- STEP 2: DETAIL -->
                 <div class="form-section" data-section="2">
                   <h5 class="mb-4">Detail Properti</h5>
 
@@ -370,8 +370,6 @@
                     <textarea class="form-control" id="rules" name="rules" rows="4" placeholder="Masukkan peraturan, satu per baris&#10;Contoh:&#10;Jam malam pukul 22.00&#10;Tidak boleh membawa tamu menginap"></textarea>
                   </div>
                 </div>
-
-                <!-- STEP 3: FOTO -->
                 <div class="form-section" data-section="3">
                   <h5 class="mb-4">Foto Properti</h5>
                   <p class="text-muted">Tambahkan minimal 4 foto berkualitas tinggi</p>
@@ -391,7 +389,6 @@
                   </div>
                 </div>
 
-                <!-- STEP 4: REVIEW -->
                 <div class="form-section" data-section="4">
                   <h5 class="mb-4">Review & Publikasi</h5>
 
@@ -407,18 +404,12 @@
                     <strong>Detail:</strong>
                     <ul id="reviewDetails" class="mt-2"></ul>
                   </div>
-
                   <div class="alert alert-success">
                     <i class="bi bi-check-circle me-2"></i>
-                    Listing Anda siap dipublikasikan!
-                  </div>
-                </div>
-
-                <!-- NAVIGATION BUTTONS -->
                 <div class="d-flex justify-content-between mt-4">
-                  <button type="button" class="btn btn-outline-secondary" id="prevBtn" style="display: none"><i class="bi bi-arrow-left me-2"></i>Sebelumnya</button>
+                  <button type="button" class="btn btn-outline-secondary nav-button-hidden" id="prevBtn"><i class="bi bi-arrow-left me-2"></i>Sebelumnya</button>
                   <button type="button" class="btn btn-primary ms-auto" id="nextBtn">Selanjutnya<i class="bi bi-arrow-right ms-2"></i></button>
-                  <button type="submit" class="btn btn-success ms-auto" id="submitBtn" style="display: none"><i class="bi bi-check-circle me-2"></i>Publikasikan</button>
+                  <button type="submit" class="btn btn-success ms-auto nav-button-hidden" id="submitBtn"><i class="bi bi-check-circle me-2"></i>Publikasikan</button>
                 </div>
               </form>
             </div>
@@ -427,10 +418,9 @@
       </div>
     </div>
 
-    <!-- MODAL MAPS -->
     <div id="mapModal" class="map-modal">
       <div class="map-modal-content">
-        <!-- Header -->
+
         <div class="map-header">
           <h5 class="mb-0">
             <i class="bi bi-geo-alt-fill text-primary me-2"></i>
@@ -438,8 +428,6 @@
           </h5>
           <button type="button" class="btn-close" id="closeMapBtn"></button>
         </div>
-
-        <!-- Search Box -->
         <div class="map-search-box">
           <div class="input-group mb-2">
             <span class="input-group-text">
@@ -453,11 +441,8 @@
             Klik pada peta untuk memilih lokasi yang tepat. Marker dapat di-drag.
           </small>
         </div>
-
-        <!-- Map Canvas -->
         <div id="mapCanvas"></div>
 
-        <!-- Footer -->
         <div class="map-footer">
           <div>
             <small class="text-muted d-block">Koordinat Terpilih:</small>
@@ -475,31 +460,22 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- Leaflet JS -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
     <script>
-      // ========================================
-      // GLOBAL VARIABLES
-      // ========================================
+
       let map;
       let marker;
       let selectedLocation = {
-        lat: -8.1703073, // Default: Jember
+        lat: -8.1703073,
         lng: 113.7238609,
       };
       let currentStep = 1;
       const totalSteps = 4;
-
-      // ========================================
-      // LEAFLET MAPS FUNCTIONS
-      // ========================================
-
       function initMap() {
         try {
           console.log("Initializing map...");
 
-          // Initialize Leaflet map
           map = L.map("mapCanvas", {
             center: [selectedLocation.lat, selectedLocation.lng],
             zoom: 15,
@@ -508,16 +484,12 @@
           });
 
           console.log("Map created");
-
-          // Add OpenStreetMap tiles
           L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
             attribution: "© OpenStreetMap contributors",
             maxZoom: 19,
           }).addTo(map);
 
           console.log("Tiles added");
-
-          // Add initial marker
           marker = L.marker([selectedLocation.lat, selectedLocation.lng], {
             draggable: true,
             icon: L.icon({
@@ -531,19 +503,15 @@
           }).addTo(map);
 
           console.log("Marker added");
-
-          // Update location when marker is dragged
           marker.on("dragend", function (e) {
             const position = marker.getLatLng();
             updateSelectedLocation(position.lat, position.lng);
           });
 
-          // Add click event to map
           map.on("click", function (e) {
             placeMarker(e.latlng);
           });
 
-          // Force map to render properly
           setTimeout(() => {
             map.invalidateSize();
           }, 100);
@@ -559,14 +527,11 @@
         const mapModal = document.getElementById("mapModal");
         mapModal.classList.add("show");
 
-        // Initialize map if not yet initialized
         if (!map) {
-          // Wait for modal to be fully visible before initializing
           setTimeout(() => {
             initMap();
           }, 300);
         } else {
-          // Refresh map size
           setTimeout(() => {
             map.invalidateSize();
             map.setView([selectedLocation.lat, selectedLocation.lng], 15);
@@ -596,7 +561,6 @@
           return;
         }
 
-        // Using Nominatim API for geocoding (free OpenStreetMap service)
         const searchQuery = searchInput.includes("Jember") ? searchInput : searchInput + ", Jember, Indonesia";
 
         fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchQuery)}&limit=1`)
@@ -625,16 +589,13 @@
           return;
         }
 
-        // Save to hidden input
-        document.getElementById("latitude").value = selectedLocation.lat;
-        document.getElementById("longitude").value = selectedLocation.lng;
-
-        // Display coordinates in form
+        document.getElementById("displayLat").textContent = selectedLocation.lat.toFixed(7);
+        document.getElementById("displayLng").textContent = selectedLocation.lng.toFixed(7);
+        document.getElementById("coordinatesDisplay").classList.remove("hidden");
         document.getElementById("displayLat").textContent = selectedLocation.lat.toFixed(7);
         document.getElementById("displayLng").textContent = selectedLocation.lng.toFixed(7);
         document.getElementById("coordinatesDisplay").style.display = "block";
 
-        // Close modal
         closeMapModal();
       }
 
@@ -642,11 +603,6 @@
         const mapModal = document.getElementById("mapModal");
         mapModal.classList.remove("show");
       }
-
-      // ========================================
-      // FORM NAVIGATION FUNCTIONS
-      // ========================================
-
       function getUrlParameter(name) {
         name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
         var regex = new RegExp("[\\?&]" + name + "=([^&#]*)");
@@ -671,7 +627,6 @@
           targetSection.classList.add("active");
         }
 
-        // Update indicators
         document.querySelectorAll(".step").forEach(function (stepEl, index) {
           stepEl.classList.remove("active", "completed");
           if (index + 1 < step) {
@@ -681,7 +636,6 @@
           }
         });
 
-        // Update buttons
         const prevBtn = document.getElementById("prevBtn");
         const nextBtn = document.getElementById("nextBtn");
         const submitBtn = document.getElementById("submitBtn");
@@ -769,17 +723,11 @@
           .join("");
       }
 
-      // ========================================
-      // EVENT LISTENERS
-      // ========================================
-
-      // Event listener untuk tombol buka maps
       document.getElementById("openMapBtn").addEventListener("click", function (e) {
         e.preventDefault();
         openMapModal();
       });
 
-      // Event listener untuk tombol tutup maps
       document.getElementById("closeMapBtn").addEventListener("click", function () {
         closeMapModal();
       });
@@ -788,17 +736,12 @@
         closeMapModal();
       });
 
-      // Event listener untuk tombol konfirmasi lokasi
       document.getElementById("confirmMapBtn").addEventListener("click", function () {
         confirmLocation();
       });
-
-      // Event listener untuk search maps
       document.getElementById("searchMapBtn").addEventListener("click", function () {
         searchLocation();
       });
-
-      // Event listener untuk Enter key di search input
       document.getElementById("mapSearchInput").addEventListener("keypress", function (e) {
         if (e.key === "Enter") {
           e.preventDefault();
@@ -806,7 +749,6 @@
         }
       });
 
-      // Event listener untuk navigasi form
       document.getElementById("nextBtn").addEventListener("click", function () {
         if (currentStep < totalSteps) {
           updateStep(currentStep + 1);
@@ -818,10 +760,6 @@
           updateStep(currentStep - 1);
         }
       });
-
-      // ========================================
-      // FORM SUBMIT
-      // ========================================
 
       document.getElementById("listingForm").addEventListener("submit", async function (e) {
         e.preventDefault();
@@ -835,8 +773,6 @@
           formData.append("id_properti", document.getElementById("id_properti").value);
           formData.append("id_kamar", document.getElementById("id_kamar").value);
         }
-
-        // Data properti
         formData.append("nama_properti", document.getElementById("title").value);
         formData.append("tipe_properti", document.getElementById("category").value);
         formData.append("alamat", document.getElementById("address").value);
@@ -844,23 +780,17 @@
         formData.append("deskripsi", document.getElementById("description").value);
         formData.append("latitude", document.getElementById("latitude").value);
         formData.append("longitude", document.getElementById("longitude").value);
-
-        // Data kamar
         formData.append("harga", document.getElementById("price").value);
         formData.append("deposit", document.getElementById("deposit").value);
         formData.append("jumlah_kamar", document.getElementById("rooms").value);
         formData.append("kamar_tersedia", document.getElementById("available").value);
         formData.append("room_size", document.getElementById("roomSize").value);
-
-        // Fasilitas
         document.querySelectorAll('[id^="fac_"]:checked').forEach(function (cb) {
           formData.append("fasilitas_kamar[]", cb.value);
         });
 
-        // Rules
         formData.append("rules", document.getElementById("rules").value);
 
-        // Upload images
         const imageInput = document.getElementById("imageUpload");
         if (imageInput.files.length > 0) {
           for (var i = 0; i < imageInput.files.length; i++) {
@@ -896,10 +826,6 @@
         }
       });
 
-      // ========================================
-      // IMAGE UPLOAD PREVIEW
-      // ========================================
-
       document.querySelector(".image-upload").addEventListener("click", function () {
         document.getElementById("imageUpload").click();
       });
@@ -929,20 +855,12 @@
           })(files[i]);
         }
       });
-
-      // ========================================
-      // INITIALIZATION
-      // ========================================
-
       document.addEventListener("DOMContentLoaded", function () {
         const editId = getUrlParameter("edit");
 
         if (editId) {
-          // Mode Edit: Load data
-          // loadListingForEdit(editId);
           console.log("Edit mode:", editId);
         } else {
-          // Mode Create
           updateStep(1);
         }
       });

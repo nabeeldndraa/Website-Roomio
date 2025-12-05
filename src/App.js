@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { Home, Search, PlusCircle, MessageSquare, User, Building2, Heart, Menu } from 'lucide-react';
 import HomePage from './components/HomePage';
 import SearchResults from './components/SearchResults';
@@ -11,16 +10,16 @@ import ProfilePage from './components/ProfilePage';
 import InboxPage from './components/InboxPage';
 import { Button } from './components/ui/button';
 
-type Page = 'home' | 'search' | 'listing' | 'create-listing' | 'host-dashboard' | 'user-dashboard' | 'auth' | 'profile' | 'inbox';
 
-interface User {
-  id: string;
-  name: string;
-  email: string;
-  role: 'user' | 'host' | 'both';
-  avatar?: string;
-  verified: boolean;
-}
+/**
+ * @typedef {Object} User
+ * @property {string} id
+ * @property {string} name
+ * @property {string} email
+ * @property {'user' | 'host' | 'both'} role
+ * @property {string} [avatar]
+ * @property {boolean} verified
+ */
 
 export default function App() {
   const [currentPage, setCurrentPage] = useState<Page>('home');
@@ -29,7 +28,7 @@ export default function App() {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  const handleLogin = (user: User) => {
+  const handleLogin = (user) => {
     setCurrentUser(user);
     setCurrentPage('home');
   };
@@ -39,12 +38,12 @@ export default function App() {
     setCurrentPage('home');
   };
 
-  const handleSearch = (params: any) => {
+  const handleSearch = (params) => {
     setSearchParams(params);
     setCurrentPage('search');
   };
 
-  const handleViewListing = (listingId: string) => {
+  const handleViewListing = (listingId) => {
     setSelectedListingId(listingId);
     setCurrentPage('listing');
   };

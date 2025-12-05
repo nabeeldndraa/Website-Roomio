@@ -87,7 +87,7 @@
     </style>
   </head>
   <body>
-    <a href="search.html" class="back-button btn btn-light">
+    <a href="search.html" class="back-button btn btn-light" title="Kembali ke pencarian">
       <i class="bi bi-arrow-left fs-5"></i>
     </a>
 
@@ -140,20 +140,12 @@
           </div>
 
           <!-- Tabs -->
-          <ul class="nav nav-tabs mb-4" role="tablist">
-            <li class="nav-item">
-              <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#overview">Ringkasan</button>
-            </li>
-            <li class="nav-item">
-              <button class="nav-link" data-bs-toggle="tab" data-bs-target="#facilities">Fasilitas</button>
-            </li>
-            <li class="nav-item">
-              <button class="nav-link" data-bs-toggle="tab" data-bs-target="#location-tab">Lokasi</button>
-            </li>
-            <li class="nav-item">
-              <button class="nav-link" data-bs-toggle="tab" data-bs-target="#reviews">Ulasan</button>
-            </li>
-          </ul>
+          <div class="nav nav-tabs mb-4" role="tablist">
+            <button class="nav-link active" role="tab" aria-selected="true" data-bs-toggle="tab" data-bs-target="#overview">Ringkasan</button>
+            <button class="nav-link" role="tab" aria-selected="false" data-bs-toggle="tab" data-bs-target="#facilities">Fasilitas</button>
+            <button class="nav-link" role="tab" aria-selected="false" data-bs-toggle="tab" data-bs-target="#location-tab">Lokasi</button>
+            <button class="nav-link" role="tab" aria-selected="false" data-bs-toggle="tab" data-bs-target="#reviews">Ulasan</button>
+          </div>
 
           <div class="tab-content">
             <!-- Overview Tab -->
@@ -340,8 +332,8 @@
               </div>
 
               <div class="mb-3">
-                <label class="form-label">Tanggal Masuk</label>
-                <input type="date" class="form-control" id="checkInDate" />
+                <label class="form-label" for="checkInDate">Tanggal Masuk</label>
+                <input type="date" class="form-control" id="checkInDate" title="Pilih tanggal masuk" />
               </div>
 
               <div class="mb-3">
