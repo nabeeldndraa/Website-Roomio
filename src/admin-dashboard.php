@@ -7,7 +7,7 @@
     
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
-    
+   
     <style>
         :root {
             --primary-color: #2563eb;
@@ -436,7 +436,7 @@ function loadBarChart() {
     new Chart(ctx, {
         type: 'bar',
         data: {
-            labels: ['Kos Putra', 'Kos Putri', 'Kos Campur', 'Kontrakan'],
+            labels: ['Kost Putra', 'Kost Putri', 'Kost Campur', 'Kontrakan'],
             datasets: [{
                 label: 'Jumlah Listing',
                 data: [12, 20, 8, 5], // contoh data
@@ -459,7 +459,7 @@ const ctx = document.getElementById('barChart').getContext('2d');
 new Chart(ctx, {
 type: 'bar',
 data: {
-labels: ['Kos Putra', 'Kos Putri', 'Kos Campur', 'Kontrakan'],
+labels: ['Kost Putra', 'Kost Putri', 'Kost Campur', 'Kontrakan'],
 datasets: [{
 label: 'Jumlah Listing',
 data: [12, 20, 8, 5], // contoh data
@@ -478,8 +478,8 @@ y: { beginAtZero: true }
 
 // ================= MAP LEAFLET ====================
 function loadMap() {
-// Set posisi awal peta (contoh: Jakarta)
-const map = L.map('map').setView([-6.200000, 106.816666], 11);
+// Set posisi awal peta (contoh: Jember)
+const map = L.map('map').setView([-8.1845, 113.6681], 12);
 
 
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -489,8 +489,8 @@ maxZoom: 18,
 
 // Contoh titik properti
 const properties = [
-{ name: 'Kos Putra Harmoni', lat: -6.203, lng: 106.820 },
-{ name: 'Kos Putri Mawar', lat: -6.190, lng: 106.830 },
+{ name: 'Kost Putra Harmoni', lat: -6.203, lng: 106.820 },
+{ name: 'Kost Putri Mawar', lat: -6.190, lng: 106.830 },
 { name: 'Kontrakan Bunga', lat: -6.210, lng: 106.810 }
 ];
 
@@ -525,7 +525,7 @@ loadMap();
         const listingFees = {}; // map listingId -> fee (fixed Rp)
 
         const mockTransactions = [
-            { id: 'T-3001', renter: 'Sari', owner: 'Agus', listing: 'Kos Modern 101', amount: 1500000, fee: 75000, status: 'pending' },
+            { id: 'T-3001', renter: 'Sari', owner: 'Agus', listing: 'Kost Modern 101', amount: 1500000, fee: 75000, status: 'pending' },
             { id: 'T-3002', renter: 'Rian', owner: 'Ika', listing: 'Apartemen A', amount: 3000000, fee: 150000, status: 'verified' }
         ];
         
@@ -629,7 +629,7 @@ loadMap();
             document.getElementById('statRejected').textContent = stats.listings.rejected;
             document.getElementById('pendingCount').textContent = stats.listings.pending;
         }
-        
+
         // Load pending listings
         function loadPendingListings() {
             const container = document.getElementById('pendingListingsContainer');
@@ -638,10 +638,10 @@ loadMap();
             const pendingListings = [
                 {
                     id: '101',
-                    title: 'Kos Modern Strategis di Pusat Kota',
+                    title: 'Kost Modern Strategis di Pusat Kota',
                     owner_name: 'Budi Santoso',
                     owner_email: 'budi@example.com',
-                    category: 'kos-putra',
+                    category: 'kost-putra',
                     price: 1500000,
                     address: 'Jl. Sudirman No. 45, Kaliwates',
                     created_at: '2024-11-18 10:30:00',
@@ -708,14 +708,6 @@ loadMap();
                                     <button class="btn btn-danger btn-sm" onclick="showRejectionModal('${listing.id}')">
                                         <i class="bi bi-x-circle me-1"></i>
                                         Tolak
-                                    </button>
-                                    <button class="btn btn-outline-secondary btn-sm" onclick="showBadgeModal('${listing.id}')">
-                                        <i class="bi bi-award me-1"></i>
-                                        Tambah Badge
-                                    </button>
-                                    <button class="btn btn-outline-warning btn-sm" onclick="showFeeModal('${listing.id}')">
-                                        <i class="bi bi-cash-stack me-1"></i>
-                                        Set Fee
                                     </button>
                                     <a href="listing-detail.html?id=${listing.id}" class="btn btn-outline-primary btn-sm" target="_blank">
                                         <i class="bi bi-eye me-1"></i>
@@ -891,7 +883,7 @@ loadMap();
             // Mock - replace with actual API call
             setTimeout(() => {
                 const all = [
-                    { id: '101', title: 'Kos Modern Strategis di Pusat Kota', owner_name: 'Budi Santoso', category: 'kos-putra', price: 1500000, status: 'pending', image: 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=400' },
+                    { id: '101', title: 'Kost Modern Strategis di Pusat Kota', owner_name: 'Budi Santoso', category: 'kost-putra', price: 1500000, status: 'pending', image: 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=400' },
                     { id: '102', title: 'Apartemen Minimalis Dekat Kampus', owner_name: 'Ika H.', category: 'apartemen', price: 2200000, status: 'approved', image: 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=400' }
                 ];
 
@@ -1000,6 +992,31 @@ loadMap();
             localStorage.removeItem('currentUser');
             window.location.href = 'index.html';
         }
+
+// Contoh: Load statistik dashboard
+fetch('api/admin.php?action=dashboard_stats')
+  .then(r => r.json())
+  .then(res => {
+    if(res.success){
+      document.getElementById('statUsers').textContent = res.data.total_pemilik + res.data.total_penyewa;
+      document.getElementById('statPending').textContent = res.data.pending_properti;
+      document.getElementById('statApproved').textContent = res.data.approved_properti;
+      document.getElementById('statRejected').textContent = res.data.rejected_properti;
+    }
+  });
+
+// Load peta
+fetch('api/admin.php?action=get_map_data')
+  .then(r => r.json())
+  .then(res => {
+    if(res.success){
+      res.data.forEach(item => {
+        L.marker([item.latitude, item.longitude])
+         .addTo(map)
+         .bindPopup(`<b>${item.nama_properti}</b><br>Harga: Rp ${Number(item.harga).toLocaleString()}<br>Tipe: ${item.tipe_properti}`);
+      });
+    }
+  });
 
     </script>
 </body>
