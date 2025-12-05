@@ -321,15 +321,22 @@
             // Update Statistik
             document.getElementById("totalListings").textContent = listings.length;
 
+            let totalRooms = 0;
             let totalAvailable = 0;
             let totalRevenue = 0;
+
             listings.forEach((listing) => {
+              totalRooms += listing.total_rooms || 0;
               totalAvailable += listing.available_rooms || 0;
+              // Revenue dari kamar yang sudah disewa
               totalRevenue += listing.price * (listing.total_rooms - listing.available_rooms) || 0;
             });
 
-            document.getElementById("totalBooked").textContent = totalAvailable;
+            // Yang BENAR:
+            const bookedRooms = totalRooms - totalAvailable; // 10 - 2 = 8
+            document.getElementById("totalBooked").textContent = bookedRooms;
             document.getElementById("totalRevenue").textContent = formatRupiah(totalRevenue);
+            document.getElementById("totalListings").textContent = listings.length;
 
             if (listings.length === 0) {
               listingContainer.innerHTML = `

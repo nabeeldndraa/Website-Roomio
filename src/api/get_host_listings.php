@@ -6,7 +6,7 @@ header('Content-Type: application/json');
 
 // Development mode bypass
 if (!isset($_SESSION['user_id'])) {
-    $_SESSION['user_id'] = 1;
+    $_SESSION['user_id'] = 1; // ← ini harus user_id
     $_SESSION['user_role'] = 'pemilik';
     $_SESSION['username'] = 'test_owner';
 }
@@ -54,20 +54,20 @@ try {
             properti p
         LEFT JOIN 
             kamar k ON p.id_properti = k.id_properti
-        -- DEV MODE: Komentar WHERE clause untuk menampilkan semua
-        -- WHERE p.id_user = ?
+        WHERE p.id_user = ? 
+        
         ORDER BY
             p.id_properti DESC
     ";
 
-    $stmt = $koneksi->prepare($sql);
+        $stmt = $koneksi->prepare($sql);
     if (!$stmt) {
         throw new Exception('Query preparation failed: ' . $koneksi->error);
     }
 
-    // DEV MODE: Tidak perlu bind_param karena WHERE di-skip
-    // $stmt->bind_param("i", $id_user_host);
-    
+    // Bind parameter untuk placeholder `?`
+    $stmt->bind_param("i", $id_user_host); // "i" untuk integer
+
     if (!$stmt->execute()) {
         throw new Exception('Query execution failed: ' . $stmt->error);
     }
