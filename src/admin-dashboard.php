@@ -436,7 +436,7 @@ function loadBarChart() {
     new Chart(ctx, {
         type: 'bar',
         data: {
-            labels: ['Kos Putra', 'Kos Putri', 'Kos Campur', 'Kontrakan'],
+            labels: ['Kost Putra', 'Kost Putri', 'Kost Campur', 'Kontrakan'],
             datasets: [{
                 label: 'Jumlah Listing',
                 data: [12, 20, 8, 5], // contoh data
@@ -459,7 +459,7 @@ const ctx = document.getElementById('barChart').getContext('2d');
 new Chart(ctx, {
 type: 'bar',
 data: {
-labels: ['Kos Putra', 'Kos Putri', 'Kos Campur', 'Kontrakan'],
+labels: ['Kost Putra', 'Kost Putri', 'Kost Campur', 'Kontrakan'],
 datasets: [{
 label: 'Jumlah Listing',
 data: [12, 20, 8, 5], // contoh data
@@ -489,8 +489,8 @@ maxZoom: 18,
 
 // Contoh titik properti
 const properties = [
-{ name: 'Kos Putra Harmoni', lat: -6.203, lng: 106.820 },
-{ name: 'Kos Putri Mawar', lat: -6.190, lng: 106.830 },
+{ name: 'Kost Putra Harmoni', lat: -6.203, lng: 106.820 },
+{ name: 'Kost Putri Mawar', lat: -6.190, lng: 106.830 },
 { name: 'Kontrakan Bunga', lat: -6.210, lng: 106.810 }
 ];
 
@@ -525,7 +525,7 @@ loadMap();
         const listingFees = {}; // map listingId -> fee (fixed Rp)
 
         const mockTransactions = [
-            { id: 'T-3001', renter: 'Sari', owner: 'Agus', listing: 'Kos Modern 101', amount: 1500000, fee: 75000, status: 'pending' },
+            { id: 'T-3001', renter: 'Sari', owner: 'Agus', listing: 'Kost Modern 101', amount: 1500000, fee: 75000, status: 'pending' },
             { id: 'T-3002', renter: 'Rian', owner: 'Ika', listing: 'Apartemen A', amount: 3000000, fee: 150000, status: 'verified' }
         ];
         
@@ -629,7 +629,7 @@ loadMap();
             document.getElementById('statRejected').textContent = stats.listings.rejected;
             document.getElementById('pendingCount').textContent = stats.listings.pending;
         }
-        
+
         // Load pending listings
         function loadPendingListings() {
             const container = document.getElementById('pendingListingsContainer');
@@ -638,10 +638,10 @@ loadMap();
             const pendingListings = [
                 {
                     id: '101',
-                    title: 'Kos Modern Strategis di Pusat Kota',
+                    title: 'Kost Modern Strategis di Pusat Kota',
                     owner_name: 'Budi Santoso',
                     owner_email: 'budi@example.com',
-                    category: 'kos-putra',
+                    category: 'kost-putra',
                     price: 1500000,
                     address: 'Jl. Sudirman No. 45, Kaliwates',
                     created_at: '2024-11-18 10:30:00',
@@ -883,7 +883,7 @@ loadMap();
             // Mock - replace with actual API call
             setTimeout(() => {
                 const all = [
-                    { id: '101', title: 'Kos Modern Strategis di Pusat Kota', owner_name: 'Budi Santoso', category: 'kos-putra', price: 1500000, status: 'pending', image: 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=400' },
+                    { id: '101', title: 'Kost Modern Strategis di Pusat Kota', owner_name: 'Budi Santoso', category: 'kost-putra', price: 1500000, status: 'pending', image: 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=400' },
                     { id: '102', title: 'Apartemen Minimalis Dekat Kampus', owner_name: 'Ika H.', category: 'apartemen', price: 2200000, status: 'approved', image: 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=400' }
                 ];
 

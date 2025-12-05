@@ -160,4 +160,23 @@ switch ($action) {
     // ==================================================================
     default:
         echo json_encode(['success' => false, 'message' => 'Action not found']);
+
+        case 'get_all_listings':
+    $status = $_GET['status'] ?? '';
+    $where = $status ? "WHERE l.status = ?" : "";
+    $sql = "SELECT l.*, u.name as owner_name 
+            FROM listings l 
+            LEFT JOIN users u ON l.user_id = u.id 
+            $where 
+            ORDER BY l.created_at DESC";
+    $stmt = $conn->prepare($sql);
+    if ($status) $stmt->bind_param('s', $status);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $data = [];
+    while ($row = $result->fetch_assoc()) {
+        $data[] = $row;
+    }
+    echo json_encode(['success' => true, 'data' => $data]);
+    break;
 }
