@@ -19,12 +19,22 @@
         #map {
             height: 500px;
             width: 100%;
-            overflow: visible !important;
+            max-width: 100%;
+            overflow: hidden !important;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Container untuk membatasi lebar map */
+        .map-wrapper {
+            max-width: 100%;
+            overflow: hidden;
+            border-radius: 0.5rem;
         }
 
         /* Jika map dibungkus div lain contoh <div class="map-container"> */
         .map-container {
-            overflow: visible !important;
+            overflow: hidden !important;
             position: relative;
         }
 
