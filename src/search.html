@@ -324,17 +324,16 @@
     </main>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script src="js/auth.js"></script>
 
     <script>
-        // Variabel global untuk menyimpan data
         let currentListings = []; 
     
-        // --- 1. LOGIKA UTAMA: AMBIL DATA DARI BACKEND ---
         async function loadResults() {
             showLoading(true);
             
             try {
-                
                 const response = await fetch('api/get_listings.php'); 
                 
                 if (!response.ok) {
@@ -343,48 +342,45 @@
     
                 const data = await response.json();
                 
-                // Cek apakah data valid (array)
-                if (Array.isArray(data)) {
-                    currentListings = data; // Simpan data asli ke variabel
-                    applyFilters();         // Terapkan filter awal
+                // ✅ Handle both array or object with data property
+                const listings = Array.isArray(data) ? data : (data.data || []);
+                
+                if (listings.length > 0) {
+                    currentListings = listings;
+                    applyFilters();
+                    console.log('Loaded', currentListings.length, 'listings');
                 } else {
-                    console.error("Format data dari server salah:", data);
+                    console.warn("No data available");
                     currentListings = [];
                     displayResults();
                 }
     
             } catch (error) {
                 console.error("Error Koneksi:", error);
-                // Opsional: Tampilkan pesan error di layar
                 document.getElementById("searchResults").innerHTML = `
                     <div class="col-12 text-center text-danger py-5">
                         <h5>Gagal memuat data kos.</h5>
                         <p>Pastikan server/database aktif.</p>
                     </div>`;
             } finally {
-                showLoading(false); // MATIKAN LOADING (PENTING)
+                showLoading(false);
             }
         }
     
-        // --- 2. LOGIKA FILTER & PENCARIAN ---
         function applyFilters() {
             const query = document.getElementById("searchInput").value.toLowerCase();
             const category = document.getElementById("categoryFilter").value;
             const priceRange = document.getElementById("priceFilter").value;
     
-            // Filter data yang sudah diambil dari database (Client-side filtering)
             const filtered = currentListings.filter(item => {
                 let match = true;
                 
-                // Filter Text (Nama & Lokasi)
                 if (query && !item.title.toLowerCase().includes(query) && !item.location.toLowerCase().includes(query)) {
                     match = false;
                 }
-                // Filter Kategori
                 if (category && !item.type.toLowerCase().includes(category.replace('kos-', ''))) {
                     match = false;
                 }
-                // Filter Harga
                 if (priceRange) {
                     const [min, max] = priceRange.split('-').map(Number);
                     if (item.price < min || item.price > max) match = false;
@@ -393,10 +389,9 @@
                 return match;
             });
             
-            displayResults(filtered); // Kirim data hasil filter ke fungsi tampilan
+            displayResults(filtered);
         }
     
-        // --- 3. FUNGSI TAMPILAN (DESAIN RAPI) ---
         function displayResults(dataToDisplay = currentListings) {
             const container = document.getElementById("searchResults");
             const noResults = document.getElementById("noResults");
@@ -412,14 +407,13 @@
     
             if(noResults) noResults.classList.add("d-none");
             
-            // Render Kartu Kos (Sama persis dengan desain sebelumnya)
             container.innerHTML = dataToDisplay.map(listing => `
                 <div class="col-md-6 col-lg-4 d-flex align-items-stretch">
                     <div class="card w-100 shadow-sm border-0 listing-card hover-lift">
                         <div class="position-relative">
-                            <img src="${listing.image}" class="card-img-top" alt="${listing.title}" 
-                                 style="height: 200px; object-fit: cover;"
-                                 onerror="this.src='https://via.placeholder.com/400x300?text=No+Image'">
+                            <img src="${listing.image || 'assets/no-image.jpg'}"
+     onerror="this.onerror=null; this.src='assets/no-image.jpg';">
+
                             
                             <span class="badge bg-light text-dark position-absolute top-0 start-0 m-2 shadow-sm">${listing.type}</span>
                             <button class="btn btn-light btn-sm position-absolute top-0 end-0 m-2 rounded-circle p-2 shadow-sm" onclick="toggleFavorite(${listing.id}, event)">
@@ -467,7 +461,6 @@
             `).join('');
         }
     
-        // --- 4. FUNGSI UTILITAS ---
         function showLoading(show) {
             const loading = document.getElementById("loadingIndicator");
             const results = document.getElementById("searchResults");
@@ -489,7 +482,6 @@
             if(btn.classList.contains("bi-heart")) {
                 btn.classList.remove("bi-heart");
                 btn.classList.add("bi-heart-fill", "text-danger");
-                // Disini nanti tambahkan logika fetch ke API 'add_favorite.php'
             } else {
                 btn.classList.add("bi-heart");
                 btn.classList.remove("bi-heart-fill", "text-danger");
@@ -505,15 +497,13 @@
         
         document.getElementById("sidebarOverlay").addEventListener("click", toggleSidebar);
     
-        // Event Listener Filter (Real-time search)
         document.getElementById("searchInput").addEventListener("input", applyFilters);
         document.getElementById("categoryFilter").addEventListener("change", applyFilters);
         document.getElementById("priceFilter").addEventListener("change", applyFilters);
         
-        // Sort
         document.getElementById("sortBy").addEventListener("change", function() {
             const sortBy = this.value;
-            const sortedData = [...currentListings]; // Copy array
+            const sortedData = [...currentListings];
             
             if (sortBy === "price-low") sortedData.sort((a, b) => a.price - b.price);
             else if (sortBy === "price-high") sortedData.sort((a, b) => b.price - a.price);
@@ -522,9 +512,13 @@
             displayResults(sortedData);
         });
     
-        // Inisialisasi
-        document.addEventListener("DOMContentLoaded", function () {
-            console.log("DOM loaded - Mengambil Data dari Backend...");
+        document.addEventListener("DOMContentLoaded", async function () {
+            console.log("DOM loaded - Checking auth & loading data...");
+            
+            if (typeof updateAuthUI === 'function') {
+                await updateAuthUI();
+            }
+            
             loadResults(); 
         });
     </script>

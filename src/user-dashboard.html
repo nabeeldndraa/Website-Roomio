@@ -7,7 +7,6 @@
     
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
-    <link rel="stylesheet" href="styles/site.css">
     
     <style>
         body {
@@ -184,22 +183,21 @@
             
             <!-- Tabs -->
             <ul class="nav nav-tabs mb-4" role="tablist">
-                
                 <li class="nav-item">
-                    <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#bookings">
-                        <i class="bi bi-calendar-check me-2"></i>Booking Saya
+                    <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#favorites">
+                        <i class="bi bi-heart me-2"></i>Favorit
                     </button>
                 </li>
                 <li class="nav-item">
-                    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#favorites">
-                        <i class="bi bi-heart me-2"></i>Favorit
+                    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#bookings">
+                        <i class="bi bi-calendar-check me-2"></i>Booking Saya
                     </button>
                 </li>
             </ul>
             
             <div class="tab-content">
                 <!-- Favorites Tab -->
-                <div class="tab-pane fade" id="favorites">
+                <div class="tab-pane fade show active" id="favorites">
                     <div class="row g-4" id="favoritesList">
                         <!-- Favorites will be loaded here -->
                     </div>
@@ -212,7 +210,7 @@
                 </div>
                 
                 <!-- Bookings Tab -->
-                <div class="tab-pane fade show active" id="bookings">
+                <div class="tab-pane fade" id="bookings">
                     <div class="row g-4" id="bookingsList">
                         <!-- Bookings will be loaded here -->
                     </div>
@@ -406,8 +404,7 @@
         }
         
         async function bayarBooking(id) {
-            alert('Anda akan diarahkan ke halaman pembayaran.'); 
-            window.location.href = 'payment.html?id_sewa=' + id;
+            alert('Fitur pembayaran akan segera tersedia!\n\nAnda akan diarahkan ke halaman pembayaran.');
         }
         
         async function cancelBooking(id) {
@@ -452,7 +449,7 @@
         function logout() {
             if (confirm('Apakah Anda yakin ingin keluar?')) {
                 localStorage.removeItem('user');
-                window.location.href = 'auth.html';
+                window.location.href = 'login.html';
             }
         }
         

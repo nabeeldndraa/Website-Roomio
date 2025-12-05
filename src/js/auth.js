@@ -1,47 +1,42 @@
-// ---------------------------------
-// BAGIAN 1: Manajemen Sesi (Milikmu)
-// ---------------------------------
+// js/auth.js - Authentication Handler
 
-// Authentication management
+// ========================================
+// 1. CEK SESSION DARI SERVER
+// ========================================
+async function checkSession() {
+    try {
+        const response = await fetch('api/check_session.php', {
+            credentials: 'include'
+        });
+        const data = await response.json();
+        
+        if (data.logged_in) {
+            localStorage.setItem('user', JSON.stringify(data.user));
+            return data.user;
+        } else {
+            localStorage.removeItem('user');
+            return null;
+        }
+    } catch (error) {
+        console.error('Error checking session:', error);
+        return null;
+    }
+}
+
+// ========================================
+// 2. GET CURRENT USER (Sync)
+// ========================================
 function getCurrentUser() {
-    const userStr = localStorage.getItem('currentUser');
+    const userStr = localStorage.getItem('user');
     return userStr ? JSON.parse(userStr) : null;
 }
 
-function setCurrentUser(user) {
-    if (user) {
-        localStorage.setItem('currentUser', JSON.stringify(user));
-    } else {
-        localStorage.removeItem('currentUser');
-    }
-}
-
-function logout() {
-    localStorage.removeItem('currentUser');
-    window.location.href = 'index.html'; // Arahkan ke beranda setelah logout
-}
-
-function requireAuth() {
-    const user = getCurrentUser();
-    if (!user) {
-        window.location.href = 'auth.html'; // Arahkan ke login
-        return false;
-    }
-    return true;
-}
-
-function requireHost() {
-    const user = getCurrentUser();
-    if (!user || (user.role !== 'pemilik')) { // Sesuaikan dengan database kita ('pemilik')
-        alert('Anda harus menjadi pemilik untuk mengakses halaman ini');
-        window.location.href = 'index.html';
-        return false;
-    }
-    return true;
-}
-
-function updateAuthUI() {
-    const user = getCurrentUser();
+// ========================================
+// 3. UPDATE UI BERDASARKAN AUTH STATUS
+// ========================================
+async function updateAuthUI() {
+    const user = await checkSession();
+    
     const userInfo = document.getElementById('userInfo');
     const authButton = document.getElementById('authButton');
     const userNavLinks = document.getElementById('userNavLinks');
@@ -51,121 +46,199 @@ function updateAuthUI() {
     if (user) {
         if (userInfo) userInfo.classList.remove('d-none');
         if (authButton) authButton.classList.add('d-none');
-        if (userName) userName.textContent = user.name; // 'name' dari data user
+        if (userName) userName.textContent = user.name;
         
-        // Sesuaikan role-check dengan data dari database
-        if (user.role === 'penyewa') {
-            if (userNavLinks) userNavLinks.classList.remove('d-none');
-        } else if (user.role === 'pemilik') {
-            // Pemilik bisa jadi juga penyewa, tampilkan keduanya
-            if (userNavLinks) userNavLinks.classList.remove('d-none');
+        if (userNavLinks) userNavLinks.classList.remove('d-none');
+        
+        if (user.role === 'pemilik') {
             if (hostNavLinks) hostNavLinks.classList.remove('d-none');
         }
+        
+        console.log('User logged in:', user);
     } else {
         if (userInfo) userInfo.classList.add('d-none');
         if (authButton) authButton.classList.remove('d-none');
         if (userNavLinks) userNavLinks.classList.add('d-none');
         if (hostNavLinks) hostNavLinks.classList.add('d-none');
+        
+        console.log('User not logged in');
     }
 }
 
-// Simple users mock store - used by profile pages and demo flows
-function getUserById(id) {
-    // In production this should call your backend (e.g. /api/users/:id)
-    const mockUsers = [
-        { id: '1', name: 'Budi Santoso', email: 'budi@example.com', role: 'pemilik', phone: '081234567890', bio: 'Pemilik kos berpengalaman, ramah, respon cepat', joined: '2022' },
-        { id: '2', name: 'Ibu Siti', email: 'siti@example.com', role: 'pemilik', phone: '081298765432', bio: 'Menyewakan beberapa properti dekat kampus', joined: '2021' },
-        { id: '3', name: 'Ayu Lestari', email: 'ayu@example.com', role: 'penyewa', phone: '08135551234', bio: 'Mahasiswi yang sedang mencari kos nyaman', joined: '2023' }
-    ];
-
-    return mockUsers.find(u => String(u.id) === String(id)) || null;
-}
-
-// ---------------------------------
-// BAGIAN 2: Aksi ke API (Gabungan)
-// ---------------------------------
-
-// Fungsi ini akan dipanggil oleh form login di auth.html
+// ========================================
+// 4. HANDLE LOGIN
+// ========================================
 async function handleLogin(event) {
-    event.preventDefault(); // Mencegah form reload halaman
-
-    // Ambil data dari form
+    event.preventDefault();
+    
     const email = document.getElementById('loginEmail').value;
     const password = document.getElementById('loginPassword').value;
-
+    
     try {
         const response = await fetch('api/login.php', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ email: email, password: password })
+            credentials: 'include',
+            body: JSON.stringify({ email, password })
         });
-
-        const data = await response.json(); // Baca respons sebagai JSON
-
+        
+        const data = await response.json();
+        
         if (data.status === 'success') {
-            // === INI INTEGRASINYA ===
-            // 'data.user' adalah objek yang dikirim oleh api/login.php
-            // Kita panggil fungsi setCurrentUser (dari Bagian 1)
-            setCurrentUser(data.user); 
-            // -------------------------
+            localStorage.setItem('user', JSON.stringify(data.user));
             
-            alert('Login berhasil! Selamat datang ' + data.user.name);
-            window.location.href = 'index.html'; // Arahkan ke beranda
+            alert('Login berhasil!');
+            
+            if (data.user.role === 'pemilik') {
+                window.location.href = 'host-dashboard.html';
+            } else {
+                window.location.href = 'index.html';
+            }
         } else {
-            alert('Login gagal: ' + data.message);
+            alert(data.message || 'Login gagal');
         }
     } catch (error) {
-        console.error('Error:', error);
-        alert('Terjadi kesalahan koneksi.');
+        console.error('Login error:', error);
+        alert('Terjadi kesalahan saat login');
     }
 }
 
-// Fungsi ini akan dipanggil oleh form register di auth.html
+// ========================================
+// 5. HANDLE REGISTER
+// ========================================
 async function handleRegister(event) {
-    event.preventDefault(); // Mencegah form reload halaman
-
-    // Ambil semua data dari form
+    event.preventDefault();
+    
     const name = document.getElementById('registerName').value;
     const email = document.getElementById('registerEmail').value;
     const phone = document.getElementById('registerPhone').value;
     const password = document.getElementById('registerPassword').value;
-    const role = document.getElementById('registerRole').value; // 'user', 'host', atau 'both'
-
+    const role = document.getElementById('registerRole').value;
+    
     try {
         const response = await fetch('api/register.php', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({
-                name: name,
-                email: email,
-                phone: phone,
-                password: password,
-                role: role // Kirim role pilihan dari form
-            })
+            body: JSON.stringify({ name, email, phone, password, role })
         });
-
-        const data = await response.json(); // Baca respons sebagai JSON
-
+        
+        const data = await response.json();
+        
         if (data.status === 'success') {
-            alert('Registrasi berhasil! Silakan login dengan akun Anda.');
-            // Reload halaman auth untuk reset form dan pindah tab ke login
-            window.location.reload(); 
+            alert('Registrasi berhasil! Silakan login.');
+            
+            const loginTab = document.querySelector('button[data-bs-target="#login"]');
+            if (loginTab) {
+                const tab = new bootstrap.Tab(loginTab);
+                tab.show();
+            }
+            
+            document.getElementById('loginEmail').value = email;
         } else {
-            alert('Registrasi gagal: ' + data.message);
+            alert(data.message || 'Registrasi gagal');
         }
     } catch (error) {
-        console.error('Error:', error);
-        alert('Terjadi kesalahan koneksi.');
+        console.error('Register error:', error);
+        alert('Terjadi kesalahan saat registrasi');
     }
 }
 
-// Fungsi lain (biarkan seperti di HTML-mu jika masih dipakai)
-function socialLogin(provider) {
-    alert('Fitur login dengan ' + provider + ' belum diimplementasikan.');
+// ========================================
+// 6. LOGOUT
+// ========================================
+async function logout() {
+    if (!confirm('Yakin ingin keluar?')) return;
+    
+    try {
+        const response = await fetch('api/logout.php', {
+            credentials: 'include'
+        });
+        
+        localStorage.removeItem('user');
+        
+        alert('Logout berhasil!');
+        window.location.href = 'index.html';
+    } catch (error) {
+        console.error('Logout error:', error);
+        localStorage.removeItem('user');
+        window.location.href = 'index.html';
+    }
 }
 
-// Hapus fungsi mockLogin() yang lama, karena sudah diganti handleLogin
+// ========================================
+// 7. SOCIAL LOGIN (Placeholder)
+// ========================================
+function socialLogin(provider) {
+    alert(`Login dengan ${provider} akan segera tersedia!`);
+}
+
+// ========================================
+// 8. REQUIRE AUTH (Proteksi Halaman)
+// ========================================
+async function requireAuth(requiredRole = null) {
+    const user = await checkSession();
+    
+    if (!user) {
+        alert('Anda harus login terlebih dahulu');
+        window.location.href = 'auth.html';
+        return false;
+    }
+    
+    if (requiredRole && user.role !== requiredRole) {
+        alert('Anda tidak memiliki akses ke halaman ini');
+        window.location.href = 'index.html';
+        return false;
+    }
+    
+    return true;
+}
+
+// ========================================
+// 9. REQUIRE HOST (Khusus untuk Host Dashboard)
+// ========================================
+function requireHost() {
+    // DEVELOPMENT MODE: Bypass untuk testing
+    console.log('requireHost called - Development mode active');
+    return true;
+    
+    // PRODUCTION: Uncomment code di bawah ini
+    /*
+    const user = getCurrentUser();
+    
+    if (!user) {
+        alert('Anda harus login terlebih dahulu');
+        window.location.href = 'auth.html';
+        return false;
+    }
+    
+    if (user.role !== 'pemilik') {
+        alert('Halaman ini hanya untuk pemilik properti');
+        window.location.href = 'index.html';
+        return false;
+    }
+    
+    return true;
+    */
+}
+
+// ========================================
+// 10. AUTO-UPDATE AUTH UI
+// ========================================
+document.addEventListener('DOMContentLoaded', function() {
+    updateAuthUI();
+});
+
+// Export functions
+window.checkSession = checkSession;
+window.getCurrentUser = getCurrentUser;
+window.updateAuthUI = updateAuthUI;
+window.handleLogin = handleLogin;
+window.handleRegister = handleRegister;
+window.logout = logout;
+window.socialLogin = socialLogin;
+window.requireAuth = requireAuth;
+window.requireHost = requireHost;

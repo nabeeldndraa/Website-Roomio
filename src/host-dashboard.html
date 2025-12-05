@@ -1,500 +1,479 @@
 <!DOCTYPE html>
 <html lang="id">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Dashboard Host - Roomio</title>
-    
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
-    <link rel="stylesheet" href="styles/site.css">
-    
-    <style>
-      body {
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-        background: #f9fafb;
-      }
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard Host - Roomio</title>
+  
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+  <link rel="stylesheet" href="styles/site.css">
+  
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background: #f9fafb;
+    }
 
+    .sidebar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 100vh;
+      width: 260px;
+      background: white;
+      border-right: 1px solid #e5e7eb;
+      z-index: 1000;
+      transition: transform 0.3s ease;
+    }
+
+    @media (max-width: 991px) {
       .sidebar {
-        position: fixed;
-        top: 0;
-        left: 0;
-        height: 100vh;
-        width: 260px;
-        background: white;
-        border-right: 1px solid #e5e7eb;
-        z-index: 1000;
-        transition: transform 0.3s ease;
+        transform: translateX(-100%);
       }
-
-      @media (max-width: 991px) {
-        .sidebar {
-          transform: translateX(-100%);
-        }
-        .sidebar.show {
-          transform: translateX(0);
-        }
+      .sidebar.show {
+        transform: translateX(0);
       }
+    }
 
-      .sidebar-overlay {
-        display: none;
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.5);
-        z-index: 999;
-      }
+    .sidebar-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 999;
+    }
 
-      .sidebar-overlay.show {
-        display: block;
-      }
+    .sidebar-overlay.show {
+      display: block;
+    }
 
+    .main-content {
+      margin-left: 260px;
+      min-height: 100vh;
+    }
+
+    @media (max-width: 991px) {
       .main-content {
-        margin-left: 260px;
-        min-height: 100vh;
+        margin-left: 0;
       }
+    }
 
-      @media (max-width: 991px) {
-        .main-content {
-          margin-left: 0;
-        }
-      }
+    .nav-link-custom {
+      display: flex;
+      align-items: center;
+      padding: 0.75rem 1rem;
+      color: #6b7280;
+      text-decoration: none;
+      border-radius: 0.5rem;
+      margin-bottom: 0.25rem;
+      transition: all 0.2s;
+    }
 
-      .nav-link-custom {
-        display: flex;
-        align-items: center;
-        padding: 0.75rem 1rem;
-        color: #6b7280;
-        text-decoration: none;
-        border-radius: 0.5rem;
-        margin-bottom: 0.25rem;
-        transition: all 0.2s;
-      }
+    .nav-link-custom:hover {
+      background: #f3f4f6;
+      color: #1f2937;
+    }
 
-      .nav-link-custom:hover {
-        background: #f3f4f6;
-        color: #1f2937;
-      }
+    .nav-link-custom.active {
+      background: #e5e7eb;
+      color: #1f2937;
+    }
 
-      .nav-link-custom.active {
-        background: #e5e7eb;
-        color: #1f2937;
-      }
+    .nav-link-custom i {
+      margin-right: 0.75rem;
+      width: 20px;
+    }
 
-      .nav-link-custom i {
-        margin-right: 0.75rem;
-        width: 20px;
-      }
+    .mobile-header {
+      display: none;
+      position: sticky;
+      top: 0;
+      z-index: 998;
+      background: white;
+      border-bottom: 1px solid #e5e7eb;
+      padding: 1rem;
+    }
 
+    @media (max-width: 991px) {
       .mobile-header {
-        display: none;
-        position: sticky;
-        top: 0;
-        z-index: 998;
-        background: white;
-        border-bottom: 1px solid #e5e7eb;
-        padding: 1rem;
+        display: flex;
       }
+    }
 
-      @media (max-width: 991px) {
-        .mobile-header {
-          display: flex;
-        }
-      }
+    .stat-card {
+      border-left: 4px solid;
+    }
+    
+    .no-image-placeholder {
+      background: #e5e7eb;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #9ca3af;
+      font-size: 14px;
+      height: 100px;
+    }
+  </style>
+</head>
+<body>
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
-      .stat-card {
-        border-left: 4px solid;
-      }
-    </style>
-  </head>
-  <body>
-    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+  <aside class="sidebar" id="sidebar">
+    <div class="p-4">
+      <div class="d-flex align-items-center">
+        <i class="bi bi-building text-primary fs-2 me-2"></i>
+        <h4 class="mb-0 text-primary">Roomio</h4>
+      </div>
+    </div>
 
-    <!-- Sidebar -->
-    <aside class="sidebar" id="sidebar">
-      <div class="p-4">
-        <div class="d-flex align-items-center">
-          <i class="bi bi-building text-primary fs-2 me-2"></i>
-          <h4 class="mb-0 text-primary">Roomio</h4>
-        </div>
+    <nav class="px-3">
+      <a href="index.html" class="nav-link-custom">
+        <i class="bi bi-house-door"></i>
+        Beranda
+      </a>
+      <a href="search.html" class="nav-link-custom">
+        <i class="bi bi-search"></i>
+        Cari Kos
+      </a>
+      <a href="inbox.html" class="nav-link-custom">
+        <i class="bi bi-chat-dots"></i>
+        Pesan
+      </a>
+      <a href="user-dashboard.html" class="nav-link-custom">
+        <i class="bi bi-heart"></i>
+        Favorit & Booking
+      </a>
+
+      <div class="pt-3 pb-2 px-3 text-muted small">PEMILIK</div>
+      <a href="host-dashboard.html" class="nav-link-custom active">
+        <i class="bi bi-building"></i>
+        Dashboard Host
+      </a>
+      <a href="create-listing.html" class="nav-link-custom">
+        <i class="bi bi-plus-circle"></i>
+        Tambah Listing
+      </a>
+    </nav>
+
+    <div class="position-absolute bottom-0 start-0 end-0 p-3 border-top">
+      <a href="profile.html" class="nav-link-custom mb-2">
+        <i class="bi bi-person"></i>
+        <span id="userName">User</span>
+      </a>
+      <button class="btn btn-outline-secondary w-100" onclick="logout()">Keluar</button>
+    </div>
+  </aside>
+
+  <main class="main-content">
+    <div class="mobile-header">
+      <button class="btn btn-link text-dark" onclick="toggleSidebar()">
+        <i class="bi bi-list fs-4"></i>
+      </button>
+      <div class="d-flex align-items-center mx-auto">
+        <i class="bi bi-building text-primary fs-5 me-2"></i>
+        <h5 class="mb-0 text-primary">Roomio</h5>
+      </div>
+      <div style="width: 40px"></div>
+    </div>
+
+    <div class="container py-4">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Dashboard Host</h2>
+        <a href="create-listing.html" class="btn btn-primary">
+          <i class="bi bi-plus-circle me-2"></i>Tambah Listing
+        </a>
       </div>
 
-      <nav class="px-3">
-        <a href="index.html" class="nav-link-custom">
-          <i class="bi bi-house-door"></i>
-          Beranda
-        </a>
-        <a href="search.html" class="nav-link-custom">
-          <i class="bi bi-search"></i>
-          Cari Kos
-        </a>
-        <a href="inbox.html" class="nav-link-custom">
-          <i class="bi bi-chat-dots"></i>
-          Pesan
-        </a>
-        <a href="user-dashboard.html" class="nav-link-custom">
-          <i class="bi bi-heart"></i>
-          Favorit & Booking
-        </a>
-
-        <div class="pt-3 pb-2 px-3 text-muted small">PEMILIK</div>
-        <a href="host-dashboard.html" class="nav-link-custom active">
-          <i class="bi bi-building"></i>
-          Dashboard Host
-        </a>
-        <a href="create-listing.html" class="nav-link-custom">
-          <i class="bi bi-plus-circle"></i>
-          Tambah Listing
-        </a>
-      </nav>
-
-      <div class="position-absolute bottom-0 start-0 end-0 p-3 border-top">
-        <a href="profile.html" class="nav-link-custom mb-2">
-          <i class="bi bi-person"></i>
-          <span id="userName">User</span>
-        </a>
-        <button class="btn btn-outline-secondary w-100" onclick="logout()">Keluar</button>
-      </div>
-    </aside>
-
-    <main class="main-content">
-      <div class="mobile-header">
-        <button class="btn btn-link text-dark" onclick="toggleSidebar()">
-          <i class="bi bi-list fs-4"></i>
-        </button>
-        <div class="d-flex align-items-center mx-auto">
-          <i class="bi bi-building text-primary fs-5 me-2"></i>
-          <h5 class="mb-0 text-primary">Roomio</h5>
-        </div>
-        <div style="width: 40px"></div>
-      </div>
-
-      <div class="container py-4">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-          <h2>Dashboard Host</h2>
-          <a href="create-listing.html" class="btn btn-primary"> <i class="bi bi-plus-circle me-2"></i>Tambah Listing </a>
-        </div>
-
-        <!-- Stats -->
-        <div class="row g-4 mb-4">
-          <div class="col-md-3">
-            <div class="card stat-card border-primary shadow-sm">
-              <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center">
-                  <div>
-                    <p class="text-muted mb-1">Total Listing</p>
-                    <h3 class="mb-0" id="totalListings">0</h3>
-                  </div>
-                  <i class="bi bi-building fs-1 text-primary opacity-25"></i>
+      <!-- Stats -->
+      <div class="row g-4 mb-4">
+        <div class="col-md-3">
+          <div class="card stat-card border-primary shadow-sm">
+            <div class="card-body">
+              <div class="d-flex justify-content-between align-items-center">
+                <div>
+                  <p class="text-muted mb-1">Total Listing</p>
+                  <h3 class="mb-0" id="totalListings">0</h3>
                 </div>
-              </div>
-            </div>
-          </div>
-          <div class="col-md-3">
-            <div class="card stat-card border-success shadow-sm">
-              <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center">
-                  <div>
-                    <p class="text-muted mb-1">Kamar Tersewa</p>
-                    <h3 class="mb-0" id="totalBooked">0</h3>
-                  </div>
-                  <i class="bi bi-check-circle fs-1 text-success opacity-25"></i>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="col-md-3">
-            <div class="card stat-card border-warning shadow-sm">
-              <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center">
-                  <div>
-                    <p class="text-muted mb-1">Total Views</p>
-                    <h3 class="mb-0" id="totalViews">0</h3>
-                  </div>
-                  <i class="bi bi-eye fs-1 text-warning opacity-25"></i>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="col-md-3">
-            <div class="card stat-card border-info shadow-sm">
-              <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center">
-                  <div>
-                    <p class="text-muted mb-1">Pendapatan</p>
-                    <h3 class="mb-0 small" id="totalRevenue">Rp 0</h3>
-                  </div>
-                  <i class="bi bi-cash fs-1 text-info opacity-25"></i>
-                </div>
+                <i class="bi bi-building fs-1 text-primary opacity-25"></i>
               </div>
             </div>
           </div>
         </div>
-
-        <!-- Tabs -->
-        <ul class="nav nav-tabs mb-4" role="tablist">
-          <li class="nav-item">
-            <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#listings"><i class="bi bi-list-ul me-2"></i>Semua Listing</button>
-          </li>
-          <li class="nav-item">
-            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#bookings"><i class="bi bi-calendar-check me-2"></i>Booking Masuk</button>
-          </li>
-          <li class="nav-item">
-            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#reviews"><i class="bi bi-star me-2"></i>Ulasan</button>
-          </li>
-        </ul>
-
-        <div class="tab-content">
-          <!-- Listings Tab - TAMBAHKAN "show active" -->
-          <div class="tab-pane fade show active" id="listings" role="tabpanel" aria-labelledby="listings-tab">
-            <div class="row mb-4">
-              <div class="col-12">
-                <div class="d-flex justify-content-between align-items-center">
-                  <h4 class="mb-0">Semua Listing Properti Anda</h4>
-                  <a href="create-listing.html" class="btn btn-primary"> <i class="bi bi-plus-lg me-2"></i>Tambah Listing Baru </a>
+        <div class="col-md-3">
+          <div class="card stat-card border-success shadow-sm">
+            <div class="card-body">
+              <div class="d-flex justify-content-between align-items-center">
+                <div>
+                  <p class="text-muted mb-1">Kamar Tersewa</p>
+                  <h3 class="mb-0" id="totalBooked">0</h3>
                 </div>
+                <i class="bi bi-check-circle fs-1 text-success opacity-25"></i>
               </div>
             </div>
-
-            <div class="row" id="listingsContainer">
-              <!-- Listings akan dimuat di sini -->
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="card stat-card border-warning shadow-sm">
+            <div class="card-body">
+              <div class="d-flex justify-content-between align-items-center">
+                <div>
+                  <p class="text-muted mb-1">Total Views</p>
+                  <h3 class="mb-0" id="totalViews">0</h3>
+                </div>
+                <i class="bi bi-eye fs-1 text-warning opacity-25"></i>
+              </div>
             </div>
           </div>
-
-          <!-- Bookings Tab -->
-          <div class="tab-pane fade" id="bookings">
-            <div class="alert alert-info">
-              <i class="bi bi-info-circle me-2"></i>
-              Belum ada booking masuk untuk properti Anda
-            </div>
-          </div>
-
-          <!-- Reviews Tab -->
-          <div class="tab-pane fade" id="reviews">
-            <div class="alert alert-info">
-              <i class="bi bi-info-circle me-2"></i>
-              Belum ada ulasan untuk properti Anda
+        </div>
+        <div class="col-md-3">
+          <div class="card stat-card border-info shadow-sm">
+            <div class="card-body">
+              <div class="d-flex justify-content-between align-items-center">
+                <div>
+                  <p class="text-muted mb-1">Pendapatan</p>
+                  <h3 class="mb-0 small" id="totalRevenue">Rp 0</h3>
+                </div>
+                <i class="bi bi-cash fs-1 text-info opacity-25"></i>
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </main>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="js/auth.js"></script>
-    <script src="js/dashboard.js"></script>
-    <script>
-      // FUNGSI HELPER
-      function formatRupiah(angka) {
-        if (isNaN(angka) || angka === null || angka === 0) return "Rp 0";
-        // Format angka menjadi Rp X.XXX.XXX
-        return (
-          "Rp " +
-          parseFloat(angka)
-            .toFixed(0)
-            .toString()
-            .replace(/\B(?=(\d{3})+(?!\d))/g, ".")
-        );
-      }
+      <!-- Tabs -->
+      <ul class="nav nav-tabs mb-4" role="tablist">
+        <li class="nav-item">
+          <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#listings">
+            <i class="bi bi-list-ul me-2"></i>Semua Listing
+          </button>
+        </li>
+        <li class="nav-item">
+          <button class="nav-link" data-bs-toggle="tab" data-bs-target="#bookings">
+            <i class="bi bi-calendar-check me-2"></i>Booking Masuk
+          </button>
+        </li>
+        <li class="nav-item">
+          <button class="nav-link" data-bs-toggle="tab" data-bs-target="#reviews">
+            <i class="bi bi-star me-2"></i>Ulasan
+          </button>
+        </li>
+      </ul>
 
-      // FUNGSI BARU: MEMUAT LISTING DARI API
-      async function loadHostListings() {
-        const listingContainer = document.getElementById("listingsContainer");
-        const noListingsMessage = document.getElementById("noListings");
-
-        // Tampilkan loader
-        listingContainer.innerHTML =
-          '<div class="col-12 text-center text-muted py-5"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div><p class="mt-3">Memuat data listing...</p></div>';
-
-        try {
-          const response = await fetch("api/get_host_listings.php");
-          const result = await response.json();
-
-          console.log("API Response:", result); // Debug
-
-          if (result.status === "success") {
-            const listings = result.data;
-            listingContainer.innerHTML = "";
-
-            // Update Statistik
-            document.getElementById("totalListings").textContent = listings.length;
-
-            let totalRooms = 0;
-            let totalAvailable = 0;
-            let totalRevenue = 0;
-
-            listings.forEach((listing) => {
-              totalRooms += listing.total_rooms || 0;
-              totalAvailable += listing.available_rooms || 0;
-              // Revenue dari kamar yang sudah disewa
-              totalRevenue += listing.price * (listing.total_rooms - listing.available_rooms) || 0;
-            });
-
-            // Yang BENAR:
-            const bookedRooms = totalRooms - totalAvailable; // 10 - 2 = 8
-            document.getElementById("totalBooked").textContent = bookedRooms;
-            document.getElementById("totalRevenue").textContent = formatRupiah(totalRevenue);
-            document.getElementById("totalListings").textContent = listings.length;
-
-            if (listings.length === 0) {
-              listingContainer.innerHTML = `
-                    <div class="col-12">
-                        <div class="card card-body text-center p-5 border-0">
-                            <i class="bi bi-building fs-1 text-muted mb-3"></i>
-                            <h5>Belum Ada Listing</h5>
-                            <p class="mb-3 text-muted">Mulai tambahkan properti Anda untuk menarik penyewa</p>
-                            <a href="create-listing.html" class="btn btn-primary w-50 mx-auto">
-                                <i class="bi bi-plus-circle me-2"></i>Tambah Listing Pertama
-                            </a>
-                        </div>
-                    </div>
-                `;
-              return;
-            }
-
-            // Render Listings
-            const htmlContent = listings
-              .map(
-                (listing) => `
-                <div class="col-12 mb-3">
-                    <div class="card shadow-sm border-0 h-100">
-                        <div class="card-body">
-                            <div class="row align-items-center">
-                                <div class="col-md-2">
-                                    <img src="${listing.image_url}"
-                                         class="img-fluid rounded" 
-                                         alt="${listing.title}" 
-                                         style="height: 100px; width: 100%; object-fit: cover;">
-                                </div>
-                                <div class="col-md-6">
-                                    <h5 class="card-title mb-2">${listing.title}</h5>
-                                    <p class="card-text text-muted small mb-2">
-                                        <i class="bi bi-geo-alt"></i> ${listing.address || listing.location}
-                                    </p>
-                                    <div>
-                                        <span class="badge bg-primary me-2">${listing.type}</span>
-                                        <span class="badge ${listing.available_rooms > 0 ? "bg-success" : "bg-danger"}">
-                                            ${listing.available_rooms} dari ${listing.total_rooms} kamar tersedia
-                                        </span>
-                                    </div>
-                                </div>
-                                <div class="col-md-2 text-end">
-                                    <p class="mb-1 fw-bold text-primary">${formatRupiah(listing.price)}</p>
-                                    <p class="mb-0 small text-muted">per ${listing.price_unit}</p>
-                                    <span class="badge ${listing.status === "tersedia" ? "bg-success" : "bg-secondary"} mt-2">
-                                        ${listing.status}
-                                    </span>
-                                </div>
-                                <div class="col-md-2 text-end">
-                                    <div class="d-flex flex-column gap-2">
-                                        <a href="listing-detail.html?id=${listing.id}" 
-                                           class="btn btn-sm btn-outline-primary" 
-                                           target="_blank">
-                                            <i class="bi bi-eye me-1"></i>Lihat
-                                        </a>
-                                        <button class="btn btn-sm btn-outline-secondary" 
-                                                onclick="editListing(${listing.id})">
-                                            <i class="bi bi-pencil me-1"></i>Edit
-                                        </button>
-                                        <button class="btn btn-sm btn-outline-danger" 
-                                                onclick="deleteListing(${listing.id})">
-                                            <i class="bi bi-trash me-1"></i>Hapus
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `
-              )
-              .join("");
-
-            listingContainer.innerHTML = htmlContent;
-          } else {
-            listingContainer.innerHTML = `
-                <div class="col-12">
-                    <div class="alert alert-danger">
-                        <i class="bi bi-exclamation-triangle me-2"></i>
-                        Gagal memuat data: ${result.message}
-                    </div>
-                </div>
-            `;
-          }
-        } catch (error) {
-          console.error("Fetch error:", error);
-          listingContainer.innerHTML = `
+      <div class="tab-content">
+        <div class="tab-pane fade show active" id="listings">
+          <div class="row mb-4">
             <div class="col-12">
-                <div class="alert alert-danger">
-                    <i class="bi bi-exclamation-triangle me-2"></i>
-                    Terjadi kesalahan koneksi server
-                </div>
+              <div class="d-flex justify-content-between align-items-center">
+                <h4 class="mb-0">Semua Listing Properti Anda</h4>
+                <a href="create-listing.html" class="btn btn-primary">
+                  <i class="bi bi-plus-lg me-2"></i>Tambah Listing Baru
+                </a>
+              </div>
             </div>
-        `;
-        }
-      }
+          </div>
 
-      // FUNGSI BAWAAN DARI HTML ANDA
-      function toggleSidebar() {
-        const sidebar = document.getElementById("sidebar");
-        const overlay = document.getElementById("sidebarOverlay");
-        sidebar.classList.toggle("show");
-        overlay.classList.toggle("show");
-      }
-      document.getElementById("sidebarOverlay").addEventListener("click", toggleSidebar);
+          <div class="row" id="listingsContainer"></div>
+        </div>
 
-      function editListing(id) {
-        window.location.href = `create-listing.html?edit=${id}`;
-      }
+        <div class="tab-pane fade" id="bookings">
+          <div class="alert alert-info">
+            <i class="bi bi-info-circle me-2"></i>
+            Belum ada booking masuk untuk properti Anda
+          </div>
+        </div>
 
-      async function deleteHostListing(id_properti) {
-        try {
-          const response = await fetch("api/delete_listing.php", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ id_properti: id_properti }), // Kirim ID yang akan dihapus
+        <div class="tab-pane fade" id="reviews">
+          <div class="alert alert-info">
+            <i class="bi bi-info-circle me-2"></i>
+            Belum ada ulasan untuk properti Anda
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="js/auth.js"></script>
+  <script>
+    function formatRupiah(angka) {
+      if (isNaN(angka) || angka === null || angka === 0) return "Rp 0";
+      return "Rp " + parseFloat(angka).toFixed(0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    }
+
+    async function loadHostListings() {
+      const listingContainer = document.getElementById("listingsContainer");
+      listingContainer.innerHTML = `
+        <div class="col-12 text-center text-muted py-5">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+          </div>
+          <p class="mt-3">Memuat data listing...</p>
+        </div>
+      `;
+
+      try {
+        const response = await fetch("api/get_host_listings.php");
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        
+        const result = await response.json();
+        console.log("API Response:", result);
+
+        if (result.status === "success") {
+          const listings = result.data;
+          listingContainer.innerHTML = "";
+
+          let totalRooms = 0, totalAvailable = 0, totalRevenue = 0;
+          listings.forEach(l => {
+            totalRooms += l.total_rooms || 0;
+            totalAvailable += l.available_rooms || 0;
+            totalRevenue += l.price * (l.total_rooms - l.available_rooms) || 0;
           });
 
-          const data = await response.json();
+          document.getElementById("totalListings").textContent = listings.length;
+          document.getElementById("totalBooked").textContent = totalRooms - totalAvailable;
+          document.getElementById("totalRevenue").textContent = formatRupiah(totalRevenue);
+          document.getElementById("totalViews").textContent = "0";
 
-          if (response.ok && data.status === "success") {
-            alert("Listing berhasil dihapus!");
-            // Panggil kembali fungsi untuk memuat daftar listing (refresh)
-            loadHostListings();
-          } else {
-            // Tampilkan error dari server (misal: "Akses ditolak" atau "Gagal menghapus")
-            alert("Gagal menghapus listing: " + (data.message || "Error tidak diketahui."));
+          if (listings.length === 0) {
+            listingContainer.innerHTML = `
+              <div class="col-12">
+                <div class="card card-body text-center p-5 border-0">
+                  <i class="bi bi-building fs-1 text-muted mb-3"></i>
+                  <h5>Belum Ada Listing</h5>
+                  <p class="mb-3 text-muted">Mulai tambahkan properti Anda untuk menarik penyewa</p>
+                  <a href="create-listing.html" class="btn btn-primary w-50 mx-auto">
+                    <i class="bi bi-plus-circle me-2"></i>Tambah Listing Pertama
+                  </a>
+                </div>
+              </div>
+            `;
+            return;
           }
-        } catch (error) {
-          console.error("Error saat menghapus listing:", error);
-          alert("Terjadi kesalahan koneksi server saat menghapus listing.");
-        }
-      }
 
-      // GANTI FUNGSI deleteListing(id) yang lama dengan yang ini:
-      function deleteListing(id) {
-        if (confirm("Apakah Anda yakin ingin menghapus listing ini? Tindakan ini tidak bisa dibatalkan.")) {
-          deleteHostListing(id);
-        }
-      }
+          // Placeholder SVG untuk gambar kosong
+          const placeholderSVG = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Crect fill='%23e5e7eb' width='200' height='200'/%3E%3Ctext fill='%239ca3af' font-family='Arial' font-size='16' text-anchor='middle' x='100' y='105'%3ENo Image%3C/text%3E%3C/svg%3E";
 
-      // --- EVENT LISTENER UTAMA ---
-      if (requireHost()) {
-        // Pengecekan sesi
-        document.addEventListener("DOMContentLoaded", function () {
-          updateAuthUI();
-          // Memanggil loadDashboardData() (asumsi ada di js/dashboard.js)
-          if (typeof loadDashboardData === "function") {
-            loadDashboardData();
-          }
-          loadHostListings(); // Muat daftar listing
+          const htmlContent = listings.map(listing => {
+            const imgSrc = listing.image_url && listing.image_url.trim() !== '' ? listing.image_url : placeholderSVG;
+            
+            return `
+            <div class="col-12 mb-3">
+              <div class="card shadow-sm border-0 h-100">
+                <div class="card-body">
+                  <div class="row align-items-center">
+                    <div class="col-md-2">
+                      <img src="${imgSrc}" class="img-fluid rounded" alt="${listing.title}" 
+                           style="height: 100px; width: 100%; object-fit: cover;">
+                    </div>
+                    <div class="col-md-6">
+                      <h5 class="card-title mb-2">${listing.title}</h5>
+                      <p class="card-text text-muted small mb-2">
+                        <i class="bi bi-geo-alt"></i> ${listing.address || listing.location}
+                      </p>
+                      <div>
+                        <span class="badge bg-primary me-2">${listing.type}</span>
+                        <span class="badge ${listing.available_rooms > 0 ? "bg-success" : "bg-danger"}">
+                          ${listing.available_rooms} dari ${listing.total_rooms} kamar tersedia
+                        </span>
+                      </div>
+                    </div>
+                    <div class="col-md-2 text-end">
+                      <p class="mb-1 fw-bold text-primary">${formatRupiah(listing.price)}</p>
+                      <p class="mb-0 small text-muted">per ${listing.price_unit}</p>
+                      <span class="badge ${listing.status === "tersedia" ? "bg-success" : "bg-secondary"} mt-2">
+                        ${listing.status}
+                      </span>
+                    </div>
+                    <div class="col-md-2 text-end">
+                      <div class="d-flex flex-column gap-2">
+                        <a href="listing-detail.html?id=${listing.id}" class="btn btn-sm btn-outline-primary" target="_blank">
+                          <i class="bi bi-eye me-1"></i>Lihat
+                        </a>
+                        <button class="btn btn-sm btn-outline-secondary" onclick="editListing(${listing.id})">
+                          <i class="bi bi-pencil me-1"></i>Edit
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger" onclick="deleteListing(${listing.id})">
+                          <i class="bi bi-trash me-1"></i>Hapus
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>`;
+          }).join("");
+
+          listingContainer.innerHTML = htmlContent;
+        } else {
+          listingContainer.innerHTML = `
+            <div class="col-12">
+              <div class="alert alert-danger">
+                <i class="bi bi-exclamation-triangle me-2"></i>
+                ${result.message || 'Gagal memuat data listing'}
+              </div>
+            </div>
+          `;
+        }
+      } catch (error) {
+        console.error("Fetch error:", error);
+        listingContainer.innerHTML = `
+          <div class="col-12">
+            <div class="alert alert-danger">
+              <i class="bi bi-exclamation-triangle me-2"></i>
+              Terjadi kesalahan koneksi: ${error.message}
+            </div>
+          </div>
+        `;
+      }
+    }
+
+    function toggleSidebar() {
+      document.getElementById("sidebar").classList.toggle("show");
+      document.getElementById("sidebarOverlay").classList.toggle("show");
+    }
+
+    document.getElementById("sidebarOverlay")?.addEventListener("click", toggleSidebar);
+
+    function editListing(id) {
+      window.location.href = `create-listing.html?edit=${id}`;
+    }
+
+    async function deleteHostListing(id) {
+      try {
+        const response = await fetch("api/delete_listing.php", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id_properti: id })
         });
+        const data = await response.json();
+        if (response.ok && data.status === "success") {
+          alert("Listing berhasil dihapus!");
+          loadHostListings();
+        } else {
+          alert("Gagal menghapus: " + (data.message || "Error"));
+        }
+      } catch (error) {
+        console.error("Delete error:", error);
+        alert("Terjadi kesalahan saat menghapus listing.");
       }
-    </script>
-  </body>
+    }
+
+    function deleteListing(id) {
+      if (confirm("Apakah Anda yakin ingin menghapus listing ini?")) {
+        deleteHostListing(id);
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+      console.log("Dashboard loaded");
+      if (typeof requireHost === 'function') requireHost();
+      if (typeof updateAuthUI === 'function') updateAuthUI();
+      loadHostListings();
+    });
+  </script>
 </body>
 </html>
