@@ -1,0 +1,1025 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Edit Listing - Roomio</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="styles/site.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+    <style>
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        background: #f9fafb;
+      }
+
+      .step-indicator {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 2rem;
+      }
+
+      .step {
+        flex: 1;
+        text-align: center;
+        padding: 1rem;
+        position: relative;
+      }
+
+      .step::before {
+        content: "";
+        position: absolute;
+        top: 20px;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: #e5e7eb;
+        z-index: 0;
+      }
+
+      .step:first-child::before {
+        left: 50%;
+      }
+
+      .step:last-child::before {
+        right: 50%;
+      }
+
+      .step-number {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: #e5e7eb;
+        color: #6b7280;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        position: relative;
+        z-index: 1;
+        margin-bottom: 0.5rem;
+      }
+
+      .step.active .step-number {
+        background: #2563eb;
+        color: white;
+      }
+
+      .step.completed .step-number {
+        background: #10b981;
+        color: white;
+      }
+
+      .form-section {
+        display: none;
+      }
+
+      .form-section.active {
+        display: block;
+      }
+
+      .image-upload {
+        border: 2px dashed #d1d5db;
+        border-radius: 0.5rem;
+        padding: 2rem;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s;
+      }
+
+      .image-upload:hover {
+        border-color: #2563eb;
+        background: #eff6ff;
+      }
+
+      .map-modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.6);
+        z-index: 9999;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+      }
+
+      .map-modal.show {
+        display: flex;
+      }
+
+      .map-modal-content {
+        background: white;
+        border-radius: 1rem;
+        width: 100%;
+        max-width: 900px;
+        max-height: 90vh;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+      }
+
+      .map-header {
+        padding: 1.25rem;
+        border-bottom: 1px solid #e5e7eb;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .map-search-box {
+        padding: 1rem;
+        border-bottom: 1px solid #e5e7eb;
+        background: #f9fafb;
+      }
+
+      #mapCanvas {
+        width: 100%;
+        height: 450px;
+        min-height: 450px;
+        flex: 1;
+        position: relative;
+        z-index: 1;
+      }
+
+      .leaflet-container {
+        height: 100%;
+        width: 100%;
+      }
+
+      .map-footer {
+        padding: 1rem;
+        border-top: 1px solid #e5e7eb;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: #f9fafb;
+      }
+
+      .coordinates-display {
+        background: #dbeafe;
+        border: 1px solid #3b82f6;
+        padding: 0.75rem 1rem;
+        border-radius: 0.5rem;
+        margin-top: 0.75rem;
+        font-size: 0.875rem;
+      }
+
+      .coordinates-display i {
+        color: #3b82f6;
+      }
+
+      #tempCoords {
+        font-family: "Courier New", monospace;
+        color: #374151;
+      }
+    </style>
+  </head>
+  <body>
+    
+    <nav class="navbar navbar-light bg-white border-bottom">
+      <div class="container">
+        <a class="navbar-brand" href="index.html">
+          <i class="bi bi-building text-primary fs-4 me-2"></i>
+          <span class="text-primary fs-5">Roomio</span>
+        </a>
+        <a href="host-dashboard.html" class="btn btn-link">
+          <i class="bi bi-x-lg"></i>
+        </a>
+      </div>
+    </nav>
+
+    <div class="container py-5">
+      <div class="row justify-content-center">
+        <div class="col-lg-8">
+          <div class="card shadow-sm">
+            <div class="card-body p-4 p-md-5">
+              <h2 class="mb-4">Edit Listing</h2>
+
+              <div class="step-indicator">
+                <div class="step active" data-step="1">
+                  <div class="step-number">1</div>
+                  <small>Info Dasar</small>
+                </div>
+                <div class="step" data-step="2">
+                  <div class="step-number">2</div>
+                  <small>Detail</small>
+                </div>
+                <div class="step" data-step="3">
+                  <div class="step-number">3</div>
+                  <small>Foto</small>
+                </div>
+                <div class="step" data-step="4">
+                  <div class="step-number">4</div>
+                  <small>Review</small>
+                </div>
+              </div>
+
+              <form id="listingForm">
+                <input type="hidden" id="id_properti" name="id_properti" />
+                <input type="hidden" id="id_kamar" name="id_kamar" />
+                <input type="hidden" id="latitude" name="latitude" />
+                <input type="hidden" id="longitude" name="longitude" />
+
+                <!-- STEP 1: INFO DASAR -->
+                <div class="form-section active" data-section="1">
+                  <h5 class="mb-4">Informasi Dasar</h5>
+
+                  <div class="mb-3">
+                    <label class="form-label">Judul Listing *</label>
+                    <input type="text" class="form-control" id="title" name="title" required placeholder="Kos Nyaman Dekat Kampus..." />
+                  </div>
+
+                  <div class="mb-3">
+                    <label class="form-label">Kategori *</label>
+                    <select class="form-select" id="category" name="category" required>
+                      <option value="">Pilih kategori</option>
+                      <option value="kos-putra">Kos Putra</option>
+                      <option value="kos-putri">Kos Putri</option>
+                      <option value="kos-campur">Kos Campur</option>
+                      <option value="kontrakan">Kontrakan</option>
+                    </select>
+                  </div>
+
+                  <div class="row">
+                    <div class="col-md-6 mb-3">
+                      <label class="form-label">Harga per Bulan (Rp) *</label>
+                      <input type="number" class="form-control" id="price" name="price" required placeholder="1000000" />
+                    </div>
+                    <div class="col-md-6 mb-3">
+                      <label class="form-label">Deposit (Rp) *</label>
+                      <input type="number" class="form-control" id="deposit" name="deposit" required placeholder="1000000" />
+                    </div>
+                  </div>
+
+                  <div class="mb-3">
+                    <label class="form-label">Lokasi *</label>
+                    <select class="form-select mb-2" id="district" name="district" required>
+                      <option value="">Pilih kecamatan</option>
+                      <option value="tegalboto">Tegalboto</option>
+                      <option value="sumbersari">Sumbersari</option>
+                      <option value="patrang">Patrang</option>
+                      <option value="kaliwates">Kaliwates</option>
+                      <option value="mangli">Mangli</option>
+                    </select>
+                    <input type="text" class="form-control" id="address" name="address" required placeholder="Alamat lengkap..." />
+                  </div>
+
+                  <div class="mb-3">
+                    <label class="form-label">Pin Lokasi di Maps *</label>
+                    <button type="button" class="btn btn-outline-primary w-100" id="openMapBtn"><i class="bi bi-geo-alt-fill me-2"></i>Pilih Lokasi di Peta</button>
+                    <small class="text-muted d-block mt-1">
+                      <i class="bi bi-info-circle me-1"></i>
+                      Klik untuk menandai lokasi properti Anda di peta
+                    </small>
+
+                    <div id="coordinatesDisplay" class="coordinates-display" style="display: none">
+                      <i class="bi bi-check-circle-fill me-2"></i>
+                      <strong>Lokasi Berhasil Dipilih</strong><br />
+                      <small>Latitude: <span id="displayLat" class="fw-bold">-</span></small><br />
+                      <small>Longitude: <span id="displayLng" class="fw-bold">-</span></small>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- STEP 2: DETAIL -->
+                <div class="form-section" data-section="2">
+                  <h5 class="mb-4">Detail Properti</h5>
+
+                  <div class="mb-3">
+                    <label class="form-label">Deskripsi *</label>
+                    <textarea class="form-control" id="description" name="description" rows="5" required placeholder="Deskripsikan properti Anda..."></textarea>
+                    <small class="text-muted">Min. 10 karakter</small>
+                  </div>
+
+                  <div class="row">
+                    <div class="col-md-4 mb-3">
+                      <label class="form-label">Jumlah Kamar *</label>
+                      <input type="number" class="form-control" id="rooms" name="rooms" required min="1" placeholder="10" />
+                    </div>
+                    <div class="col-md-4 mb-3">
+                      <label class="form-label">Kamar Tersedia *</label>
+                      <input type="number" class="form-control" id="available" name="available" required min="0" placeholder="5" />
+                    </div>
+                    <div class="col-md-4 mb-3">
+                      <label class="form-label">Ukuran Kamar</label>
+                      <input type="text" class="form-control" id="roomSize" name="roomSize" placeholder="3x4 m" />
+                    </div>
+                  </div>
+
+                  <div class="mb-3">
+                    <label class="form-label">Fasilitas Kamar</label>
+                    <div class="row">
+                      <div class="col-md-6">
+                        <div class="form-check">
+                          <input class="form-check-input" type="checkbox" id="fac_kasur" value="Kasur" />
+                          <label class="form-check-label" for="fac_kasur">Kasur</label>
+                        </div>
+                        <div class="form-check">
+                          <input class="form-check-input" type="checkbox" id="fac_lemari" value="Lemari" />
+                          <label class="form-check-label" for="fac_lemari">Lemari</label>
+                        </div>
+                        <div class="form-check">
+                          <input class="form-check-input" type="checkbox" id="fac_ac" value="AC" />
+                          <label class="form-check-label" for="fac_ac">AC</label>
+                        </div>
+                        <div class="form-check">
+                          <input class="form-check-input" type="checkbox" id="fac_km" value="Kamar Mandi Dalam" />
+                          <label class="form-check-label" for="fac_km">Kamar Mandi Dalam</label>
+                        </div>
+                      </div>
+                      <div class="col-md-6">
+                        <div class="form-check">
+                          <input class="form-check-input" type="checkbox" id="fac_wifi" value="Wifi" />
+                          <label class="form-check-label" for="fac_wifi">Wifi</label>
+                        </div>
+                        <div class="form-check">
+                          <input class="form-check-input" type="checkbox" id="fac_meja" value="Meja Belajar" />
+                          <label class="form-check-label" for="fac_meja">Meja Belajar</label>
+                        </div>
+                        <div class="form-check">
+                          <input class="form-check-input" type="checkbox" id="fac_laundry" value="Laundry" />
+                          <label class="form-check-label" for="fac_laundry">Laundry</label>
+                        </div>
+                        <div class="form-check">
+                          <input class="form-check-input" type="checkbox" id="fac_parkir" value="Parkir" />
+                          <label class="form-check-label" for="fac_parkir">Parkir</label>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="mb-3">
+                    <label class="form-label">Peraturan Kos</label>
+                    <textarea class="form-control" id="rules" name="rules" rows="4" placeholder="Masukkan peraturan, satu per baris&#10;Contoh:&#10;Jam malam pukul 22.00&#10;Tidak boleh membawa tamu menginap"></textarea>
+                  </div>
+                </div>
+
+                <!-- STEP 3: FOTO -->
+                <div class="form-section" data-section="3">
+                  <h5 class="mb-4">Foto Properti</h5>
+                  <p class="text-muted">Tambahkan minimal 4 foto berkualitas tinggi</p>
+
+                  <div class="image-upload mb-3">
+                    <i class="bi bi-cloud-upload fs-1 text-primary mb-3"></i>
+                    <p class="mb-2">Klik untuk upload foto atau drag & drop</p>
+                    <small class="text-muted">Format: JPG, PNG (Max 5MB per file)</small>
+                    <input type="file" class="d-none" id="imageUpload" multiple accept="image/*" />
+                  </div>
+
+                  <div id="imagePreview" class="row g-3"></div>
+
+                  <div class="alert alert-info mt-3">
+                    <i class="bi bi-info-circle me-2"></i>
+                    <strong>Tips:</strong> Foto yang bagus akan meningkatkan minat penyewa. Sertakan foto kamar, kamar mandi, dan area umum.
+                  </div>
+                </div>
+
+                <!-- STEP 4: REVIEW -->
+                <div class="form-section" data-section="4">
+                  <h5 class="mb-4">Review & Simpan Perubahan</h5>
+
+                  <div class="card bg-light mb-3">
+                    <div class="card-body">
+                      <h6 class="card-title" id="reviewTitle">-</h6>
+                      <p class="card-text small text-muted mb-2" id="reviewLocation">-</p>
+                      <h5 class="text-primary mb-0">Rp <span id="reviewPrice">-</span> <small class="text-muted">/ bulan</small></h5>
+                    </div>
+                  </div>
+
+                  <div class="mb-3">
+                    <strong>Detail:</strong>
+                    <ul id="reviewDetails" class="mt-2"></ul>
+                  </div>
+
+                  <div class="alert alert-success">
+                    <i class="bi bi-check-circle me-2"></i>
+                    Perubahan listing siap disimpan!
+                  </div>
+                </div>
+
+                <!-- NAVIGATION BUTTONS -->
+                <div class="d-flex justify-content-between mt-4">
+                  <button type="button" class="btn btn-outline-secondary" id="prevBtn" style="display: none"><i class="bi bi-arrow-left me-2"></i>Sebelumnya</button>
+                  <button type="button" class="btn btn-primary ms-auto" id="nextBtn">Selanjutnya<i class="bi bi-arrow-right ms-2"></i></button>
+                  <button type="submit" class="btn btn-success ms-auto" id="submitBtn" style="display: none"><i class="bi bi-check-circle me-2"></i>Simpan Perubahan</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL MAPS -->
+    <div id="mapModal" class="map-modal">
+      <div class="map-modal-content">
+        <div class="map-header">
+          <h5 class="mb-0">
+            <i class="bi bi-geo-alt-fill text-primary me-2"></i>
+            Pilih Lokasi Properti
+          </h5>
+          <button type="button" class="btn-close" id="closeMapBtn"></button>
+        </div>
+
+        <div class="map-search-box">
+          <div class="input-group mb-2">
+            <span class="input-group-text">
+              <i class="bi bi-search"></i>
+            </span>
+            <input type="text" class="form-control" id="mapSearchInput" placeholder="Cari lokasi (contoh: Universitas Jember)" />
+            <button class="btn btn-primary" type="button" id="searchMapBtn">Cari</button>
+          </div>
+          <small class="text-muted">
+            <i class="bi bi-info-circle me-1"></i>
+            Klik pada peta untuk memilih lokasi yang tepat. Marker dapat di-drag.
+          </small>
+        </div>
+
+        <div id="mapCanvas"></div>
+
+        <div class="map-footer">
+          <div>
+            <small class="text-muted d-block">Koordinat Terpilih:</small>
+            <small id="tempCoords" class="fw-bold">Klik peta untuk memilih lokasi</small>
+          </div>
+          <div>
+            <button type="button" class="btn btn-secondary me-2" id="cancelMapBtn">Batal</button>
+            <button type="button" class="btn btn-primary" id="confirmMapBtn">
+              <i class="bi bi-check-circle me-1"></i>
+              Konfirmasi Lokasi
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <script>
+// GLOBAL VARIABLES
+let map;
+let marker;
+let selectedLocation = {
+  lat: -8.1703073,
+  lng: 113.7238609,
+};
+let currentStep = 1;
+const totalSteps = 4;
+
+// LEAFLET MAPS FUNCTIONS
+function initMap() {
+  try {
+    map = L.map("mapCanvas", {
+      center: [selectedLocation.lat, selectedLocation.lng],
+      zoom: 15,
+      zoomControl: true,
+      scrollWheelZoom: true,
+    });
+
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      attribution: "© OpenStreetMap contributors",
+      maxZoom: 19,
+    }).addTo(map);
+
+    marker = L.marker([selectedLocation.lat, selectedLocation.lng], {
+      draggable: true,
+      icon: L.icon({
+        iconUrl: "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png",
+        shadowUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png",
+        iconSize: [25, 41],
+        iconAnchor: [12, 41],
+        popupAnchor: [1, -34],
+        shadowSize: [41, 41],
+      }),
+    }).addTo(map);
+
+    marker.on("dragend", function (e) {
+      const position = marker.getLatLng();
+      updateSelectedLocation(position.lat, position.lng);
+    });
+
+    map.on("click", function (e) {
+      placeMarker(e.latlng);
+    });
+
+    setTimeout(() => {
+      map.invalidateSize();
+    }, 100);
+  } catch (error) {
+    console.error("Error initializing map:", error);
+    alert("Gagal memuat peta. Silakan refresh halaman.");
+  }
+}
+
+function openMapModal() {
+  const mapModal = document.getElementById("mapModal");
+  mapModal.classList.add("show");
+
+  if (!map) {
+    setTimeout(() => {
+      initMap();
+    }, 300);
+  } else {
+    setTimeout(() => {
+      map.invalidateSize();
+      map.setView([selectedLocation.lat, selectedLocation.lng], 15);
+    }, 300);
+  }
+}
+
+function placeMarker(location) {
+  if (marker) {
+    marker.setLatLng(location);
+  }
+  map.panTo(location);
+  updateSelectedLocation(location.lat, location.lng);
+}
+
+function updateSelectedLocation(lat, lng) {
+  selectedLocation = { lat: lat, lng: lng };
+  document.getElementById("tempCoords").textContent = "Lat: " + lat.toFixed(7) + ", Lng: " + lng.toFixed(7);
+}
+
+function searchLocation() {
+  const searchInput = document.getElementById("mapSearchInput").value.trim();
+  if (!searchInput) {
+    alert("Masukkan nama lokasi yang ingin dicari");
+    return;
+  }
+
+  const searchQuery = searchInput.includes("Jember") ? searchInput : searchInput + ", Jember, Indonesia";
+
+  fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchQuery)}&limit=1`)
+    .then((response) => response.json())
+    .then((data) => {
+      if (data && data.length > 0) {
+        const result = data[0];
+        const lat = parseFloat(result.lat);
+        const lng = parseFloat(result.lon);
+        map.setView([lat, lng], 17);
+        placeMarker(L.latLng(lat, lng));
+      } else {
+        alert("Lokasi tidak ditemukan. Coba kata kunci yang berbeda.");
+      }
+    })
+    .catch((error) => {
+      console.error("Error searching location:", error);
+      alert("Terjadi kesalahan saat mencari lokasi.");
+    });
+}
+
+function confirmLocation() {
+  if (!selectedLocation.lat || !selectedLocation.lng) {
+    alert("Mohon pilih lokasi di peta terlebih dahulu");
+    return;
+  }
+
+  document.getElementById("latitude").value = selectedLocation.lat;
+  document.getElementById("longitude").value = selectedLocation.lng;
+  document.getElementById("displayLat").textContent = selectedLocation.lat.toFixed(7);
+  document.getElementById("displayLng").textContent = selectedLocation.lng.toFixed(7);
+  document.getElementById("coordinatesDisplay").style.display = "block";
+  closeMapModal();
+}
+
+function closeMapModal() {
+  const mapModal = document.getElementById("mapModal");
+  mapModal.classList.remove("show");
+}
+
+// FORM NAVIGATION FUNCTIONS
+function getUrlParameter(name) {
+  name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+  var regex = new RegExp("[\\?&]" + name + "=([^&#]*)");
+  var results = regex.exec(location.search);
+  return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+}
+
+function updateStep(step) {
+  console.log('updateStep called with:', step, 'current:', currentStep);
+  
+  if (step > currentStep && !validateStep(currentStep)) {
+    console.log('Validation failed for step:', currentStep);
+    return;
+  }
+
+  currentStep = step;
+  console.log('Moving to step:', currentStep);
+
+  document.querySelectorAll(".form-section").forEach(function (section) {
+    section.classList.remove("active");
+  });
+
+  const targetSection = document.querySelector('[data-section="' + step + '"]');
+  if (targetSection) {
+    targetSection.classList.add("active");
+    console.log('Section activated:', step);
+  }
+
+  document.querySelectorAll(".step").forEach(function (stepEl, index) {
+    stepEl.classList.remove("active", "completed");
+    if (index + 1 < step) {
+      stepEl.classList.add("completed");
+    } else if (index + 1 === step) {
+      stepEl.classList.add("active");
+    }
+  });
+
+  const prevBtn = document.getElementById("prevBtn");
+  const nextBtn = document.getElementById("nextBtn");
+  const submitBtn = document.getElementById("submitBtn");
+
+  if (prevBtn) prevBtn.style.display = step === 1 ? "none" : "block";
+  if (nextBtn) nextBtn.style.display = step === totalSteps ? "none" : "block";
+  if (submitBtn) submitBtn.style.display = step === totalSteps ? "block" : "none";
+
+  if (currentStep === 4) {
+    updateReview();
+  }
+  
+  // Scroll to top
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function validateStep(step) {
+  console.log('Validating step:', step);
+  
+  if (step === 1) {
+    const title = document.getElementById("title").value;
+    const category = document.getElementById("category").value;
+    const price = document.getElementById("price").value;
+    const deposit = document.getElementById("deposit").value;
+    const district = document.getElementById("district").value;
+    const address = document.getElementById("address").value;
+    const latitude = document.getElementById("latitude").value;
+    const longitude = document.getElementById("longitude").value;
+
+    console.log('Step 1 validation:', { title, category, price, deposit, district, address, latitude, longitude });
+
+    if (!title || !category || !price || !deposit || !district || !address) {
+      alert("Mohon lengkapi semua field yang wajib diisi.");
+      return false;
+    }
+
+    if (!latitude || !longitude) {
+      alert('Mohon pilih lokasi di peta dengan klik tombol "Pilih Lokasi di Peta"');
+      return false;
+    }
+  }
+
+  if (step === 2) {
+    const description = document.getElementById("description").value;
+    const rooms = document.getElementById("rooms").value;
+    const available = document.getElementById("available").value;
+
+    console.log('Step 2 validation:', { description, rooms, available });
+
+    if (!description || description.length < 10) {
+      alert("Deskripsi minimal 10 karakter");
+      return false;
+    }
+
+    if (!rooms || !available) {
+      alert("Mohon lengkapi jumlah kamar");
+      return false;
+    }
+  }
+
+  console.log('Validation passed for step:', step);
+  return true;
+}
+
+function updateReview() {
+  document.getElementById("reviewTitle").textContent = document.getElementById("title").value || "N/A";
+  document.getElementById("reviewLocation").textContent = document.getElementById("address").value || "N/A";
+
+  const priceValue = document.getElementById("price").value;
+  document.getElementById("reviewPrice").textContent = priceValue ? parseInt(priceValue).toLocaleString("id-ID") : "N/A";
+
+  const details = [];
+  details.push("Kategori: " + (document.getElementById("category").value || "N/A"));
+  details.push("Jumlah kamar: " + (document.getElementById("rooms").value || "N/A"));
+  details.push("Kamar tersedia: " + (document.getElementById("available").value || "N/A"));
+
+  const lat = document.getElementById("latitude").value;
+  const lng = document.getElementById("longitude").value;
+  if (lat && lng) {
+    details.push("Koordinat: " + parseFloat(lat).toFixed(6) + ", " + parseFloat(lng).toFixed(6));
+  }
+
+  const facilities = [];
+  document.querySelectorAll('[id^="fac_"]:checked').forEach(function (cb) {
+    facilities.push(cb.value);
+  });
+  if (facilities.length > 0) {
+    details.push("Fasilitas: " + facilities.join(", "));
+  }
+
+  document.getElementById("reviewDetails").innerHTML = details
+    .map(function (d) {
+      return "<li>" + d + "</li>";
+    })
+    .join("");
+}
+
+// Image upload handler
+function handleImageUpload(e) {
+  const files = e.target.files;
+  const preview = document.getElementById("imagePreview");
+
+  for (var i = 0; i < files.length; i++) {
+    (function (file) {
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        const col = document.createElement("div");
+        col.className = "col-md-3";
+        col.innerHTML =
+          '<div class="position-relative">' +
+          '<img src="' +
+          e.target.result +
+          '" class="img-fluid rounded" alt="Preview">' +
+          '<button type="button" class="btn btn-danger btn-sm position-absolute top-0 end-0 m-2" onclick="this.closest(\'.col-md-3\').remove()">' +
+          '<i class="bi bi-x"></i>' +
+          "</button>" +
+          "</div>";
+        preview.appendChild(col);
+      };
+      reader.readAsDataURL(file);
+    })(files[i]);
+  }
+}
+
+// Form submit handler
+async function handleFormSubmit(e) {
+  e.preventDefault();
+
+  const formData = new FormData();
+  formData.append("id_properti", document.getElementById("id_properti").value);
+  formData.append("id_kamar", document.getElementById("id_kamar").value);
+  formData.append("nama_properti", document.getElementById("title").value);
+  formData.append("tipe_properti", document.getElementById("category").value);
+  formData.append("alamat", document.getElementById("address").value);
+  formData.append("kota", document.getElementById("district").value);
+  formData.append("deskripsi", document.getElementById("description").value);
+  formData.append("latitude", document.getElementById("latitude").value);
+  formData.append("longitude", document.getElementById("longitude").value);
+  formData.append("harga", document.getElementById("price").value);
+  formData.append("deposit", document.getElementById("deposit").value);
+  formData.append("jumlah_kamar", document.getElementById("rooms").value);
+  formData.append("kamar_tersedia", document.getElementById("available").value);
+  formData.append("room_size", document.getElementById("roomSize").value);
+
+  document.querySelectorAll('[id^="fac_"]:checked').forEach(function (cb) {
+    formData.append("fasilitas_kamar[]", cb.value);
+  });
+
+  formData.append("rules", document.getElementById("rules").value);
+
+  const imageInput = document.getElementById("imageUpload");
+  if (imageInput.files.length > 0) {
+    for (var i = 0; i < imageInput.files.length; i++) {
+      formData.append("images[]", imageInput.files[i]);
+    }
+  }
+
+  const submitButton = document.getElementById("submitBtn");
+  const originalText = submitButton.innerHTML;
+  submitButton.disabled = true;
+  submitButton.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Menyimpan...';
+
+  try {
+    const response = await fetch("api/update_listing.php", {
+      method: "POST",
+      body: formData,
+    });
+
+    const data = await response.json();
+
+    if (response.ok && data.status === "success") {
+      alert(data.message);
+      window.location.href = "host-dashboard.html";
+    } else {
+      alert("Gagal update listing: " + (data.message || "Error tidak diketahui"));
+    }
+  } catch (error) {
+    console.error("Error:", error);
+    alert("Terjadi kesalahan koneksi ke server.");
+  } finally {
+    submitButton.disabled = false;
+    submitButton.innerHTML = originalText;
+  }
+}
+
+// Function to initialize all event listeners
+function initializeEventListeners() {
+  console.log('Initializing event listeners...');
+  
+  // Map buttons - HAPUS LISTENER LAMA DAN TAMBAH BARU
+  document.getElementById("openMapBtn")?.addEventListener("click", function (e) {
+    e.preventDefault();
+    openMapModal();
+  });
+
+  document.getElementById("closeMapBtn")?.addEventListener("click", closeMapModal);
+  document.getElementById("cancelMapBtn")?.addEventListener("click", closeMapModal);
+  document.getElementById("confirmMapBtn")?.addEventListener("click", confirmLocation);
+  document.getElementById("searchMapBtn")?.addEventListener("click", searchLocation);
+
+  document.getElementById("mapSearchInput")?.addEventListener("keypress", function (e) {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      searchLocation();
+    }
+  });
+
+  // Navigation buttons
+  const nextBtn = document.getElementById("nextBtn");
+  if (nextBtn) {
+    nextBtn.addEventListener("click", function () {
+      console.log('=== NEXT BUTTON CLICKED ===');
+      console.log('Current step:', currentStep);
+      console.log('Total steps:', totalSteps);
+      
+      if (currentStep < totalSteps) {
+        console.log('Calling updateStep with:', currentStep + 1);
+        updateStep(currentStep + 1);
+      } else {
+        console.log('Already at last step');
+      }
+    });
+    console.log('Next button listener attached');
+  } else {
+    console.error('Next button not found!');
+  }
+
+  const prevBtn = document.getElementById("prevBtn");
+  if (prevBtn) {
+    prevBtn.addEventListener("click", function () {
+      console.log('Prev button clicked, current step:', currentStep);
+      if (currentStep > 1) {
+        updateStep(currentStep - 1);
+      }
+    });
+  }
+
+  // Form submit
+  document.getElementById("listingForm")?.addEventListener("submit", handleFormSubmit);
+
+  // Image upload
+  document.querySelector(".image-upload")?.addEventListener("click", function () {
+    document.getElementById("imageUpload").click();
+  });
+
+  document.getElementById("imageUpload")?.addEventListener("change", handleImageUpload);
+  
+  console.log('Event listeners initialized successfully');
+}
+
+// LOAD DATA SAAT EDIT MODE
+async function loadListingData(id) {
+  try {
+    console.log('=== START LOADING LISTING DATA ===');
+    
+    const userStr = localStorage.getItem('user');
+    if (!userStr) {
+      alert('Anda harus login terlebih dahulu');
+      window.location.href = 'login.html';
+      return;
+    }
+    
+    const user = JSON.parse(userStr);
+    const userId = user.id_user || user.id || user.user_id;
+    
+    if (!userId) {
+      alert('ID user tidak ditemukan. Silakan login kembali.');
+      window.location.href = 'login.html';
+      return;
+    }
+    
+    const url = `api/get_listing_for_edit.php?id=${id}&id_user=${userId}`;
+    console.log('Fetching:', url);
+    
+    const response = await fetch(url);
+    const responseText = await response.text();
+    
+    const result = JSON.parse(responseText);
+    console.log('API Response:', result);
+
+    if (result.status === "success") {
+      const data = result.data;
+      
+      // Populate form fields
+      document.getElementById("id_properti").value = data.id_properti || "";
+      document.getElementById("id_kamar").value = data.id_kamar || "";
+      document.getElementById("title").value = data.nama_properti || "";
+      document.getElementById("category").value = data.tipe_properti || "";
+      document.getElementById("price").value = data.harga || "";
+      document.getElementById("deposit").value = data.deposit || "";
+      document.getElementById("district").value = data.kecamatan || "";
+      document.getElementById("address").value = data.alamat || "";
+      
+      // Set coordinates
+      if (data.latitude && data.longitude) {
+        const lat = parseFloat(data.latitude);
+        const lng = parseFloat(data.longitude);
+        
+        document.getElementById("latitude").value = lat;
+        document.getElementById("longitude").value = lng;
+        selectedLocation = { lat: lat, lng: lng };
+        
+        document.getElementById("displayLat").textContent = lat.toFixed(7);
+        document.getElementById("displayLng").textContent = lng.toFixed(7);
+        document.getElementById("coordinatesDisplay").style.display = "block";
+      }
+
+      document.getElementById("description").value = data.deskripsi || "";
+      document.getElementById("rooms").value = data.jumlah_kamar || "";
+      document.getElementById("available").value = data.kamar_tersedia || "";
+      document.getElementById("roomSize").value = data.room_size || "";
+      document.getElementById("rules").value = data.rules || "";
+
+      // Check facilities
+      if (data.fasilitas_kamar) {
+        let fasilitas = [];
+        try {
+          fasilitas = JSON.parse(data.fasilitas_kamar);
+        } catch (e) {
+          fasilitas = data.fasilitas_kamar.split(',').map(f => f.trim());
+        }
+        
+        fasilitas.forEach(function(fac) {
+          const checkbox = document.querySelector(`input[type="checkbox"][value="${fac.trim()}"]`);
+          if (checkbox) {
+            checkbox.checked = true;
+          }
+        });
+      }
+
+      // Load photos
+      if (data.fotos && data.fotos.length > 0) {
+        const preview = document.getElementById("imagePreview");
+        preview.innerHTML = "";
+        
+        data.fotos.forEach(function(foto) {
+          const col = document.createElement("div");
+          col.className = "col-md-3";
+          col.innerHTML =
+            '<div class="position-relative">' +
+            '<img src="' + foto + '" class="img-fluid rounded" alt="Preview">' +
+            '<button type="button" class="btn btn-danger btn-sm position-absolute top-0 end-0 m-2" onclick="this.closest(\'.col-md-3\').remove()">' +
+            '<i class="bi bi-x"></i>' +
+            "</button>" +
+            "</div>";
+          preview.appendChild(col);
+        });
+      }
+
+      console.log('Data loaded successfully!');
+      alert('Data berhasil dimuat! Anda dapat mengedit listing.');
+      
+    } else {
+      throw new Error(result.message || 'Gagal memuat data');
+    }
+    
+  } catch (error) {
+    console.error("Error loading listing:", error);
+    alert("Terjadi kesalahan: " + error.message);
+  }
+}
+
+// INITIALIZATION
+document.addEventListener("DOMContentLoaded", function () {
+  console.log('=== PAGE LOADED ===');
+  
+  const userStr = localStorage.getItem('user');
+  if (!userStr) {
+    alert('Anda harus login terlebih dahulu');
+    window.location.href = 'login.html';
+    return;
+  }
+  
+  const editId = getUrlParameter("id");
+  console.log('Edit ID:', editId);
+  
+  if (editId) {
+    loadListingData(editId).then(() => {
+      // Initialize event listeners SETELAH data dimuat
+      initializeEventListeners();
+      console.log('Ready for editing');
+    });
+  } else {
+    alert("ID listing tidak ditemukan");
+    window.location.href = "host-dashboard.html";
+  }
+});
+</script>
+  </body>
+</html>
