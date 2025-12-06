@@ -1,118 +1,143 @@
 <?php
 // api/update_listing.php
-
-session_start();
 header('Content-Type: application/json');
+require_once 'db_connect.php';
+session_start();
 
-// 1. Cek Autentikasi dan Method
-if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'pemilik') {
-    http_response_code(401);
-    echo json_encode(['status' => 'error', 'message' => 'Akses ditolak. Silakan login sebagai Host.']);
+if (!isset($_SESSION['id_user'])) {
+    echo json_encode(['status' => 'error', 'message' => 'Unauthorized']);
     exit;
 }
 
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    http_response_code(405);
-    echo json_encode(['status' => 'error', 'message' => 'Metode request tidak diizinkan.']);
+if (!isset($_POST['id_properti'])) {
+    echo json_encode(['status' => 'error', 'message' => 'ID properti tidak ditemukan']);
     exit;
 }
 
-include 'db_connect.php'; 
-$id_user_host = $_SESSION['user_id'];
+$id_properti = $_POST['id_properti'];
+$id_kamar = $_POST['id_kamar'] ?? null;
+$id_user = $_SESSION['id_user'];
 
-// Ambil data dari POST menggunakan isset() untuk kompatibilitas yang lebih luas
-$id_properti = isset($_POST['id_properti']) ? $_POST['id_properti'] : null;
-$id_kamar = isset($_POST['id_kamar']) ? $_POST['id_kamar'] : null; 
+// Validasi kepemilikan
+$check_sql = "SELECT id_user FROM properti WHERE id_properti = ?";
+$check_stmt = $koneksi->prepare($check_sql);
+$check_stmt->bind_param("i", $id_properti);
+$check_stmt->execute();
+$check_result = $check_stmt->get_result();
 
-$nama_properti = isset($_POST['nama_properti']) ? $_POST['nama_properti'] : '';
-$deskripsi = isset($_POST['deskripsi']) ? $_POST['deskripsi'] : '';
-$tipe_properti = isset($_POST['tipe_properti']) ? $_POST['tipe_properti'] : '';
-$tipe_kos = isset($_POST['tipe_kos']) ? $_POST['tipe_kos'] : null;
-$alamat = isset($_POST['alamat']) ? $_POST['alamat'] : '';
-$kota = isset($_POST['kota']) ? $_POST['kota'] : '';
-
-$nama_kamar = isset($_POST['nama_kamar']) ? $_POST['nama_kamar'] : '';
-$harga = (float)(isset($_POST['harga']) ? $_POST['harga'] : 0);
-$satuan_harga = isset($_POST['satuan_harga']) ? $_POST['satuan_harga'] : 'bulan';
-$deposit = (float)(isset($_POST['deposit']) ? $_POST['deposit'] : 0);
-$jumlah_kamar = (int)(isset($_POST['jumlah_kamar']) ? $_POST['jumlah_kamar'] : 0);
-$kamar_tersedia = (int)(isset($_POST['kamar_tersedia']) ? $_POST['kamar_tersedia'] : 0);
-$room_size = isset($_POST['room_size']) ? $_POST['room_size'] : '';
-
-// Perubahan pada Fasilitas:
-// Cek jika fasilitas_kamar dikirim sebagai array (saat mode edit, fasilitas bisa kosong)
-$fasilitas_kamar_raw = isset($_POST['fasilitas_kamar']) ? $_POST['fasilitas_kamar'] : [];
-$fasilitas_kamar = is_array($fasilitas_kamar_raw) ? implode(', ', $fasilitas_kamar_raw) : $fasilitas_kamar_raw;
-
-
-if (!$id_properti || !$id_kamar) {
-// ... kode selanjutnya (biarkan sama)
-    http_response_code(400);
-    echo json_encode(['status' => 'error', 'message' => 'ID Properti atau ID Kamar tidak ditemukan.']);
+if ($check_result->num_rows === 0) {
+    echo json_encode(['status' => 'error', 'message' => 'Properti tidak ditemukan']);
     exit;
 }
 
-$koneksi->begin_transaction();
-$success = true;
+$owner = $check_result->fetch_assoc();
+if ($owner['id_user'] != $id_user) {
+    echo json_encode(['status' => 'error', 'message' => 'Anda tidak memiliki akses untuk mengedit properti ini']);
+    exit;
+}
 
 try {
-    // 1. UPDATE TABEL properti
-    $sql_properti = "
-        UPDATE properti SET
-            nama_properti = ?,
-            deskripsi = ?,
-            tipe_properti = ?,
-            tipe_kos = ?,
-            alamat = ?,
-            kota = ?
-        WHERE id_properti = ? AND id_user = ?
-    ";
-    $stmt_properti = $koneksi->prepare($sql_properti);
-    $stmt_properti->bind_param("ssssssii", 
-        $nama_properti, $deskripsi, $tipe_properti, $tipe_kos, $alamat, $kota, 
-        $id_properti, $id_user_host
+    $koneksi->begin_transaction();
+    
+    // Update data properti
+    $nama_properti = $_POST['nama_properti'];
+    $tipe_properti = $_POST['tipe_properti'];
+    $alamat = $_POST['alamat'];
+    $kota = $_POST['kota'];
+    $deskripsi = $_POST['deskripsi'];
+    $latitude = $_POST['latitude'];
+    $longitude = $_POST['longitude'];
+    $rules = $_POST['rules'] ?? '';
+    
+    $update_properti = "UPDATE properti SET 
+                        nama_properti = ?,
+                        tipe_properti = ?,
+                        alamat = ?,
+                        kecamatan = ?,
+                        deskripsi = ?,
+                        latitude = ?,
+                        longitude = ?,
+                        rules = ?
+                        WHERE id_properti = ?";
+    
+    $stmt = $koneksi->prepare($update_properti);
+    $stmt->bind_param("sssssddsi", 
+        $nama_properti, 
+        $tipe_properti, 
+        $alamat, 
+        $kota, 
+        $deskripsi, 
+        $latitude, 
+        $longitude, 
+        $rules,
+        $id_properti
     );
-    if (!$stmt_properti->execute()) {
-        throw new Exception("Gagal mengupdate properti: " . $stmt_properti->error, 500);
-    }
-    $stmt_properti->close();
-
-    // 2. UPDATE TABEL kamar
-    $sql_kamar = "
-        UPDATE kamar SET
-            nama_kamar = ?,
-            harga = ?,
-            satuan_harga = ?,
-            deposit = ?,
-            jumlah_kamar = ?,
-            kamar_tersedia = ?,
-            room_size = ?,
-            fasilitas_kamar = ?
-        WHERE id_kamar = ?
-    ";
-    $stmt_kamar = $koneksi->prepare($sql_kamar);
-    $stmt_kamar->bind_param("sdsdiisi", 
-        $nama_kamar, $harga, $satuan_harga, $deposit, $jumlah_kamar, $kamar_tersedia, $room_size, $fasilitas_kamar,
-        $id_kamar
-    );
-    if (!$stmt_kamar->execute()) {
-        throw new Exception("Gagal mengupdate kamar: " . $stmt_kamar->error, 500);
-    }
-
-    // code images kamar
-    $stmt_kamar->close();
-    if (isset($_FILES['images'])) {
+    $stmt->execute();
+    
+    // Update data kamar
+    if ($id_kamar) {
+        $harga = $_POST['harga'];
+        $deposit = $_POST['deposit'];
+        $jumlah_kamar = $_POST['jumlah_kamar'];
+        $kamar_tersedia = $_POST['kamar_tersedia'];
+        $room_size = $_POST['room_size'] ?? '';
+        $fasilitas_kamar = isset($_POST['fasilitas_kamar']) ? implode(', ', $_POST['fasilitas_kamar']) : '';
+        
+        $update_kamar = "UPDATE kamar SET 
+                        harga = ?,
+                        deposit = ?,
+                        jumlah_kamar = ?,
+                        kamar_tersedia = ?,
+                        room_size = ?,
+                        fasilitas_kamar = ?
+                        WHERE id_kamar = ?";
+        
+        $stmt_kamar = $koneksi->prepare($update_kamar);
+        $stmt_kamar->bind_param("dddiisi", 
+            $harga, 
+            $deposit, 
+            $jumlah_kamar, 
+            $kamar_tersedia, 
+            $room_size, 
+            $fasilitas_kamar,
+            $id_kamar
+        );
+        $stmt_kamar->execute();
     }
     
-    // Commit transaksi jika semua berhasil
+    // Handle upload foto baru
+    if (isset($_FILES['images']) && !empty($_FILES['images']['name'][0])) {
+        $upload_dir = '../uploads/';
+        
+        if (!file_exists($upload_dir)) {
+            mkdir($upload_dir, 0777, true);
+        }
+        
+        foreach ($_FILES['images']['name'] as $key => $filename) {
+            if ($_FILES['images']['error'][$key] === UPLOAD_ERR_OK) {
+                $tmp_name = $_FILES['images']['tmp_name'][$key];
+                $file_extension = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+                $new_filename = uniqid() . '_' . time() . '.' . $file_extension;
+                $destination = $upload_dir . $new_filename;
+                
+                if (move_uploaded_file($tmp_name, $destination)) {
+                    $url_foto = 'uploads/' . $new_filename;
+                    
+                    $insert_foto = "INSERT INTO foto_properti (id_properti, url_foto) VALUES (?, ?)";
+                    $stmt_foto = $koneksi->prepare($insert_foto);
+                    $stmt_foto->bind_param("is", $id_properti, $url_foto);
+                    $stmt_foto->execute();
+                }
+            }
+        }
+    }
+    
     $koneksi->commit();
-    echo json_encode(['status' => 'success', 'message' => 'Listing berhasil diperbarui!']);
-
+    echo json_encode(['status' => 'success', 'message' => 'Listing berhasil diupdate!']);
+    
 } catch (Exception $e) {
-    // Rollback jika ada yang gagal
     $koneksi->rollback();
-    http_response_code($e->getCode() === 403 ? 403 : 500);
-    echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
+    echo json_encode(['status' => 'error', 'message' => 'Gagal update listing: ' . $e->getMessage()]);
 }
 
 $koneksi->close();
