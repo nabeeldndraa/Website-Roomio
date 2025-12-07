@@ -19,7 +19,7 @@ try {
     $priceMin = isset($_GET['priceMin']) ? (int)$_GET['priceMin'] : 0;
     $priceMax = isset($_GET['priceMax']) ? (int)$_GET['priceMax'] : 999999999;
     
-    // Build query - join properti with kamar and foto
+    // ✅ QUERY FIXED - Menghilangkan duplikat dengan GROUP BY id_kamar
     $sql = "SELECT 
                 p.id_properti,
                 p.nama_properti,
@@ -51,7 +51,8 @@ try {
     if (!empty($search)) {
         $sql .= " AND (p.nama_properti LIKE :search 
                   OR p.alamat LIKE :search 
-                  OR p.kecamatan LIKE :search)";
+                  OR p.kecamatan LIKE :search
+                  OR k.nama_kamar LIKE :search)";
     }
     
     // Add category filter
@@ -74,11 +75,11 @@ try {
     
     // Add location filter
     if (!empty($location)) {
-        $sql .= " AND p.kecamatan LIKE :location";
+        $sql .= " AND (p.kecamatan LIKE :location OR p.alamat LIKE :location)";
     }
     
-    // Group by to avoid duplicates
-    $sql .= " GROUP BY p.id_properti, k.id_kamar ORDER BY k.id_kamar DESC";
+    // ✅ GROUP BY id_kamar untuk menghilangkan duplikat
+    $sql .= " GROUP BY k.id_kamar ORDER BY k.id_kamar DESC";
     
     $stmt = $pdo->prepare($sql);
     $stmt->bindParam(':priceMin', $priceMin, PDO::PARAM_INT);
@@ -128,39 +129,52 @@ try {
         // Use placeholder if no image
         $imageUrl = !empty($row['url_foto']) 
             ? $row['url_foto'] 
-            : 'https://via.placeholder.com/400x300?text=No+Image';
+            : 'assets/no-image.jpg';
+        
+        // ✅ Cek apakah nama_kamar sudah mengandung nama_properti
+        $title = $row['nama_properti'];
+        if (!empty($row['nama_kamar']) && stripos($row['nama_kamar'], $row['nama_properti']) === false) {
+            // Jika nama_kamar tidak mengandung nama_properti, gabungkan
+            $title = $row['nama_properti'] . ' - ' . $row['nama_kamar'];
+        } elseif (!empty($row['nama_kamar'])) {
+            // Jika sudah mengandung, pakai nama_kamar saja
+            $title = $row['nama_kamar'];
+        }
         
         $listing = [
             'id' => (int)$row['id_kamar'],
             'property_id' => (int)$row['id_properti'],
-            'title' => $row['nama_properti'] . ' - ' . $row['nama_kamar'],
+            'title' => $title,
             'type' => $typeDisplay,
             'location' => $row['alamat'],
+            'district' => $row['kecamatan'],
             'address' => $row['alamat'],
             'price' => (int)$row['harga'],
             'deposit' => (int)$row['deposit'],
             'image' => $imageUrl,
-            'rating' => 4.5,
-            'reviews' => 10,
+            'rating' => 4.5, // Default rating, bisa diganti dengan data real
+            'reviews' => rand(5, 50), // Random reviews, bisa diganti dengan data real
             'available' => (int)$row['kamar_tersedia'],
             'rooms' => (int)$row['jumlah_kamar'],
             'roomSize' => $row['room_size'] ?? '3x4m',
             'facilities' => $facilities,
             'views' => (int)$row['total_views'],
-            'description' => $row['deskripsi'] ?? ''
+            'description' => $row['deskripsi'] ?? '',
+            'latitude' => $row['latitude'] ?? null,
+            'longitude' => $row['longitude'] ?? null
         ];
         
         $listings[] = $listing;
     }
     
-    // ✅ KIRIM ARRAY LANGSUNG (tidak pakai wrapper object)
-    echo json_encode($listings);
+    // ✅ KIRIM ARRAY LANGSUNG (tidak pakai wrapper)
+    echo json_encode($listings, JSON_UNESCAPED_UNICODE);
     
 } catch(PDOException $e) {
     http_response_code(500);
     echo json_encode([
         'success' => false,
         'error' => 'Database error: ' . $e->getMessage()
-    ]);
+    ], JSON_UNESCAPED_UNICODE);
 }
 ?>
