@@ -270,7 +270,16 @@
           </div>
 
           <div class="tab-pane fade" id="bookings">
-            <div class="alert alert-info">
+            <div id="loadingHostBookings" class="text-center py-5">
+              <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+              </div>
+              <p class="text-muted mt-3">Memuat booking masuk...</p>
+            </div>
+            
+            <div id="hostBookingsList"></div>
+            
+            <div id="noHostBookings" class="alert alert-info d-none">
               <i class="bi bi-info-circle me-2"></i>
               Belum ada booking masuk untuk properti Anda
             </div>
@@ -352,15 +361,14 @@
               return;
             }
 
-            // Placeholder SVG untuk gambar kosong
             const placeholderSVG =
               "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Crect fill='%23e5e7eb' width='200' height='200'/%3E%3Ctext fill='%239ca3af' font-family='Arial' font-size='16' text-anchor='middle' x='100' y='105'%3ENo Image%3C/text%3E%3C/svg%3E";
 
             const htmlContent = listings
-  .map((listing) => {
-    const imgSrc = listing.image_url && listing.image_url.trim() !== "" ? listing.image_url : placeholderSVG;
+              .map((listing) => {
+                const imgSrc = listing.image_url && listing.image_url.trim() !== "" ? listing.image_url : placeholderSVG;
 
-    return `
+                return `
       <div class="col-12 mb-3">
         <div class="card shadow-sm border-0 h-100">
           <div class="card-body">
@@ -405,8 +413,8 @@
           </div>
         </div>
       </div>`;
-  })
-  .join("");  
+              })
+              .join("");
 
             listingContainer.innerHTML = htmlContent;
           } else {
@@ -432,6 +440,230 @@
         }
       }
 
+      // Tambahkan script ini ke host-dashboard.html untuk mengganti fungsi loadHostBookings
+
+async function loadHostBookings() {
+  const container = document.getElementById('hostBookingsList');
+  const loading = document.getElementById('loadingHostBookings');
+  const noBookings = document.getElementById('noHostBookings');
+  
+  loading.style.display = 'block';
+  container.innerHTML = '';
+  noBookings.classList.add('d-none');
+  
+  try {
+    const response = await fetch('api/get_host_bookings.php', {
+      credentials: 'include'
+    });
+    
+    const result = await response.json();
+    console.log('Bookings Response:', result);
+    
+    loading.style.display = 'none';
+    
+    if (result.status === 'success') {
+      const bookings = result.data;
+      
+      if (bookings.length === 0) {
+        noBookings.classList.remove('d-none');
+        return;
+      }
+      
+      container.innerHTML = bookings.map(booking => {
+        const statusBadge = {
+          'pending': 'bg-warning text-dark',
+          'terisi': 'bg-success',
+          'selesai': 'bg-info',
+          'dibatalkan': 'bg-danger'
+        }[booking.status] || 'bg-secondary';
+        
+        const statusText = {
+          'pending': 'Menunggu Konfirmasi',
+          'terisi': 'Aktif',
+          'selesai': 'Selesai',
+          'dibatalkan': 'Dibatalkan'
+        }[booking.status] || 'Pending';
+        
+        const statusBayarBadge = {
+          'pending': 'bg-warning text-dark',
+          'lunas': 'bg-success',
+          'gagal': 'bg-danger'
+        }[booking.status_bayar] || 'bg-secondary';
+        
+        const statusBayarText = {
+          'pending': 'Belum Dibayar',
+          'lunas': 'Lunas',
+          'gagal': 'Pembayaran Gagal'
+        }[booking.status_bayar] || 'Pending';
+        
+        // Tombol aksi berdasarkan status
+        let actionButtons = '';
+        
+        if (booking.status === 'pending') {
+          actionButtons = `
+            <button class="btn btn-sm btn-success d-block w-100 mb-2" onclick="approveBooking(${booking.id_sewa})">
+              <i class="bi bi-check-circle me-1"></i>Setujui
+            </button>
+            <button class="btn btn-sm btn-danger d-block w-100" onclick="rejectBooking(${booking.id_sewa})">
+              <i class="bi bi-x-circle me-1"></i>Tolak
+            </button>
+          `;
+        } else if (booking.status === 'terisi') {
+          actionButtons = `
+            <button class="btn btn-sm btn-outline-info d-block w-100 mb-2" onclick="completeBooking(${booking.id_sewa})">
+              <i class="bi bi-check-all me-1"></i>Selesaikan
+            </button>
+          `;
+        } else {
+          actionButtons = `
+            <span class="badge ${statusBadge} d-block mb-2">${statusText}</span>
+          `;
+        }
+        
+        return `
+          <div class="card mb-3 shadow-sm">
+            <div class="card-body">
+              <div class="row align-items-center">
+                <div class="col-md-3">
+                  <img src="${booking.image}" class="img-fluid rounded" alt="${booking.property_title}" 
+                       style="height: 120px; width: 100%; object-fit: cover;">
+                </div>
+                <div class="col-md-6">
+                  <h6 class="mb-2">${booking.property_title}</h6>
+                  <p class="text-muted small mb-2">
+                    <i class="bi bi-person me-1"></i><strong>Penyewa:</strong> ${booking.user_name}<br>
+                    <i class="bi bi-envelope me-1"></i>${booking.user_email}<br>
+                    <i class="bi bi-phone me-1"></i>${booking.user_phone}<br>
+                    <i class="bi bi-calendar-check me-1"></i><strong>Check-in:</strong> ${new Date(booking.tanggal_masuk).toLocaleDateString('id-ID')}<br>
+                    <i class="bi bi-calendar-x me-1"></i><strong>Check-out:</strong> ${new Date(booking.tanggal_keluar).toLocaleDateString('id-ID')}<br>
+                    <i class="bi bi-clock me-1"></i><strong>Durasi:</strong> ${booking.durasi_bulan} bulan
+                  </p>
+                  <div class="d-flex gap-2 mt-2">
+                    <span class="badge ${statusBadge}">${statusText}</span>
+                    <span class="badge ${statusBayarBadge}">${statusBayarText}</span>
+                  </div>
+                </div>
+                <div class="col-md-3 text-end">
+                  <h5 class="text-primary mb-3">${formatRupiah(booking.total_harga)}</h5>
+                  <small class="text-muted d-block mb-3">Booking: ${new Date(booking.created_at).toLocaleDateString('id-ID')}</small>
+                  
+                  ${actionButtons}
+                  
+                  <a href="listing-detail-host.html?id=${booking.id_properti}" class="btn btn-sm btn-outline-primary d-block w-100 mt-2" target="_blank">
+                    <i class="bi bi-eye me-1"></i>Lihat Properti
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    } else {
+      container.innerHTML = `
+        <div class="alert alert-warning">
+          <i class="bi bi-exclamation-triangle me-2"></i>
+          ${result.message || 'Gagal memuat data booking'}
+        </div>
+      `;
+    }
+  } catch (error) {
+    console.error('Error loading bookings:', error);
+    loading.style.display = 'none';
+    container.innerHTML = `
+      <div class="alert alert-danger">
+        <i class="bi bi-exclamation-triangle me-2"></i>
+        Terjadi kesalahan saat memuat booking: ${error.message}
+      </div>
+    `;
+  }
+}
+
+      // Approve Booking
+      async function approveBooking(id) {
+        if (!confirm('Setujui booking ini?')) return;
+        
+        try {
+          const response = await fetch('api/approve_booking.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ id_sewa: id })
+          });
+          
+          const result = await response.json();
+          
+          if (result.status === 'success') {
+            alert('✅ Booking berhasil disetujui!');
+            loadHostBookings();
+            loadHostListings();
+          } else {
+            alert('❌ Gagal menyetujui booking: ' + result.message);
+          }
+        } catch (error) {
+          console.error('Error:', error);
+          alert('❌ Terjadi kesalahan saat menyetujui booking');
+        }
+      }
+
+      // Reject Booking
+      async function rejectBooking(id) {
+        if (!confirm('Tolak booking ini?')) return;
+        
+        const alasan = prompt('Alasan penolakan (opsional):');
+        
+        try {
+          const response = await fetch('api/reject_booking.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ 
+              id_sewa: id,
+              alasan: alasan 
+            })
+          });
+          
+          const result = await response.json();
+          
+          if (result.status === 'success') {
+            alert('✅ Booking berhasil ditolak!');
+            loadHostBookings();
+            loadHostListings();
+          } else {
+            alert('❌ Gagal menolak booking: ' + result.message);
+          }
+        } catch (error) {
+          console.error('Error:', error);
+          alert('❌ Terjadi kesalahan saat menolak booking');
+        }
+      }
+
+      // Complete Booking
+      async function completeBooking(id) {
+        if (!confirm('Tandai booking ini sebagai selesai?')) return;
+        
+        try {
+          const response = await fetch('api/complete_booking.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ id_sewa: id })
+          });
+          
+          const result = await response.json();
+          
+          if (result.status === 'success') {
+            alert('✅ Booking berhasil diselesaikan!');
+            loadHostBookings();
+            loadHostListings();
+          } else {
+            alert('❌ Gagal menyelesaikan booking: ' + result.message);
+          }
+        } catch (error) {
+          console.error('Error:', error);
+          alert('❌ Terjadi kesalahan saat menyelesaikan booking');
+        }
+      }
+
       function toggleSidebar() {
         document.getElementById("sidebar").classList.toggle("show");
         document.getElementById("sidebarOverlay").classList.toggle("show");
@@ -440,7 +672,7 @@
       document.getElementById("sidebarOverlay")?.addEventListener("click", toggleSidebar);
 
       function editListing(id) {
-       window.location.href = `edit-listing.html?id=${id}`;
+        window.location.href = `edit-listing.html?id=${id}`;
       }
 
       async function deleteHostListing(id) {
@@ -474,6 +706,15 @@
         if (typeof requireHost === "function") requireHost();
         if (typeof updateAuthUI === "function") updateAuthUI();
         loadHostListings();
+        
+        // Load bookings when tab is clicked
+        const bookingsTab = document.querySelector('button[data-bs-target="#bookings"]');
+        if (bookingsTab) {
+          bookingsTab.addEventListener('shown.bs.tab', function() {
+            console.log('Loading bookings...');
+            loadHostBookings();
+          });
+        }
       });
     </script>
   </body>

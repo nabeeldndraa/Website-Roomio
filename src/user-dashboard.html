@@ -198,9 +198,17 @@
             <div class="tab-content">
                 <!-- Favorites Tab -->
                 <div class="tab-pane fade show active" id="favorites">
-                    <div class="row g-4" id="favoritesList">
+                    <div id="loadingFavorites" class="text-center py-5">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="text-muted mt-3">Memuat favorit...</p>
+                    </div>
+                    
+                    <div class="row g-4" id="favoritesList" style="display: none;">
                         <!-- Favorites will be loaded here -->
                     </div>
+                    
                     <div id="noFavorites" class="text-center py-5 d-none">
                         <i class="bi bi-heart fs-1 text-muted mb-3"></i>
                         <h5 class="text-muted">Belum ada favorit</h5>
@@ -211,9 +219,17 @@
                 
                 <!-- Bookings Tab -->
                 <div class="tab-pane fade" id="bookings">
-                    <div class="row g-4" id="bookingsList">
+                    <div id="loadingBookings" class="text-center py-5">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="text-muted mt-3">Memuat booking...</p>
+                    </div>
+                    
+                    <div class="row g-4" id="bookingsList" style="display: none;">
                         <!-- Bookings will be loaded here -->
                     </div>
+                    
                     <div id="noBookings" class="text-center py-5 d-none">
                         <i class="bi bi-calendar-x fs-1 text-muted mb-3"></i>
                         <h5 class="text-muted">Belum ada booking</h5>
@@ -227,10 +243,13 @@
     
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="js/auth.js"></script>
-    <script src="js/listings.js"></script>
+    
     <script>
-        if (!requireAuth()) {
-            // redirected by requireAuth()
+        // Check if user is logged in
+        if (typeof requireAuth === 'function') {
+            if (!requireAuth()) {
+                // redirected by requireAuth()
+            }
         }
         
         function toggleSidebar() {
@@ -242,74 +261,115 @@
         
         document.getElementById('sidebarOverlay').addEventListener('click', toggleSidebar);
         
-        function loadFavorites() {
-            const favorites = getFavorites();
+        // Format harga sesuai aturan
+        function formatPrice(price) {
+            if (price >= 1000000) {
+                const juta = price / 1000000;
+                return `Rp ${juta % 1 === 0 ? juta : juta.toFixed(1)}jt`;
+            } else {
+                const ribu = price / 1000;
+                return `Rp ${ribu % 1 === 0 ? ribu : ribu.toFixed(0)}rb`;
+            }
+        }
+        
+        // Load Favorites from API
+        async function loadFavorites() {
             const container = document.getElementById('favoritesList');
             const noFavorites = document.getElementById('noFavorites');
+            const loading = document.getElementById('loadingFavorites');
             
-            if (favorites.length === 0) {
-                container.innerHTML = '';
+            try {
+                const response = await fetch('api/get_favorites.php', {
+                    credentials: 'include'
+                });
+                const result = await response.json();
+                
+                loading.style.display = 'none';
+                
+                if (result.status === 'success') {
+                    const favorites = result.data;
+                    
+                    if (favorites.length === 0) {
+                        container.style.display = 'none';
+                        noFavorites.classList.remove('d-none');
+                        return;
+                    }
+                    
+                    noFavorites.classList.add('d-none');
+                    container.style.display = 'flex';
+                    
+                    container.innerHTML = favorites.map(listing => `
+                        <div class="col-md-6 col-lg-4">
+                            <div class="card card-hover h-100 border-0 shadow-sm">
+                                <div class="position-relative overflow-hidden" style="height: 200px;">
+                                    <img src="${listing.image}" class="card-img-top h-100" style="object-fit: cover;" alt="${listing.title}">
+                                    <span class="badge bg-primary position-absolute top-0 start-0 m-3">${listing.type}</span>
+                                    <button class="btn btn-danger btn-sm rounded-circle position-absolute top-0 end-0 m-3" 
+                                            onclick="removeFavorite(${listing.id})">
+                                        <i class="bi bi-heart-fill"></i>
+                                    </button>
+                                </div>
+                                <div class="card-body">
+                                    <h6 class="card-title mb-2">${listing.title}</h6>
+                                    <div class="d-flex align-items-center text-muted small mb-2">
+                                        <i class="bi bi-geo-alt me-1"></i>
+                                        ${listing.location}
+                                    </div>
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <div class="d-flex align-items-center gap-1">
+                                            <i class="bi bi-star-fill text-warning"></i>
+                                            <span>${listing.rating}</span>
+                                        </div>
+                                        <div class="text-end">
+                                            <h6 class="text-primary mb-0">${formatPrice(listing.price)}</h6>
+                                            <small class="text-muted">per bulan</small>
+                                        </div>
+                                    </div>
+                                    <a href="listing-detail.html?id=${listing.id}" class="btn btn-outline-primary w-100">Lihat Detail</a>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('');
+                } else {
+                    if (response.status === 401) {
+                        window.location.href = 'auth.html';
+                        return;
+                    }
+                    noFavorites.classList.remove('d-none');
+                    container.style.display = 'none';
+                }
+            } catch (error) {
+                console.error('Error loading favorites:', error);
+                loading.style.display = 'none';
                 noFavorites.classList.remove('d-none');
-                return;
+                container.style.display = 'none';
             }
-            
-            noFavorites.classList.add('d-none');
-            const allListings = getFeaturedListings();
-            const favoriteListings = allListings.filter(l => favorites.includes(l.id));
-            
-            container.innerHTML = favoriteListings.map(listing => `
-                <div class="col-md-6 col-lg-4">
-                    <div class="card card-hover h-100 border-0 shadow-sm">
-                        <div class="position-relative overflow-hidden" style="height: 200px;">
-                            <img src="${listing.image}" class="card-img-top h-100 object-fit-cover" alt="${listing.title}">
-                            <span class="badge bg-primary position-absolute top-0 start-0 m-3">${listing.type}</span>
-                            <button class="btn btn-danger btn-sm rounded-circle position-absolute top-0 end-0 m-3" 
-                                    onclick="removeFavorite('${listing.id}')">
-                                <i class="bi bi-heart-fill"></i>
-                            </button>
-                        </div>
-                        <div class="card-body">
-                            <h6 class="card-title mb-2">${listing.title}</h6>
-                            <div class="d-flex align-items-center text-muted small mb-2">
-                                <i class="bi bi-geo-alt me-1"></i>
-                                ${listing.location}
-                            </div>
-                            <div class="d-flex justify-content-between align-items-center mb-3">
-                                <div class="d-flex align-items-center gap-1">
-                                    <i class="bi bi-star-fill text-warning"></i>
-                                    <span>${listing.rating}</span>
-                                </div>
-                                <div class="text-end">
-                                    <h6 class="text-primary mb-0">Rp ${listing.price.toLocaleString('id-ID')}</h6>
-                                    <small class="text-muted">per bulan</small>
-                                </div>
-                            </div>
-                            <a href="listing-detail.html?id=${listing.id}" class="btn btn-outline-primary w-100">Lihat Detail</a>
-                        </div>
-                    </div>
-                </div>
-            `).join('');
         }
         
         async function loadBookings() {
             const container = document.getElementById('bookingsList');
             const noBookings = document.getElementById('noBookings');
+            const loading = document.getElementById('loadingBookings');
             
             try {
-                const response = await fetch('api/get_user_bookings.php');
+                const response = await fetch('api/get_user_bookings.php', {
+                    credentials: 'include'
+                });
                 const result = await response.json();
+                
+                loading.style.display = 'none';
                 
                 if (result.status === 'success') {
                     const bookings = result.data;
-                    console.log('Bookings data:', bookings); // Debug log
                     
                     if (bookings.length === 0) {
-                        container.innerHTML = '';
+                        container.style.display = 'none';
                         noBookings.classList.remove('d-none');
                         return;
                     }
                     
                     noBookings.classList.add('d-none');
+                    container.style.display = 'flex';
                     
                     container.innerHTML = bookings.map(booking => {
                         const statusBadge = {
@@ -385,22 +445,45 @@
                     }).join('');
                 } else {
                     if (response.status === 401) {
-                        window.location.href = 'login.html';
+                        window.location.href = 'auth.html';
                         return;
                     }
                     noBookings.classList.remove('d-none');
-                    container.innerHTML = '';
+                    container.style.display = 'none';
                 }
             } catch (error) {
                 console.error('Error loading bookings:', error);
+                loading.style.display = 'none';
                 noBookings.classList.remove('d-none');
-                container.innerHTML = '';
+                container.style.display = 'none';
             }
         }
         
-        function removeFavorite(id) {
-            removeFromFavorites(id);
-            loadFavorites();
+        async function removeFavorite(id) {
+            if (!confirm('Hapus dari favorit?')) return;
+            
+            try {
+                const response = await fetch('api/toggle_favorite.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({ id_kamar: id })
+                });
+                
+                const result = await response.json();
+                
+                if (result.status === 'success') {
+                    alert('✅ Dihapus dari favorit');
+                    loadFavorites();
+                } else {
+                    alert('❌ Gagal menghapus: ' + result.message);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('❌ Terjadi kesalahan');
+            }
         }
         
         async function bayarBooking(id) {
@@ -412,51 +495,48 @@
                 return;
             }
             
-            // Show loading state
-            const button = event.target;
-            const originalText = button.innerHTML;
-            button.disabled = true;
-            button.innerHTML = '<i class="bi bi-hourglass-split me-1"></i>Memproses...';
-            
             try {
                 const response = await fetch('api/cancel_booking.php', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
+                    credentials: 'include',
                     body: JSON.stringify({ id_sewa: id })
                 });
                 
                 const result = await response.json();
-                console.log('Cancel booking response:', result); // Debug log
                 
                 if (result.status === 'success') {
                     alert('✅ Booking berhasil dibatalkan');
                     loadBookings();
                 } else {
                     alert('❌ Gagal membatalkan booking:\n' + result.message);
-                    button.disabled = false;
-                    button.innerHTML = originalText;
                 }
             } catch (error) {
                 console.error('Error:', error);
                 alert('❌ Terjadi kesalahan saat membatalkan booking');
-                button.disabled = false;
-                button.innerHTML = originalText;
             }
         }
         
         function logout() {
             if (confirm('Apakah Anda yakin ingin keluar?')) {
                 localStorage.removeItem('user');
-                window.location.href = 'login.html';
+                window.location.href = 'auth.html';
             }
         }
         
         document.addEventListener('DOMContentLoaded', function() {
-            updateAuthUI();
+            if (typeof updateAuthUI === 'function') {
+                updateAuthUI();
+            }
             loadFavorites();
-            loadBookings();
+            
+            // Load bookings when tab is clicked
+            const bookingsTab = document.querySelector('button[data-bs-target="#bookings"]');
+            bookingsTab.addEventListener('shown.bs.tab', function() {
+                loadBookings();
+            });
         });
     </script>
 </body>

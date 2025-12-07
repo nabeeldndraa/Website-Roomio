@@ -10,14 +10,94 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     
     <style>
+      .star-rating {
+        font-size: 2rem;
+        cursor: pointer;
+        display: inline-flex;
+        gap: 0.25rem;
+      }
+
+      .star-icon {
+        color: #d1d5db;
+        transition: color 0.2s;
+      }
+
+      .star-icon:hover,
+      .star-icon.active {
+        color: #fbbf24;
+      }
+
+      .star-icon.bi-star-fill {
+        color: #fbbf24;
+      }
+
+      .rating-bar {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 0.5rem;
+      }
+
+      .rating-bar-fill {
+        height: 8px;
+        background: #fbbf24;
+        border-radius: 4px;
+        transition: width 0.3s;
+      }
+
+      .rating-bar-bg {
+        flex: 1;
+        height: 8px;
+        background: #e5e7eb;
+        border-radius: 4px;
+        overflow: hidden;
+      }
+
+      .review-card {
+        border-left: 3px solid #e5e7eb;
+        transition: border-color 0.2s;
+      }
+
+      .review-card:hover {
+        border-left-color: #2563eb;
+      }
+
       body {
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
       }
 
+      /* Layout Gallery dengan Booking Card di Samping */
+      .gallery-booking-wrapper {
+        display: flex;
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+      }
+
+      .gallery-section {
+        flex: 1;
+        min-width: 0;
+      }
+
+      .booking-sidebar-right {
+        width: 360px;
+        flex-shrink: 0;
+      }
+
       .image-gallery-main {
-        height: 400px;
+        height: 500px;
         overflow: hidden;
         border-radius: 0.5rem;
+        background: #f8f9fa;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .image-gallery-main img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain !important;
+        object-position: center;
       }
 
       .gallery-thumbnail {
@@ -27,6 +107,12 @@
         overflow: hidden;
         border: 2px solid transparent;
         transition: border 0.3s;
+      }
+
+      .gallery-thumbnail img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
       }
 
       .gallery-thumbnail:hover,
@@ -43,14 +129,10 @@
         gap: 0.5rem;
       }
 
-      .sidebar-sticky {
-        position: sticky;
-        top: 20px;
-        z-index: 100;
-      }
-
       .booking-card {
         box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        position: sticky;
+        top: 20px;
       }
 
       .back-button {
@@ -74,6 +156,27 @@
         border-radius: 0.5rem;
         z-index: 1;
       }
+
+      #description {
+        white-space: pre-wrap;
+        word-wrap: break-word;
+      }
+
+      /* Responsive */
+      @media (max-width: 991px) {
+        .gallery-booking-wrapper {
+          flex-direction: column;
+        }
+        
+        .booking-sidebar-right {
+          width: 100%;
+        }
+        
+        .booking-card {
+          position: relative;
+          top: 0;
+        }
+      }
     </style>
 </head>
 <body>
@@ -82,290 +185,319 @@
     </a>
 
     <div class="container py-5 mt-5">
-      <div class="row g-4">
-        <!-- Left Column -->
-        <div class="col-lg-8">
-          <!-- Image Gallery -->
-          <div class="mb-4">
-            <div class="image-gallery-main mb-3">
-              <img id="mainImage" src="https://via.placeholder.com/800x600?text=Loading..." class="w-100 h-100 object-fit-cover" alt="Listing" />
-            </div>
-            <div class="row g-2" id="thumbnails">
-              <!-- Thumbnails will be loaded here -->
+      <!-- Gallery dan Booking Card Sejajar -->
+      <div class="gallery-booking-wrapper">
+        <!-- Gallery Section -->
+        <div class="gallery-section">
+          <div class="image-gallery-main mb-3">
+            <img id="mainImage" src="https://via.placeholder.com/800x600?text=Loading..." alt="Listing" />
+          </div>
+          <div class="row g-2" id="thumbnails">
+            <!-- Thumbnails will be loaded here -->
+          </div>
+        </div>
+
+        <!-- Booking Card di Samping Kanan -->
+        <div class="booking-sidebar-right">
+          <div class="card booking-card">
+            <div class="card-body">
+              <div class="mb-4">
+                <h3 class="text-primary mb-0">Rp <span id="price">-</span></h3>
+                <small class="text-muted">per bulan</small>
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label">Tanggal Masuk</label>
+                <input type="date" class="form-control" id="checkInDate" />
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label">Durasi Sewa</label>
+                <select class="form-select" id="duration">
+                  <option value="1">1 Bulan</option>
+                  <option value="3">3 Bulan</option>
+                  <option value="6">6 Bulan</option>
+                  <option value="12">12 Bulan</option>
+                </select>
+              </div>
+
+              <div class="mb-3">
+                <div class="d-flex justify-content-between mb-2">
+                  <span>Harga per bulan</span>
+                  <span id="monthlyPrice">Rp -</span>
+                </div>
+                <div class="d-flex justify-content-between mb-2">
+                  <span>Durasi</span>
+                  <span><span id="durationText">1</span> bulan</span>
+                </div>
+                <div class="d-flex justify-content-between mb-2">
+                  <span>Deposit</span>
+                  <span id="depositAmount">Rp -</span>
+                </div>
+                <hr />
+                <div class="d-flex justify-content-between">
+                  <strong>Total</strong>
+                  <strong class="text-primary" id="totalPrice">Rp -</strong>
+                </div>
+              </div>
+
+              <button class="btn btn-primary w-100 mb-2" onclick="bookNow()">
+                <i class="bi bi-calendar-check me-2"></i>Booking Sekarang
+              </button>
+              <button class="btn btn-outline-primary w-100" onclick="contactHost()">
+                <i class="bi bi-chat-dots me-2"></i>Hubungi Pemilik
+              </button>
             </div>
           </div>
 
-          <!-- Title and Basic Info -->
-          <div class="mb-4">
-            <div class="d-flex justify-content-between align-items-start mb-3">
-              <div>
-                <span class="badge bg-primary me-2" id="listingType">Kos</span>
-                <span class="badge bg-success" id="verifiedBadge">Verified</span>
-              </div>
-              <div class="d-flex gap-2">
-                <button class="btn btn-outline-secondary btn-sm" onclick="shareLink()">
-                  <i class="bi bi-share"></i> Share
-                </button>
-                <button class="btn btn-outline-danger btn-sm" onclick="toggleFavoriteDetail()">
-                  <i class="bi bi-heart" id="favoriteIcon"></i>
-                  <span id="favoriteText">Simpan</span>
-                </button>
-              </div>
+          <div class="card mt-3">
+            <div class="card-body text-center">
+              <i class="bi bi-camera-video fs-1 text-primary mb-2"></i>
+              <h6 class="mb-2">Video Tour Tersedia</h6>
+              <p class="small text-muted mb-3">Lihat video tour 360° dari properti ini</p>
+              <button class="btn btn-outline-primary btn-sm">
+                <i class="bi bi-play-circle me-1"></i>Tonton Video
+              </button>
             </div>
+          </div>
+        </div>
+      </div>
 
-            <h2 id="listingTitle" class="mb-2">Loading...</h2>
-            <div class="d-flex align-items-center gap-3 text-muted mb-3">
-              <div class="d-flex align-items-center">
-                <i class="bi bi-star-fill text-warning me-1"></i>
-                <span id="rating">-</span>
-                <span class="ms-1">(<span id="reviewCount">0</span> ulasan)</span>
-              </div>
-              <div class="d-flex align-items-center">
-                <i class="bi bi-geo-alt me-1"></i>
-                <span id="location">-</span>
-              </div>
+      <!-- Title and Basic Info -->
+      <div class="mb-4">
+        <div class="d-flex justify-content-between align-items-start mb-3">
+          <div>
+            <span class="badge bg-primary me-2" id="listingType">Kos</span>
+            <span class="badge bg-success" id="verifiedBadge">Verified</span>
+          </div>
+          <div class="d-flex gap-2">
+            <button class="btn btn-outline-secondary btn-sm" onclick="shareLink()">
+              <i class="bi bi-share"></i> Share
+            </button>
+          </div>
+        </div>
+
+        <h2 id="listingTitle" class="mb-2">Loading...</h2>
+        <div class="d-flex align-items-center gap-3 text-muted mb-3">
+          <div class="d-flex align-items-center">
+            <i class="bi bi-star-fill text-warning me-1"></i>
+            <span id="rating">-</span>
+            <span class="ms-1">(<span id="reviewCount">0</span> ulasan)</span>
+          </div>
+          <div class="d-flex align-items-center">
+            <i class="bi bi-geo-alt me-1"></i>
+            <span id="location">-</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tabs -->
+      <ul class="nav nav-tabs mb-4" role="tablist">
+        <li class="nav-item">
+          <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#overview">Ringkasan</button>
+        </li>
+        <li class="nav-item">
+          <button class="nav-link" data-bs-toggle="tab" data-bs-target="#facilities">Fasilitas</button>
+        </li>
+        <li class="nav-item">
+          <button class="nav-link" data-bs-toggle="tab" data-bs-target="#location-tab">Lokasi</button>
+        </li>
+        <li class="nav-item">
+          <button class="nav-link" data-bs-toggle="tab" data-bs-target="#reviews">Ulasan</button>
+        </li>
+      </ul>
+
+      <div class="tab-content">
+        <!-- Overview Tab -->
+        <div class="tab-pane fade show active" id="overview">
+          <div class="card mb-4">
+            <div class="card-body">
+              <h5 class="card-title mb-3">Deskripsi</h5>
+              <p id="description" class="text-muted">Loading...</p>
             </div>
           </div>
 
-          <!-- Tabs -->
-          <ul class="nav nav-tabs mb-4" role="tablist">
-            <li class="nav-item">
-              <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#overview">Ringkasan</button>
-            </li>
-            <li class="nav-item">
-              <button class="nav-link" data-bs-toggle="tab" data-bs-target="#facilities">Fasilitas</button>
-            </li>
-            <li class="nav-item">
-              <button class="nav-link" data-bs-toggle="tab" data-bs-target="#location-tab">Lokasi</button>
-            </li>
-            <li class="nav-item">
-              <button class="nav-link" data-bs-toggle="tab" data-bs-target="#reviews">Ulasan</button>
-            </li>
-          </ul>
-
-          <div class="tab-content">
-            <!-- Overview Tab -->
-            <div class="tab-pane fade show active" id="overview">
-              <div class="card mb-4">
-                <div class="card-body">
-                  <h5 class="card-title mb-3">Deskripsi</h5>
-                  <p id="description" class="text-muted">Loading...</p>
-                </div>
-              </div>
-
-              <div class="card mb-4">
-                <div class="card-body">
-                  <h5 class="card-title mb-3">Detail Kamar</h5>
-                  <div class="row g-3">
-                    <div class="col-md-6">
-                      <div class="d-flex align-items-center">
-                        <i class="bi bi-rulers text-primary me-2"></i>
-                        <div>
-                          <small class="text-muted d-block">Ukuran Kamar</small>
-                          <span id="roomSize">-</span>
-                        </div>
-                      </div>
-                    </div>
-                    <div class="col-md-6">
-                      <div class="d-flex align-items-center">
-                        <i class="bi bi-door-open text-primary me-2"></i>
-                        <div>
-                          <small class="text-muted d-block">Ketersediaan</small>
-                          <span><span id="available">0</span> dari <span id="totalRooms">0</span> kamar</span>
-                        </div>
-                      </div>
-                    </div>
-                    <div class="col-md-6">
-                      <div class="d-flex align-items-center">
-                        <i class="bi bi-clock text-primary me-2"></i>
-                        <div>
-                          <small class="text-muted d-block">Minimum Sewa</small>
-                          <span id="minimumStay">1 bulan</span>
-                        </div>
-                      </div>
-                    </div>
-                    <div class="col-md-6">
-                      <div class="d-flex align-items-center">
-                        <i class="bi bi-wallet text-primary me-2"></i>
-                        <div>
-                          <small class="text-muted d-block">Deposit</small>
-                          <span id="deposit">-</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div class="card mb-4">
-                <div class="card-body">
-                  <h5 class="card-title mb-3">Peraturan Kos</h5>
-                  <ul id="rules" class="mb-0">
-                    <li class="mb-2">Loading...</li>
-                  </ul>
-                </div>
-              </div>
-
-              <div class="card">
-                <div class="card-body">
-                  <h5 class="card-title mb-3">Tentang Pemilik</h5>
-                  <div class="d-flex align-items-center mb-3">
-                    <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 64px; height: 64px">
-                      <i class="bi bi-person fs-3"></i>
-                    </div>
+          <div class="card mb-4">
+            <div class="card-body">
+              <h5 class="card-title mb-3">Detail Kamar</h5>
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <div class="d-flex align-items-center">
+                    <i class="bi bi-rulers text-primary me-2"></i>
                     <div>
-                      <h6 class="mb-1" id="hostName">-</h6>
-                      <small class="text-muted">Bergabung sejak 2024</small>
-                      <div class="mt-1">
-                        <span class="badge bg-success">Verified</span>
-                      </div>
+                      <small class="text-muted d-block">Ukuran Kamar</small>
+                      <span id="roomSize">-</span>
                     </div>
                   </div>
-                  <div class="row g-3 small">
-                    <div class="col-6"><i class="bi bi-clock text-muted me-1"></i> Response: <strong>< 1 jam</strong></div>
-                    <div class="col-6"><i class="bi bi-building text-muted me-1"></i> Properti: <strong>1+</strong></div>
+                </div>
+                <div class="col-md-6">
+                  <div class="d-flex align-items-center">
+                    <i class="bi bi-door-open text-primary me-2"></i>
+                    <div>
+                      <small class="text-muted d-block">Ketersediaan</small>
+                      <span><span id="available">0</span> dari <span id="totalRooms">0</span> kamar</span>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </div>
-
-            <!-- Facilities Tab -->
-            <div class="tab-pane fade" id="facilities">
-              <div class="card mb-4">
-                <div class="card-body">
-                  <h5 class="card-title mb-3">Fasilitas Kamar</h5>
-                  <div class="d-flex flex-wrap gap-2" id="roomFacilities">
-                    <span class="text-muted">Loading...</span>
+                <div class="col-md-6">
+                  <div class="d-flex align-items-center">
+                    <i class="bi bi-clock text-primary me-2"></i>
+                    <div>
+                      <small class="text-muted d-block">Minimum Sewa</small>
+                      <span id="minimumStay">1 bulan</span>
+                    </div>
                   </div>
                 </div>
-              </div>
-
-              <div class="card">
-                <div class="card-body">
-                  <h5 class="card-title mb-3">Fasilitas Bangunan</h5>
-                  <div class="d-flex flex-wrap gap-2" id="buildingFacilities">
-                    <span class="facility-badge"><i class="bi bi-check-circle text-success"></i>Area Parkir</span>
-                    <span class="facility-badge"><i class="bi bi-check-circle text-success"></i>Keamanan 24 Jam</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Location Tab -->
-            <div class="tab-pane fade" id="location-tab">
-              <div class="card mb-4">
-                <div class="card-body">
-                  <h5 class="card-title mb-3">
-                    <i class="bi bi-geo-alt-fill text-primary me-2"></i>
-                    Lokasi Properti
-                  </h5>
-                  <p class="small text-muted mb-3" id="fullAddress">-</p>
-                  <div id="detailMap"></div>
-                  <div class="mt-3 d-flex gap-2">
-                    <button class="btn btn-outline-primary btn-sm" onclick="openInGoogleMaps()">
-                      <i class="bi bi-map me-1"></i>
-                      Buka di Google Maps
-                    </button>
-                    <button class="btn btn-outline-secondary btn-sm" onclick="getDirections()">
-                      <i class="bi bi-signpost me-1"></i>
-                      Dapatkan Arah
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Reviews Tab -->
-            <div class="tab-pane fade" id="reviews">
-              <div class="card mb-4">
-                <div class="card-body">
-                  <h5 class="card-title mb-3">Rating & Ulasan</h5>
-                  <div class="row align-items-center mb-4">
-                    <div class="col-md-4 text-center">
-                      <h1 class="display-3 mb-0" id="avgRating">-</h1>
-                      <div class="text-warning mb-2">
-                        <i class="bi bi-star-fill"></i>
-                        <i class="bi bi-star-fill"></i>
-                        <i class="bi bi-star-fill"></i>
-                        <i class="bi bi-star-fill"></i>
-                        <i class="bi bi-star-fill"></i>
-                      </div>
-                      <p class="text-muted">Dari <span id="totalReviews">0</span> ulasan</p>
+                <div class="col-md-6">
+                  <div class="d-flex align-items-center">
+                    <i class="bi bi-wallet text-primary me-2"></i>
+                    <div>
+                      <small class="text-muted d-block">Deposit</small>
+                      <span id="deposit">-</span>
                     </div>
                   </div>
                 </div>
               </div>
+            </div>
+          </div>
 
-              <div id="reviewsList">
-                <div class="alert alert-info">Belum ada ulasan untuk properti ini</div>
+          <div class="card mb-4">
+            <div class="card-body">
+              <h5 class="card-title mb-3">Peraturan Kos</h5>
+              <ul id="rules" class="mb-0">
+                <li class="mb-2">Loading...</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-body">
+              <h5 class="card-title mb-3">Tentang Pemilik</h5>
+              <div class="d-flex align-items-center mb-3">
+                <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 64px; height: 64px">
+                  <i class="bi bi-person fs-3"></i>
+                </div>
+                <div>
+                  <h6 class="mb-1" id="hostName">-</h6>
+                  <small class="text-muted">Bergabung sejak 2024</small>
+                  <div class="mt-1">
+                    <span class="badge bg-success">Verified</span>
+                  </div>
+                </div>
+              </div>
+              <div class="row g-3 small">
+                <div class="col-6"><i class="bi bi-clock text-muted me-1"></i> Response: <strong>< 1 jam</strong></div>
+                <div class="col-6"><i class="bi bi-building text-muted me-1"></i> Properti: <strong>1+</strong></div>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- Right Column - Booking Card -->
-        <div class="col-lg-4">
-          <div class="sidebar-sticky">
-            <div class="card booking-card">
-              <div class="card-body">
-                <div class="mb-4">
-                  <h3 class="text-primary mb-0">Rp <span id="price">-</span></h3>
-                  <small class="text-muted">per bulan</small>
-                </div>
+        <!-- Facilities Tab -->
+        <div class="tab-pane fade" id="facilities">
+          <div class="card mb-4">
+            <div class="card-body">
+              <h5 class="card-title mb-3">Fasilitas Kamar</h5>
+              <div class="d-flex flex-wrap gap-2" id="roomFacilities">
+                <span class="text-muted">Loading...</span>
+              </div>
+            </div>
+          </div>
 
-                <div class="mb-3">
-                  <label class="form-label">Tanggal Masuk</label>
-                  <input type="date" class="form-control" id="checkInDate" />
-                </div>
+          <div class="card">
+            <div class="card-body">
+              <h5 class="card-title mb-3">Fasilitas Bangunan</h5>
+              <div class="d-flex flex-wrap gap-2" id="buildingFacilities">
+                <span class="facility-badge"><i class="bi bi-check-circle text-success"></i>Area Parkir</span>
+                <span class="facility-badge"><i class="bi bi-check-circle text-success"></i>Keamanan 24 Jam</span>
+              </div>
+            </div>
+          </div>
+        </div>
 
-                <div class="mb-3">
-                  <label class="form-label">Durasi Sewa</label>
-                  <select class="form-select" id="duration">
-                    <option value="1">1 Bulan</option>
-                    <option value="3">3 Bulan</option>
-                    <option value="6">6 Bulan</option>
-                    <option value="12">12 Bulan</option>
-                  </select>
-                </div>
-
-                <div class="mb-3">
-                  <div class="d-flex justify-content-between mb-2">
-                    <span>Harga per bulan</span>
-                    <span id="monthlyPrice">Rp -</span>
-                  </div>
-                  <div class="d-flex justify-content-between mb-2">
-                    <span>Durasi</span>
-                    <span><span id="durationText">1</span> bulan</span>
-                  </div>
-                  <div class="d-flex justify-content-between mb-2">
-                    <span>Deposit</span>
-                    <span id="depositAmount">Rp -</span>
-                  </div>
-                  <hr />
-                  <div class="d-flex justify-content-between">
-                    <strong>Total</strong>
-                    <strong class="text-primary" id="totalPrice">Rp -</strong>
-                  </div>
-                </div>
-
-                <button class="btn btn-primary w-100 mb-2" onclick="bookNow()">
-                  <i class="bi bi-calendar-check me-2"></i>Booking Sekarang
+        <!-- Location Tab -->
+        <div class="tab-pane fade" id="location-tab">
+          <div class="card mb-4">
+            <div class="card-body">
+              <h5 class="card-title mb-3">
+                <i class="bi bi-geo-alt-fill text-primary me-2"></i>
+                Lokasi Properti
+              </h5>
+              <p class="small text-muted mb-3" id="fullAddress">-</p>
+              <div id="detailMap"></div>
+              <div class="mt-3 d-flex gap-2">
+                <button class="btn btn-outline-primary btn-sm" onclick="openInGoogleMaps()">
+                  <i class="bi bi-map me-1"></i>
+                  Buka di Google Maps
                 </button>
-                <button class="btn btn-outline-primary w-100" onclick="contactHost()">
-                  <i class="bi bi-chat-dots me-2"></i>Hubungi Pemilik
+                <button class="btn btn-outline-secondary btn-sm" onclick="getDirections()">
+                  <i class="bi bi-signpost me-1"></i>
+                  Dapatkan Arah
                 </button>
               </div>
             </div>
+          </div>
+        </div>
 
-            <div class="card mt-3">
-              <div class="card-body text-center">
-                <i class="bi bi-camera-video fs-1 text-primary mb-2"></i>
-                <h6 class="mb-2">Video Tour Tersedia</h6>
-                <p class="small text-muted mb-3">Lihat video tour 360° dari properti ini</p>
-                <button class="btn btn-outline-primary btn-sm">
-                  <i class="bi bi-play-circle me-1"></i>Tonton Video
-                </button>
+        <!-- Reviews Tab -->
+        <div class="tab-pane fade" id="reviews">
+          <div class="card mb-4">
+            <div class="card-body">
+              <h5 class="card-title mb-3">Rating & Ulasan</h5>
+              <div class="row align-items-center mb-4">
+                <div class="col-md-4 text-center border-end">
+                  <h1 class="display-3 mb-0" id="avgRatingDisplay">0.0</h1>
+                  <div class="text-warning mb-2" id="avgStarsDisplay">
+                    <i class="bi bi-star"></i>
+                    <i class="bi bi-star"></i>
+                    <i class="bi bi-star"></i>
+                    <i class="bi bi-star"></i>
+                    <i class="bi bi-star"></i>
+                  </div>
+                  <p class="text-muted">Dari <span id="totalReviewsDisplay">0</span> ulasan</p>
+                </div>
+                <div class="col-md-8">
+                  <div id="ratingBars"></div>
+                </div>
               </div>
+            </div>
+          </div>
+
+          <div class="card mb-4" id="reviewFormCard">
+            <div class="card-body">
+              <h5 class="card-title mb-3">Tulis Ulasan Anda</h5>
+              <form id="reviewForm">
+                <div class="mb-3">
+                  <label class="form-label">Rating *</label>
+                  <div class="star-rating" id="starRating">
+                    <i class="bi bi-star star-icon" data-rating="1"></i>
+                    <i class="bi bi-star star-icon" data-rating="2"></i>
+                    <i class="bi bi-star star-icon" data-rating="3"></i>
+                    <i class="bi bi-star star-icon" data-rating="4"></i>
+                    <i class="bi bi-star star-icon" data-rating="5"></i>
+                  </div>
+                  <input type="hidden" id="ratingInput" required>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">Ulasan Anda *</label>
+                  <textarea class="form-control" id="reviewText" rows="4" 
+                            placeholder="Bagikan pengalaman Anda tentang properti ini..." 
+                            required minlength="10"></textarea>
+                  <small class="text-muted">Minimal 10 karakter</small>
+                </div>
+                <button type="submit" class="btn btn-primary" id="submitReviewBtn">
+                  <i class="bi bi-send me-2"></i>Kirim Ulasan
+                </button>
+              </form>
+            </div>
+          </div>
+
+          <div id="reviewsList">
+            <div class="text-center py-4">
+              <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+              </div>
+              <p class="text-muted mt-2">Memuat ulasan...</p>
             </div>
           </div>
         </div>
@@ -380,14 +512,10 @@
       let detailMap = null;
       let detailMarker = null;
 
-      // ✅ PERBAIKAN: URL yang benar sesuai struktur XAMPP
       async function getListingById(id) {
         try {
-          // Gunakan relative path karena file HTML dan PHP sama-sama di folder src
           const response = await fetch(`api/get_listing_detail.php?id=${id}`);
           const result = await response.json();
-
-          console.log("API Response:", result);
 
           if (result.status === "success") {
             return result.data;
@@ -402,119 +530,25 @@
       }
 
       function initDetailMap(lat, lng, title, address) {
-        console.log("Initializing map:", { lat, lng });
-
         detailMap = L.map("detailMap").setView([lat, lng], 16);
-
         L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
           attribution: "© OpenStreetMap contributors",
           maxZoom: 19,
         }).addTo(detailMap);
-
         detailMarker = L.marker([lat, lng]).addTo(detailMap);
         detailMarker.bindPopup(`<div class="text-center"><strong>${title}</strong><br><small class="text-muted">${address}</small></div>`).openPopup();
       }
 
       function openInGoogleMaps() {
         if (currentListing && currentListing.latitude && currentListing.longitude) {
-          const url = `https://www.google.com/maps?q=${currentListing.latitude},${currentListing.longitude}`;
-          window.open(url, "_blank");
+          window.open(`https://www.google.com/maps?q=${currentListing.latitude},${currentListing.longitude}`, "_blank");
         }
       }
 
       function getDirections() {
         if (currentListing && currentListing.latitude && currentListing.longitude) {
-          const url = `https://www.google.com/maps/dir/?api=1&destination=${currentListing.latitude},${currentListing.longitude}`;
-          window.open(url, "_blank");
+          window.open(`https://www.google.com/maps/dir/?api=1&destination=${currentListing.latitude},${currentListing.longitude}`, "_blank");
         }
-      }
-
-      async function loadListingDetail() {
-        const urlParams = new URLSearchParams(window.location.search);
-        const listingId = urlParams.get("id");
-
-        if (!listingId) {
-          alert("Listing tidak ditemukan");
-          window.location.href = "search.html";
-          return;
-        }
-
-        currentListing = await getListingById(listingId);
-
-        if (!currentListing) {
-          alert("Listing tidak ditemukan atau terjadi kesalahan");
-          window.location.href = "search.html";
-          return;
-        }
-
-        console.log("Loaded listing:", currentListing);
-
-        // Populate data
-        document.getElementById("listingTitle").textContent = currentListing.title;
-        document.getElementById("listingType").textContent = currentListing.type;
-        document.getElementById("rating").textContent = currentListing.rating || "-";
-        document.getElementById("reviewCount").textContent = currentListing.reviews || 0;
-        document.getElementById("location").textContent = currentListing.location;
-        document.getElementById("description").textContent = currentListing.description || "Tidak ada deskripsi";
-        document.getElementById("price").textContent = currentListing.price.toLocaleString("id-ID");
-        document.getElementById("monthlyPrice").textContent = "Rp " + currentListing.price.toLocaleString("id-ID");
-        document.getElementById("depositAmount").textContent = "Rp " + currentListing.deposit.toLocaleString("id-ID");
-        document.getElementById("roomSize").textContent = currentListing.roomSize || "-";
-        document.getElementById("available").textContent = currentListing.available;
-        document.getElementById("totalRooms").textContent = currentListing.rooms;
-        document.getElementById("deposit").textContent = "Rp " + currentListing.deposit.toLocaleString("id-ID");
-        document.getElementById("fullAddress").textContent = currentListing.address;
-        document.getElementById("hostName").textContent = currentListing.host_name || "Pemilik";
-
-        // ✅ GALLERY: Tampilkan foto dari API
-        if (currentListing.images && currentListing.images.length > 0) {
-          const images = currentListing.images;
-          document.getElementById("mainImage").src = images[0];
-
-          const thumbnailsContainer = document.getElementById("thumbnails");
-          thumbnailsContainer.innerHTML = images.map((img, idx) => `
-              <div class="col-3">
-                <div class="gallery-thumbnail ${idx === 0 ? "active" : ""}" onclick="changeImage('${img}', ${idx})">
-                  <img src="${img}" class="w-100 h-100 object-fit-cover" alt="Thumbnail ${idx + 1}">
-                </div>
-              </div>
-            `).join("");
-        } else {
-          document.getElementById("mainImage").src = "https://via.placeholder.com/800x600?text=No+Image";
-        }
-
-        // Facilities
-        if (currentListing.facilities && currentListing.facilities.length > 0) {
-          document.getElementById("roomFacilities").innerHTML = currentListing.facilities
-            .map(f => `<span class="facility-badge"><i class="bi bi-check-circle text-success"></i>${f}</span>`)
-            .join("");
-        } else {
-          document.getElementById("roomFacilities").innerHTML = '<span class="text-muted">Tidak ada fasilitas</span>';
-        }
-
-        // Rules
-        if (currentListing.rules && currentListing.rules.length > 0) {
-          document.getElementById("rules").innerHTML = currentListing.rules
-            .filter(rule => rule.trim() !== "")
-            .map(rule => `<li class="mb-2"><i class="bi bi-check-circle text-success me-2"></i>${rule}</li>`)
-            .join("");
-        } else {
-          document.getElementById("rules").innerHTML = '<li class="text-muted">Tidak ada peraturan khusus</li>';
-        }
-
-        // Map
-        if (currentListing.latitude && currentListing.longitude) {
-          const locationTab = document.querySelector('button[data-bs-target="#location-tab"]');
-          locationTab.addEventListener("shown.bs.tab", function () {
-            if (!detailMap) {
-              setTimeout(() => {
-                initDetailMap(currentListing.latitude, currentListing.longitude, currentListing.title, currentListing.address);
-              }, 100);
-            }
-          });
-        }
-
-        calculateTotalPrice();
       }
 
       function changeImage(src, idx) {
@@ -529,73 +563,66 @@
         const monthlyPrice = currentListing.price;
         const deposit = currentListing.deposit;
         const total = monthlyPrice * duration + deposit;
-
         document.getElementById("durationText").textContent = duration;
         document.getElementById("totalPrice").textContent = "Rp " + total.toLocaleString("id-ID");
       }
 
       async function bookNow() {
-  const checkIn = document.getElementById("checkInDate").value;
-  const duration = parseInt(document.getElementById("duration").value);
-  
-  if (!checkIn) {
-    alert("Pilih tanggal masuk terlebih dahulu");
-    return;
-  }
-  
-  // Validate date is not in the past
-  const selectedDate = new Date(checkIn);
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  
-  if (selectedDate < today) {
-    alert("Tanggal masuk tidak boleh di masa lalu");
-    return;
-  }
-  
-  // Calculate total
-  const monthlyPrice = currentListing.price;
-  const deposit = currentListing.deposit;
-  const total = (monthlyPrice * duration) + deposit;
-  
-  // Confirm booking
-  if (!confirm(`Konfirmasi booking:\n\nProperti: ${currentListing.title}\nTanggal Masuk: ${checkIn}\nDurasi: ${duration} bulan\nTotal: Rp ${total.toLocaleString('id-ID')}\n\nLanjutkan booking?`)) {
-    return;
-  }
-  
-  try {
-    const response = await fetch('api/create_booking.php', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      credentials: 'include', // PENTING: Include session
-      body: JSON.stringify({
-        id_properti: currentListing.property_id, // Gunakan property_id, bukan id
-        tanggal_masuk: checkIn,
-        durasi_bulan: duration,
-        total_harga: total
-      })
-    });
-    
-    const result = await response.json();
-    
-    if (result.status === 'success') {
-      alert('Booking berhasil dibuat! Silakan lakukan pembayaran.');
-      window.location.href = 'user-dashboard.html';
-    } else {
-      alert('Gagal membuat booking: ' + result.message);
-      if (response.status === 401) {
-        // User belum login
-        alert('Anda harus login terlebih dahulu');
-        window.location.href = 'auth.html';
+        const checkIn = document.getElementById("checkInDate").value;
+        const duration = parseInt(document.getElementById("duration").value);
+        
+        if (!checkIn) {
+          alert("Pilih tanggal masuk terlebih dahulu");
+          return;
+        }
+        
+        const selectedDate = new Date(checkIn);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        
+        if (selectedDate < today) {
+          alert("Tanggal masuk tidak boleh di masa lalu");
+          return;
+        }
+        
+        const monthlyPrice = currentListing.price;
+        const deposit = currentListing.deposit;
+        const total = (monthlyPrice * duration) + deposit;
+        
+        if (!confirm(`Konfirmasi booking:\n\nProperti: ${currentListing.title}\nTanggal Masuk: ${checkIn}\nDurasi: ${duration} bulan\nTotal: Rp ${total.toLocaleString('id-ID')}\n\nLanjutkan booking?`)) {
+          return;
+        }
+        
+        try {
+          const response = await fetch('api/create_booking.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({
+              id_properti: currentListing.property_id,
+              tanggal_masuk: checkIn,
+              durasi_bulan: duration,
+              total_harga: total
+            })
+          });
+          
+          const result = await response.json();
+          
+          if (result.status === 'success') {
+            alert('Booking berhasil dibuat! Silakan lakukan pembayaran.');
+            window.location.href = 'user-dashboard.html';
+          } else {
+            alert('Gagal membuat booking: ' + result.message);
+            if (response.status === 401) {
+              alert('Anda harus login terlebih dahulu');
+              window.location.href = 'auth.html';
+            }
+          }
+        } catch (error) {
+          console.error('Error:', error);
+          alert('Terjadi kesalahan saat membuat booking');
+        }
       }
-    }
-  } catch (error) {
-    console.error('Error:', error);
-    alert('Terjadi kesalahan saat membuat booking');
-  }
-}
 
       function contactHost() {
         alert("Fitur chat dengan pemilik akan segera tersedia!");
@@ -616,7 +643,305 @@
       }
 
       document.getElementById("duration").addEventListener("change", calculateTotalPrice);
-      document.addEventListener("DOMContentLoaded", loadListingDetail);
+
+      let selectedRating = 0;
+      let currentPropertyId = null;
+
+      function initStarRating() {
+        const stars = document.querySelectorAll('.star-icon');
+        
+        stars.forEach(star => {
+          star.addEventListener('click', function() {
+            selectedRating = parseInt(this.dataset.rating);
+            document.getElementById('ratingInput').value = selectedRating;
+            updateStarDisplay(selectedRating);
+          });
+          
+          star.addEventListener('mouseenter', function() {
+            updateStarDisplay(parseInt(this.dataset.rating));
+          });
+        });
+        
+        document.getElementById('starRating').addEventListener('mouseleave', function() {
+          updateStarDisplay(selectedRating);
+        });
+      }
+
+      function updateStarDisplay(rating) {
+        const stars = document.querySelectorAll('.star-icon');
+        stars.forEach((star, index) => {
+          if (index < rating) {
+            star.classList.remove('bi-star');
+            star.classList.add('bi-star-fill', 'active');
+          } else {
+            star.classList.remove('bi-star-fill', 'active');
+            star.classList.add('bi-star');
+          }
+        });
+      }
+
+      async function loadReviews(idProperti) {
+        currentPropertyId = idProperti;
+        
+        try {
+          const response = await fetch(`api/get_reviews.php?id_properti=${idProperti}`);
+          const result = await response.json();
+          
+          if (result.status === 'success') {
+            const { statistics, reviews } = result.data;
+            
+            document.getElementById('avgRatingDisplay').textContent = statistics.avg_rating.toFixed(1);
+            document.getElementById('totalReviewsDisplay').textContent = statistics.total_reviews;
+            document.getElementById('rating').textContent = statistics.avg_rating.toFixed(1);
+            document.getElementById('reviewCount').textContent = statistics.total_reviews;
+            
+            updateStarIcons('avgStarsDisplay', statistics.avg_rating);
+            displayRatingBars(statistics);
+            displayReviews(reviews);
+          }
+        } catch (error) {
+          console.error('Error loading reviews:', error);
+          document.getElementById('reviewsList').innerHTML = '<div class="alert alert-danger">Gagal memuat ulasan.</div>';
+        }
+      }
+
+      function updateStarIcons(containerId, rating) {
+        const container = document.getElementById(containerId);
+        const fullStars = Math.floor(rating);
+        const hasHalfStar = rating % 1 >= 0.5;
+        
+        let html = '';
+        for (let i = 0; i < 5; i++) {
+          if (i < fullStars) {
+            html += '<i class="bi bi-star-fill"></i>';
+          } else if (i === fullStars && hasHalfStar) {
+            html += '<i class="bi bi-star-half"></i>';
+          } else {
+            html += '<i class="bi bi-star"></i>';
+          }
+        }
+        container.innerHTML = html;
+      }
+
+      function displayRatingBars(stats) {
+        const total = stats.total_reviews;
+        const container = document.getElementById('ratingBars');
+        
+        if (total === 0) {
+          container.innerHTML = '<p class="text-muted small">Belum ada rating</p>';
+          return;
+        }
+        
+        const ratings = [
+          { stars: 5, count: stats.rating_5 },
+          { stars: 4, count: stats.rating_4 },
+          { stars: 3, count: stats.rating_3 },
+          { stars: 2, count: stats.rating_2 },
+          { stars: 1, count: stats.rating_1 }
+        ];
+        
+        container.innerHTML = ratings.map(r => {
+          const percentage = total > 0 ? (r.count / total * 100) : 0;
+          return `
+            <div class="rating-bar">
+              <span class="text-muted small" style="width: 50px">${r.stars} bintang</span>
+              <div class="rating-bar-bg">
+                <div class="rating-bar-fill" style="width: ${percentage}%"></div>
+              </div>
+              <span class="text-muted small" style="width: 50px">${r.count}</span>
+            </div>
+          `;
+        }).join('');
+      }
+
+      function displayReviews(reviews) {
+  const container = document.getElementById('reviewsList');
+  
+  if (reviews.length === 0) {
+    container.innerHTML = '<div class="alert alert-info"><i class="bi bi-info-circle me-2"></i>Belum ada ulasan untuk properti ini.</div>';
+    return;
+  }
+  
+  container.innerHTML = reviews.map(review => `
+    <div class="card review-card mb-3">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-start mb-2">
+          <div class="d-flex align-items-center">
+            <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px">
+              <i class="bi bi-person"></i>
+            </div>
+            <div>
+              <h6 class="mb-0">${review.user_name}</h6>
+              <small class="text-muted">${review.time_ago}</small>
+            </div>
+          </div>
+          <div class="text-warning">${generateStars(review.rating)}</div>
+        </div>
+        <p class="mb-0 mt-2">${review.review_text}</p>
+      </div>
+    </div>
+  `).join('');
+}
+
+function generateStars(rating) {
+  let html = '';
+  for (let i = 0; i < 5; i++) {
+    html += `<i class="bi bi-star${i < rating ? '-fill' : ''}"></i>`;
+  }
+  return html;
+}
+
+// ✅ Submit Review
+document.getElementById('reviewForm').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  
+  if (selectedRating === 0) {
+    alert('Pilih rating terlebih dahulu');
+    return;
+  }
+  
+  const reviewText = document.getElementById('reviewText').value.trim();
+  if (reviewText.length < 10) {
+    alert('Ulasan minimal 10 karakter');
+    return;
+  }
+  
+  const submitBtn = document.getElementById('submitReviewBtn');
+  const originalText = submitBtn.innerHTML;
+  submitBtn.disabled = true;
+  submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Mengirim...';
+  
+  try {
+    const response = await fetch('api/submit_review.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({
+        id_properti: currentPropertyId,
+        rating: selectedRating,
+        review_text: reviewText
+      })
+    });
+    
+    const result = await response.json();
+    
+    if (result.status === 'success') {
+      alert(result.message);
+      document.getElementById('reviewText').value = '';
+      selectedRating = 0;
+      updateStarDisplay(0);
+      await loadReviews(currentPropertyId);
+    } else {
+      if (response.status === 401) {
+        alert('Anda harus login terlebih dahulu');
+        window.location.href = 'auth.html';
+      } else {
+        alert('Gagal mengirim ulasan: ' + result.message);
+      }
+    }
+  } catch (error) {
+    console.error('Error:', error);
+    alert('Terjadi kesalahan saat mengirim ulasan');
+  } finally {
+    submitBtn.disabled = false;
+    submitBtn.innerHTML = originalText;
+  }
+});
+
+// ✅ FIXED loadListingDetail - HANYA 1 VERSI INI YANG DIPAKAI
+async function loadListingDetail() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const listingId = urlParams.get("id");
+
+  if (!listingId) {
+    alert("Listing tidak ditemukan");
+    window.location.href = "search.html";
+    return;
+  }
+
+  currentListing = await getListingById(listingId);
+
+  if (!currentListing) {
+    alert("Listing tidak ditemukan atau terjadi kesalahan");
+    window.location.href = "search.html";
+    return;
+  }
+
+  currentPropertyId = currentListing.property_id;
+
+  // Populate data
+  document.getElementById("listingTitle").textContent = currentListing.title;
+  document.getElementById("listingType").textContent = currentListing.type;
+  document.getElementById("rating").textContent = currentListing.rating || "0";
+  document.getElementById("reviewCount").textContent = currentListing.reviews || 0;
+  document.getElementById("location").textContent = currentListing.location;
+  document.getElementById("description").textContent = currentListing.description || "Tidak ada deskripsi";
+  document.getElementById("price").textContent = currentListing.price.toLocaleString("id-ID");
+  document.getElementById("monthlyPrice").textContent = "Rp " + currentListing.price.toLocaleString("id-ID");
+  document.getElementById("depositAmount").textContent = "Rp " + currentListing.deposit.toLocaleString("id-ID");
+  document.getElementById("roomSize").textContent = currentListing.roomSize || "-";
+  document.getElementById("available").textContent = currentListing.available;
+  document.getElementById("totalRooms").textContent = currentListing.rooms;
+  document.getElementById("deposit").textContent = "Rp " + currentListing.deposit.toLocaleString("id-ID");
+  document.getElementById("fullAddress").textContent = currentListing.address;
+  document.getElementById("hostName").textContent = currentListing.host_name || "Pemilik";
+
+  // Gallery
+  if (currentListing.images && currentListing.images.length > 0) {
+    document.getElementById("mainImage").src = currentListing.images[0];
+    document.getElementById("thumbnails").innerHTML = currentListing.images.map((img, idx) => `
+      <div class="col-3">
+        <div class="gallery-thumbnail ${idx === 0 ? "active" : ""}" onclick="changeImage('${img}', ${idx})">
+          <img src="${img}" alt="Thumbnail ${idx + 1}">
+        </div>
+      </div>
+    `).join("");
+  } else {
+    document.getElementById("mainImage").src = "https://via.placeholder.com/800x600?text=No+Image";
+  }
+
+  // Facilities
+  if (currentListing.facilities && currentListing.facilities.length > 0) {
+    document.getElementById("roomFacilities").innerHTML = currentListing.facilities
+      .map(f => `<span class="facility-badge"><i class="bi bi-check-circle text-success"></i>${f}</span>`)
+      .join("");
+  } else {
+    document.getElementById("roomFacilities").innerHTML = '<span class="text-muted">Tidak ada fasilitas</span>';
+  }
+
+  // Rules
+  if (currentListing.rules && currentListing.rules.length > 0) {
+    document.getElementById("rules").innerHTML = currentListing.rules
+      .filter(rule => rule.trim() !== "")
+      .map(rule => `<li class="mb-2"><i class="bi bi-check-circle text-success me-2"></i>${rule}</li>`)
+      .join("");
+  } else {
+    document.getElementById("rules").innerHTML = '<li class="text-muted">Tidak ada peraturan khusus</li>';
+  }
+
+  // Map
+  if (currentListing.latitude && currentListing.longitude) {
+    const locationTab = document.querySelector('button[data-bs-target="#location-tab"]');
+    locationTab.addEventListener("shown.bs.tab", function () {
+      if (!detailMap) {
+        setTimeout(() => {
+          initDetailMap(currentListing.latitude, currentListing.longitude, currentListing.title, currentListing.address);
+        }, 100);
+      }
+    });
+  }
+  
+  // ✅ Load reviews when tab clicked
+  const reviewsTab = document.querySelector('button[data-bs-target="#reviews"]');
+  reviewsTab.addEventListener('shown.bs.tab', function() {
+    loadReviews(currentPropertyId);
+  });
+
+  calculateTotalPrice();
+  initStarRating();
+}
+
+document.addEventListener("DOMContentLoaded", loadListingDetail);
     </script>
 </body>
 </html>

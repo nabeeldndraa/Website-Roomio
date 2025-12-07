@@ -8,6 +8,9 @@ $db_name = "db_roomio";
 // Buat koneksi
 $koneksi = new mysqli($db_host, $db_user, $db_pass, $db_name);
 
+// Alias untuk kompatibilitas
+$conn = $koneksi;
+
 // Cek koneksi
 if ($koneksi->connect_error) {
     if (headers_sent()) {
