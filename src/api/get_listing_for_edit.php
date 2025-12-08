@@ -56,25 +56,27 @@ try {
     }
 
     // Query data properti dan kamar
+    // Query data properti dan kamar
     $sql = "SELECT 
                 p.id_properti,
                 p.id_user,
                 p.nama_properti,
                 p.tipe_properti,
+                p.tipe_kos,
                 p.alamat,
                 p.kecamatan,
                 p.latitude,
                 p.longitude,
-                p.deskripsi,
-                p.rules,
+                COALESCE(p.deskripsi, '') as deskripsi,
+                COALESCE(p.rules, '') as rules,
                 k.id_kamar,
                 k.nama_kamar,
                 k.harga,
                 k.deposit,
                 k.jumlah_kamar,
                 k.kamar_tersedia,
-                k.room_size,
-                k.fasilitas_kamar,
+                COALESCE(k.room_size, '') as room_size,
+                COALESCE(k.fasilitas_kamar, '') as fasilitas_kamar,
                 k.status
             FROM properti p
             LEFT JOIN kamar k ON p.id_properti = k.id_properti

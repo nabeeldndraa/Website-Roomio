@@ -25,3 +25,119 @@
 [2025-12-07 09:44:47] Photo uploaded: uploads/69353e7f7678e_1765097087.png
 [2025-12-07 09:44:47] Total photos uploaded: 1
 [2025-12-07 09:44:47] Transaction committed successfully
+[2025-12-07 22:15:07] === UPDATE REQUEST ===
+[2025-12-07 22:15:07] Session ID: c1u8bt4h2p335r0uhmfrcf0qjk
+[2025-12-07 22:15:07] Found user_id in session: 10
+[2025-12-07 22:15:07] User ID: 10
+[2025-12-07 22:15:07] Properti ID: 50
+[2025-12-07 22:15:07] Kamar ID: 27
+[2025-12-07 22:15:07] Owner ID: 10, Current User: 10
+[2025-12-07 22:15:07] Updating properti...
+[2025-12-07 22:15:07] Properti updated successfully
+[2025-12-07 22:15:07] Updating kamar ID: 27
+[2025-12-07 22:15:07] Kamar updated successfully
+[2025-12-07 22:15:07] Transaction committed successfully
+[2025-12-08 00:36:40] === UPDATE REQUEST ===
+[2025-12-08 00:36:40] Session ID: 2aatc92ad08cnfi504clgmliop
+[2025-12-08 00:36:40] Found user_id in session: 10
+[2025-12-08 00:36:40] User ID: 10
+[2025-12-08 00:36:40] Properti ID: 50
+[2025-12-08 00:36:40] Kamar ID: 27
+[2025-12-08 00:36:40] Owner ID: 10, Current User: 10
+[2025-12-08 00:36:40] Updating properti...
+[2025-12-08 00:36:40] Properti updated successfully
+[2025-12-08 00:36:40] Updating kamar ID: 27
+[2025-12-08 00:36:40] Kamar updated successfully
+[2025-12-08 00:36:40] Processing image uploads...
+[2025-12-08 00:36:40] Photo uploaded: uploads/69360f88b5cf3_1765150600.jpeg
+[2025-12-08 00:36:40] Photo uploaded: uploads/69360f88b94dd_1765150600.jpeg
+[2025-12-08 00:36:40] Photo uploaded: uploads/69360f88be426_1765150600.jpeg
+[2025-12-08 00:36:40] Photo uploaded: uploads/69360f88c15a6_1765150600.jpeg
+[2025-12-08 00:36:40] Photo uploaded: uploads/69360f88c4e93_1765150600.jpeg
+[2025-12-08 00:36:40] Photo uploaded: uploads/69360f88c757e_1765150600.jpeg
+[2025-12-08 00:36:40] Total photos uploaded: 6
+[2025-12-08 00:36:40] Transaction committed successfully
+[2025-12-08 00:37:47] === UPDATE REQUEST ===
+[2025-12-08 00:37:47] Session ID: 2aatc92ad08cnfi504clgmliop
+[2025-12-08 00:37:47] Found user_id in session: 10
+[2025-12-08 00:37:47] User ID: 10
+[2025-12-08 00:37:47] Properti ID: 50
+[2025-12-08 00:37:47] Kamar ID: 27
+[2025-12-08 00:37:47] Owner ID: 10, Current User: 10
+[2025-12-08 00:37:47] Updating properti...
+[2025-12-08 00:37:47] Properti updated successfully
+[2025-12-08 00:37:47] Updating kamar ID: 27
+[2025-12-08 00:37:47] Kamar updated successfully
+[2025-12-08 00:37:47] Transaction committed successfully
+[2025-12-08 00:38:34] === UPDATE REQUEST ===
+[2025-12-08 00:38:34] Session ID: 2aatc92ad08cnfi504clgmliop
+[2025-12-08 00:38:34] Found user_id in session: 10
+[2025-12-08 00:38:34] User ID: 10
+[2025-12-08 00:38:34] Properti ID: 50
+[2025-12-08 00:38:34] Kamar ID: 27
+[2025-12-08 00:38:34] Owner ID: 10, Current User: 10
+[2025-12-08 00:38:34] Updating properti...
+[2025-12-08 00:38:34] Properti updated successfully
+[2025-12-08 00:38:34] Updating kamar ID: 27
+[2025-12-08 00:38:34] Kamar updated successfully
+[2025-12-08 00:38:34] Transaction committed successfully
+[2025-12-08 00:40:44] === UPDATE REQUEST ===
+[2025-12-08 00:40:44] Session ID: 2aatc92ad08cnfi504clgmliop
+[2025-12-08 00:40:44] Found user_id in session: 10
+[2025-12-08 00:40:44] User ID: 10
+[2025-12-08 00:40:44] Properti ID: 50
+[2025-12-08 00:40:44] Kamar ID: 27
+[2025-12-08 00:40:44] Owner ID: 10, Current User: 10
+[2025-12-08 00:40:44] Updating properti...
+[2025-12-08 00:40:44] Properti updated successfully
+[2025-12-08 00:40:44] Updating kamar ID: 27
+[2025-12-08 00:40:44] Kamar updated successfully
+[2025-12-08 00:40:44] Transaction committed successfully
+[2025-12-08 00:52:43] === UPDATE REQUEST ===
+[2025-12-08 00:52:43] Session ID: 2aatc92ad08cnfi504clgmliop
+[2025-12-08 00:52:43] Found user_id in session: 10
+[2025-12-08 00:52:43] User ID: 10
+[2025-12-08 00:52:43] Properti ID: 50
+[2025-12-08 00:52:43] Kamar ID: 27
+[2025-12-08 00:52:43] Owner ID: 10, Current User: 10
+[2025-12-08 00:52:43] Updating properti...
+[2025-12-08 00:52:43] Properti updated successfully
+[2025-12-08 00:52:43] Updating kamar ID: 27
+[2025-12-08 00:52:43] Kamar updated successfully
+[2025-12-08 00:52:43] Transaction committed successfully
+[2025-12-08 00:56:00] === UPDATE REQUEST ===
+[2025-12-08 00:56:00] Session ID: f4cglbs5a55uqh88est9580caf
+[2025-12-08 00:56:00] ERROR: No user session found
+[2025-12-08 00:56:00] Session contents: Array
+(
+)
+
+[2025-12-08 01:06:35] === UPDATE REQUEST ===
+[2025-12-08 01:06:35] Session ID: d16oed1jsribb42fn3fkpmeoe4
+[2025-12-08 01:06:35] Found user_id in session: 10
+[2025-12-08 01:06:35] User ID: 10
+[2025-12-08 01:06:35] Properti ID: 50
+[2025-12-08 01:06:35] Kamar ID: 27
+[2025-12-08 01:06:35] Owner ID: 10, Current User: 10
+[2025-12-08 01:06:35] Updating properti...
+[2025-12-08 01:06:35] Properti updated successfully
+[2025-12-08 01:06:35] Updating kamar ID: 27
+[2025-12-08 01:06:35] Kamar updated successfully
+[2025-12-08 01:06:35] Transaction committed successfully
+[2025-12-08 01:08:53] === UPDATE REQUEST ===
+[2025-12-08 01:08:53] Session ID: d16oed1jsribb42fn3fkpmeoe4
+[2025-12-08 01:08:53] Found user_id in session: 10
+[2025-12-08 01:08:53] User ID: 10
+[2025-12-08 01:08:53] Properti ID: 50
+[2025-12-08 01:08:53] Kamar ID: 27
+[2025-12-08 01:08:53] Owner ID: 10, Current User: 10
+[2025-12-08 01:08:53] Category from form: kos-putra
+[2025-12-08 01:08:53] Parsed - tipe_properti: Kos, tipe_kos: Putra
+[2025-12-08 01:08:53] Updating properti...
+[2025-12-08 01:08:53] nama_properti: apipi
+[2025-12-08 01:08:53] deskripsi length: 27
+[2025-12-08 01:08:53] ✅ Properti updated successfully
+[2025-12-08 01:08:53] Updating kamar ID: 27
+[2025-12-08 01:08:53] fasilitas_kamar: ["Kasur","Kamar Mandi Dalam","Wifi","Meja Belajar","Bantal_Guling"]
+[2025-12-08 01:08:53] ✅ Kamar updated successfully
+[2025-12-08 01:08:53] ✅ Transaction committed successfully
