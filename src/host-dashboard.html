@@ -286,7 +286,38 @@
           </div>
 
           <div class="tab-pane fade" id="reviews">
-            <div class="alert alert-info">
+            <div id="loadingReviews" class="text-center py-5" style="display: none;">
+              <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+              </div>
+              <p class="text-muted mt-3">Memuat ulasan...</p>
+            </div>
+            
+            <div id="reviewsStats" style="display: none;">
+              <div class="row mb-4">
+                <div class="col-md-4">
+                  <div class="card shadow-sm">
+                    <div class="card-body text-center">
+                      <h2 class="display-4 text-warning mb-0" id="avgRating">0.0</h2>
+                      <div id="avgStars" class="mb-2"></div>
+                      <p class="text-muted mb-0"><span id="totalReviews">0</span> ulasan</p>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-8">
+                  <div class="card shadow-sm">
+                    <div class="card-body">
+                      <h6 class="mb-3">Distribusi Rating</h6>
+                      <div id="ratingDistribution"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div id="reviewsList"></div>
+            
+            <div id="noReviews" class="alert alert-info" style="display: none;">
               <i class="bi bi-info-circle me-2"></i>
               Belum ada ulasan untuk properti Anda
             </div>
@@ -295,7 +326,7 @@
       </div>
     </main>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="js/auth.js"></script>
     <script>
       function formatRupiah(angka) {
@@ -440,145 +471,290 @@
         }
       }
 
-      // Tambahkan script ini ke host-dashboard.html untuk mengganti fungsi loadHostBookings
-
-async function loadHostBookings() {
-  const container = document.getElementById('hostBookingsList');
-  const loading = document.getElementById('loadingHostBookings');
-  const noBookings = document.getElementById('noHostBookings');
-  
-  loading.style.display = 'block';
-  container.innerHTML = '';
-  noBookings.classList.add('d-none');
-  
-  try {
-    const response = await fetch('api/get_host_bookings.php', {
-      credentials: 'include'
-    });
-    
-    const result = await response.json();
-    console.log('Bookings Response:', result);
-    
-    loading.style.display = 'none';
-    
-    if (result.status === 'success') {
-      const bookings = result.data;
-      
-      if (bookings.length === 0) {
-        noBookings.classList.remove('d-none');
-        return;
-      }
-      
-      container.innerHTML = bookings.map(booking => {
-        const statusBadge = {
-          'pending': 'bg-warning text-dark',
-          'terisi': 'bg-success',
-          'selesai': 'bg-info',
-          'dibatalkan': 'bg-danger'
-        }[booking.status] || 'bg-secondary';
+      async function loadHostBookings() {
+        const container = document.getElementById('hostBookingsList');
+        const loading = document.getElementById('loadingHostBookings');
+        const noBookings = document.getElementById('noHostBookings');
         
-        const statusText = {
-          'pending': 'Menunggu Konfirmasi',
-          'terisi': 'Aktif',
-          'selesai': 'Selesai',
-          'dibatalkan': 'Dibatalkan'
-        }[booking.status] || 'Pending';
+        loading.style.display = 'block';
+        container.innerHTML = '';
+        noBookings.classList.add('d-none');
         
-        const statusBayarBadge = {
-          'pending': 'bg-warning text-dark',
-          'lunas': 'bg-success',
-          'gagal': 'bg-danger'
-        }[booking.status_bayar] || 'bg-secondary';
-        
-        const statusBayarText = {
-          'pending': 'Belum Dibayar',
-          'lunas': 'Lunas',
-          'gagal': 'Pembayaran Gagal'
-        }[booking.status_bayar] || 'Pending';
-        
-        // Tombol aksi berdasarkan status
-        let actionButtons = '';
-        
-        if (booking.status === 'pending') {
-          actionButtons = `
-            <button class="btn btn-sm btn-success d-block w-100 mb-2" onclick="approveBooking(${booking.id_sewa})">
-              <i class="bi bi-check-circle me-1"></i>Setujui
-            </button>
-            <button class="btn btn-sm btn-danger d-block w-100" onclick="rejectBooking(${booking.id_sewa})">
-              <i class="bi bi-x-circle me-1"></i>Tolak
-            </button>
-          `;
-        } else if (booking.status === 'terisi') {
-          actionButtons = `
-            <button class="btn btn-sm btn-outline-info d-block w-100 mb-2" onclick="completeBooking(${booking.id_sewa})">
-              <i class="bi bi-check-all me-1"></i>Selesaikan
-            </button>
-          `;
-        } else {
-          actionButtons = `
-            <span class="badge ${statusBadge} d-block mb-2">${statusText}</span>
-          `;
-        }
-        
-        return `
-          <div class="card mb-3 shadow-sm">
-            <div class="card-body">
-              <div class="row align-items-center">
-                <div class="col-md-3">
-                  <img src="${booking.image}" class="img-fluid rounded" alt="${booking.property_title}" 
-                       style="height: 120px; width: 100%; object-fit: cover;">
-                </div>
-                <div class="col-md-6">
-                  <h6 class="mb-2">${booking.property_title}</h6>
-                  <p class="text-muted small mb-2">
-                    <i class="bi bi-person me-1"></i><strong>Penyewa:</strong> ${booking.user_name}<br>
-                    <i class="bi bi-envelope me-1"></i>${booking.user_email}<br>
-                    <i class="bi bi-phone me-1"></i>${booking.user_phone}<br>
-                    <i class="bi bi-calendar-check me-1"></i><strong>Check-in:</strong> ${new Date(booking.tanggal_masuk).toLocaleDateString('id-ID')}<br>
-                    <i class="bi bi-calendar-x me-1"></i><strong>Check-out:</strong> ${new Date(booking.tanggal_keluar).toLocaleDateString('id-ID')}<br>
-                    <i class="bi bi-clock me-1"></i><strong>Durasi:</strong> ${booking.durasi_bulan} bulan
-                  </p>
-                  <div class="d-flex gap-2 mt-2">
-                    <span class="badge ${statusBadge}">${statusText}</span>
-                    <span class="badge ${statusBayarBadge}">${statusBayarText}</span>
+        try {
+          const response = await fetch('api/get_host_bookings.php', {
+            credentials: 'include'
+          });
+          
+          const result = await response.json();
+          console.log('Bookings Response:', result);
+          
+          loading.style.display = 'none';
+          
+          if (result.status === 'success') {
+            const bookings = result.data;
+            
+            if (bookings.length === 0) {
+              noBookings.classList.remove('d-none');
+              return;
+            }
+            
+            container.innerHTML = bookings.map(booking => {
+              const statusBadge = {
+                'pending': 'bg-warning text-dark',
+                'terisi': 'bg-success',
+                'selesai': 'bg-info',
+                'dibatalkan': 'bg-danger'
+              }[booking.status] || 'bg-secondary';
+              
+              const statusText = {
+                'pending': 'Menunggu Konfirmasi',
+                'terisi': 'Aktif',
+                'selesai': 'Selesai',
+                'dibatalkan': 'Dibatalkan'
+              }[booking.status] || 'Pending';
+              
+              const statusBayarBadge = {
+                'pending': 'bg-warning text-dark',
+                'lunas': 'bg-success',
+                'gagal': 'bg-danger'
+              }[booking.status_bayar] || 'bg-secondary';
+              
+              const statusBayarText = {
+                'pending': 'Belum Dibayar',
+                'lunas': 'Lunas',
+                'gagal': 'Pembayaran Gagal'
+              }[booking.status_bayar] || 'Pending';
+              
+              let actionButtons = '';
+              
+              if (booking.status === 'pending') {
+                actionButtons = `
+                  <button class="btn btn-sm btn-success d-block w-100 mb-2" onclick="approveBooking(${booking.id_sewa})">
+                    <i class="bi bi-check-circle me-1"></i>Setujui
+                  </button>
+                  <button class="btn btn-sm btn-danger d-block w-100" onclick="rejectBooking(${booking.id_sewa})">
+                    <i class="bi bi-x-circle me-1"></i>Tolak
+                  </button>
+                `;
+              } else if (booking.status === 'terisi') {
+                actionButtons = `
+                  <button class="btn btn-sm btn-outline-info d-block w-100 mb-2" onclick="completeBooking(${booking.id_sewa})">
+                    <i class="bi bi-check-all me-1"></i>Selesaikan
+                  </button>
+                `;
+              } else {
+                actionButtons = `
+                  <span class="badge ${statusBadge} d-block mb-2">${statusText}</span>
+                `;
+              }
+              
+              return `
+                <div class="card mb-3 shadow-sm">
+                  <div class="card-body">
+                    <div class="row align-items-center">
+                      <div class="col-md-3">
+                        <img src="${booking.image}" class="img-fluid rounded" alt="${booking.property_title}" 
+                             style="height: 120px; width: 100%; object-fit: cover;">
+                      </div>
+                      <div class="col-md-6">
+                        <h6 class="mb-2">${booking.property_title}</h6>
+                        <p class="text-muted small mb-2">
+                          <i class="bi bi-person me-1"></i><strong>Penyewa:</strong> ${booking.user_name}<br>
+                          <i class="bi bi-envelope me-1"></i>${booking.user_email}<br>
+                          <i class="bi bi-phone me-1"></i>${booking.user_phone}<br>
+                          <i class="bi bi-calendar-check me-1"></i><strong>Check-in:</strong> ${new Date(booking.tanggal_masuk).toLocaleDateString('id-ID')}<br>
+                          <i class="bi bi-calendar-x me-1"></i><strong>Check-out:</strong> ${new Date(booking.tanggal_keluar).toLocaleDateString('id-ID')}<br>
+                          <i class="bi bi-clock me-1"></i><strong>Durasi:</strong> ${booking.durasi_bulan} bulan
+                        </p>
+                        <div class="d-flex gap-2 mt-2">
+                          <span class="badge ${statusBadge}">${statusText}</span>
+                          <span class="badge ${statusBayarBadge}">${statusBayarText}</span>
+                        </div>
+                      </div>
+                      <div class="col-md-3 text-end">
+                        <h5 class="text-primary mb-3">${formatRupiah(booking.total_harga)}</h5>
+                        <small class="text-muted d-block mb-3">Booking: ${new Date(booking.created_at).toLocaleDateString('id-ID')}</small>
+                        
+                        ${actionButtons}
+                        
+                        <a href="listing-detail-host.html?id=${booking.id_properti}" class="btn btn-sm btn-outline-primary d-block w-100 mt-2" target="_blank">
+                          <i class="bi bi-eye me-1"></i>Lihat Properti
+                        </a>
+                      </div>
+                    </div>
                   </div>
                 </div>
-                <div class="col-md-3 text-end">
-                  <h5 class="text-primary mb-3">${formatRupiah(booking.total_harga)}</h5>
-                  <small class="text-muted d-block mb-3">Booking: ${new Date(booking.created_at).toLocaleDateString('id-ID')}</small>
-                  
-                  ${actionButtons}
-                  
-                  <a href="listing-detail-host.html?id=${booking.id_properti}" class="btn btn-sm btn-outline-primary d-block w-100 mt-2" target="_blank">
-                    <i class="bi bi-eye me-1"></i>Lihat Properti
-                  </a>
-                </div>
+              `;
+            }).join('');
+          } else {
+            container.innerHTML = `
+              <div class="alert alert-warning">
+                <i class="bi bi-exclamation-triangle me-2"></i>
+                ${result.message || 'Gagal memuat data booking'}
               </div>
+            `;
+          }
+        } catch (error) {
+          console.error('Error loading bookings:', error);
+          loading.style.display = 'none';
+          container.innerHTML = `
+            <div class="alert alert-danger">
+              <i class="bi bi-exclamation-triangle me-2"></i>
+              Terjadi kesalahan saat memuat booking: ${error.message}
             </div>
-          </div>
+          `;
+        }
+      }
+
+      // Load Reviews - FUNGSI DIPERBAIKI
+async function loadHostReviews() {
+    console.log('Loading reviews...');
+    const loading = document.getElementById('loadingReviews');
+    const reviewsList = document.getElementById('reviewsList');
+    const noReviews = document.getElementById('noReviews');
+    const reviewsStats = document.getElementById('reviewsStats');
+    
+    loading.style.display = 'block';
+    reviewsList.innerHTML = '';
+    noReviews.style.display = 'none';
+    reviewsStats.style.display = 'none';
+    
+    try {
+        const response = await fetch('api/get_host_reviews.php', {
+            credentials: 'include'
+        });
+        
+        // Cek response mentah untuk debugging
+        const text = await response.text();
+        console.log('Raw Response:', text);
+        
+        // Parse JSON
+        let result;
+        try {
+            result = JSON.parse(text);
+        } catch (parseError) {
+            console.error('JSON Parse Error:', parseError);
+            console.error('Response Text:', text);
+            throw new Error('Invalid JSON response from server');
+        }
+        
+        console.log('Reviews Response:', result);
+        
+        loading.style.display = 'none';
+        
+        if (result.status === 'success') {
+            const reviews = result.data;
+            const stats = result.statistics;
+            
+            if (reviews.length === 0) {
+                noReviews.style.display = 'block';
+                return;
+            }
+            
+            // Tampilkan statistik
+            reviewsStats.style.display = 'block';
+            document.getElementById('avgRating').textContent = stats.average_rating.toFixed(1);
+            document.getElementById('totalReviews').textContent = stats.total_reviews;
+            
+            // Generate stars untuk rata-rata rating
+            const avgStars = document.getElementById('avgStars');
+            avgStars.innerHTML = generateStars(stats.average_rating);
+            
+            // Distribusi rating
+            const distributionContainer = document.getElementById('ratingDistribution');
+            let distributionHTML = '';
+            for (let i = 5; i >= 1; i--) {
+                const count = stats.rating_distribution[i] || 0;
+                const percentage = stats.total_reviews > 0 ? (count / stats.total_reviews * 100) : 0;
+                distributionHTML += `
+                    <div class="d-flex align-items-center mb-2">
+                        <span class="me-2" style="width: 60px;">${i} <i class="bi bi-star-fill text-warning"></i></span>
+                        <div class="progress flex-grow-1 me-2" style="height: 8px;">
+                            <div class="progress-bar bg-warning" style="width: ${percentage}%"></div>
+                        </div>
+                        <span class="text-muted" style="width: 40px;">${count}</span>
+                    </div>
+                `;
+            }
+            distributionContainer.innerHTML = distributionHTML;
+            
+            // Tampilkan daftar ulasan
+            reviewsList.innerHTML = reviews.map(review => {
+                const stars = generateStars(review.rating);
+                const date = new Date(review.created_at).toLocaleDateString('id-ID', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+                
+                const placeholderImage = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Crect fill='%23e5e7eb' width='200' height='200'/%3E%3Ctext fill='%239ca3af' font-family='Arial' font-size='16' text-anchor='middle' x='100' y='105'%3ENo Image%3C/text%3E%3C/svg%3E";
+                const imgSrc = review.property_image && review.property_image.trim() !== "" ? review.property_image : placeholderImage;
+                
+                return `
+                    <div class="card mb-3 shadow-sm">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-2">
+                                    <img src="${imgSrc}" 
+                                         class="img-fluid rounded" alt="${review.property_title}"
+                                         style="height: 100px; width: 100%; object-fit: cover;"
+                                         onerror="this.src='${placeholderImage}'">
+                                </div>
+                                <div class="col-md-10">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <div>
+                                            <h6 class="mb-1">${review.property_title}</h6>
+                                            <div class="mb-2">${stars}</div>
+                                        </div>
+                                        <small class="text-muted">${date}</small>
+                                    </div>
+                                    <p class="mb-2"><strong><i class="bi bi-person-circle me-1"></i>${review.reviewer_name}</strong></p>
+                                    <p class="text-muted mb-0">${review.review_text || 'Tidak ada komentar'}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+        } else {
+            noReviews.style.display = 'block';
+            noReviews.className = 'alert alert-warning';
+            noReviews.innerHTML = `
+                <i class="bi bi-exclamation-triangle me-2"></i>
+                ${result.message || 'Gagal memuat ulasan'}
+            `;
+        }
+    } catch (error) {
+        console.error('Error loading reviews:', error);
+        loading.style.display = 'none';
+        noReviews.style.display = 'block';
+        noReviews.className = 'alert alert-danger';
+        noReviews.innerHTML = `
+            <i class="bi bi-exclamation-triangle me-2"></i>
+            Terjadi kesalahan saat memuat ulasan: ${error.message}
         `;
-      }).join('');
-    } else {
-      container.innerHTML = `
-        <div class="alert alert-warning">
-          <i class="bi bi-exclamation-triangle me-2"></i>
-          ${result.message || 'Gagal memuat data booking'}
-        </div>
-      `;
     }
-  } catch (error) {
-    console.error('Error loading bookings:', error);
-    loading.style.display = 'none';
-    container.innerHTML = `
-      <div class="alert alert-danger">
-        <i class="bi bi-exclamation-triangle me-2"></i>
-        Terjadi kesalahan saat memuat booking: ${error.message}
-      </div>
-    `;
-  }
 }
 
-      // Approve Booking
+// Generate stars HTML
+function generateStars(rating) {
+    let stars = '';
+    const fullStars = Math.floor(rating);
+    const hasHalfStar = rating % 1 >= 0.5;
+    
+    for (let i = 1; i <= 5; i++) {
+        if (i <= fullStars) {
+            stars += '<i class="bi bi-star-fill text-warning"></i>';
+        } else if (i === fullStars + 1 && hasHalfStar) {
+            stars += '<i class="bi bi-star-half text-warning"></i>';
+        } else {
+            stars += '<i class="bi bi-star text-warning"></i>';
+        }
+    }
+    return stars;
+}
+
       async function approveBooking(id) {
         if (!confirm('Setujui booking ini?')) return;
         
@@ -605,7 +781,6 @@ async function loadHostBookings() {
         }
       }
 
-      // Reject Booking
       async function rejectBooking(id) {
         if (!confirm('Tolak booking ini?')) return;
         
@@ -637,7 +812,6 @@ async function loadHostBookings() {
         }
       }
 
-      // Complete Booking
       async function completeBooking(id) {
         if (!confirm('Tandai booking ini sebagai selesai?')) return;
         
@@ -707,12 +881,20 @@ async function loadHostBookings() {
         if (typeof updateAuthUI === "function") updateAuthUI();
         loadHostListings();
         
-        // Load bookings when tab is clicked
         const bookingsTab = document.querySelector('button[data-bs-target="#bookings"]');
         if (bookingsTab) {
           bookingsTab.addEventListener('shown.bs.tab', function() {
             console.log('Loading bookings...');
             loadHostBookings();
+          });
+        }
+        
+        // EVENT LISTENER UNTUK TAB ULASAN - INI YANG DITAMBAHKAN
+        const reviewsTab = document.querySelector('button[data-bs-target="#reviews"]');
+        if (reviewsTab) {
+          reviewsTab.addEventListener('shown.bs.tab', function() {
+            console.log('Loading reviews...');
+            loadHostReviews();
           });
         }
       });

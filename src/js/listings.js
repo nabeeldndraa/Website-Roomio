@@ -14,18 +14,20 @@ async function fetchListingsFromDB(filters = {}) {
     const response = await fetch(`api/get_listings.php?${params.toString()}`);
     const result = await response.json();
     
-    if (result.success) {
+    // ✅ Handle response - bisa array langsung atau object dengan success
+    if (Array.isArray(result)) {
+      allListings = result;
+      return allListings;
+    } else if (result.success) {
       allListings = result.data;
       return allListings;
     } else {
       console.error('Error fetching listings:', result.error);
-      // Fallback to mock data if database fails
       allListings = getMockListings();
       return allListings;
     }
   } catch (error) {
     console.error('Network error:', error);
-    // Fallback to mock data if network fails
     allListings = getMockListings();
     return allListings;
   }
@@ -88,70 +90,30 @@ function getMockListings() {
       rules: ["Profesional only", "No noise after 22.00", "Keep clean"],
       nearbyPlaces: ["Kantor Pusat - 1km", "Mall - 2km", "Gym - 500m"],
     },
-    {
-      id: "4",
-      title: "Kos Modern Dekat Alun-Alun",
-      type: "Kos Campur",
-      location: "Kaliwates, Jember",
-      price: 950000,
-      rating: 4.6,
-      reviews: 15,
-      image: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800",
-      facilities: ["Wifi", "AC", "Kasur", "Lemari"],
-      badges: ["New", "Verified"],
-      description: "Kos modern di lokasi strategis dekat pusat kota",
-      rooms: 12,
-      available: 4,
-      address: "Jl. Gajah Mada No. 12, Kaliwates",
-      rules: ["No smoking in room", "Guest max 21.00", "Monthly payment"],
-      nearbyPlaces: ["Alun-alun - 300m", "Bioskop - 500m", "Foodcourt - 200m"],
-    },
-    {
-      id: "5",
-      title: "Kontrakan Minimalis 1 Kamar",
-      type: "Kontrakan",
-      location: "Mangli, Jember",
-      price: 1500000,
-      rating: 4.5,
-      reviews: 12,
-      image: "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800",
-      facilities: ["Wifi", "Dapur", "Parkir Motor"],
-      badges: ["Budget-Friendly"],
-      description: "Kontrakan minimalis cocok untuk pasangan muda atau single",
-      rooms: 1,
-      available: 1,
-      address: "Jl. Mawar No. 67, Mangli",
-      rules: ["Max 2 orang", "No pets", "Maintain cleanliness"],
-      nearbyPlaces: ["Pasar - 400m", "Puskesmas - 600m", "ATM - 150m"],
-    },
-    {
-      id: "6",
-      title: "Kos Nyaman untuk Mahasiswi",
-      type: "Kos Putri",
-      location: "Jember Lor, Jember",
-      price: 750000,
-      rating: 4.8,
-      reviews: 28,
-      image: "https://images.unsplash.com/photo-1595526114035-0d45ed16cfbf?w=800",
-      facilities: ["Wifi", "Kasur", "Meja Belajar"],
-      badges: ["Student-Friendly", "Safe"],
-      description: "Kos khusus putri dengan keamanan 24 jam",
-      rooms: 8,
-      available: 2,
-      address: "Jl. Brawijaya No. 34, Jember Lor",
-      rules: ["No male visitors", "Curfew 22.00", "No smoking"],
-      nearbyPlaces: ["Kampus - 800m", "Minimarket - 50m", "Warung Makan - 100m"],
-    },
   ];
 }
 
 // ==================== MAIN FUNCTIONS ====================
-function getFeaturedListings() {
-  // Return from allListings if available, otherwise return mock data
-  if (allListings.length > 0) {
-    return allListings.slice(0, 6);
+// ✅ UPDATE: getFeaturedListings sekarang async dan sort by rating
+async function getFeaturedListings() {
+  // Load data dari database jika belum ada
+  if (allListings.length === 0) {
+    await fetchListingsFromDB();
   }
-  return getMockListings();
+  
+  // Return top 6 dengan rating tertinggi
+  if (allListings.length > 0) {
+    // Sort by rating DESC, reviews DESC
+    const sorted = [...allListings].sort((a, b) => {
+      if (b.rating !== a.rating) {
+        return b.rating - a.rating;
+      }
+      return b.reviews - a.reviews;
+    });
+    return sorted.slice(0, 6);
+  }
+  
+  return getMockListings().slice(0, 6);
 }
 
 async function getListingById(id) {
@@ -344,7 +306,6 @@ function deleteHostListing(id) {
 }
 
 // ==================== INITIALIZATION ====================
-// Auto-load data from database when page loads
 window.addEventListener('DOMContentLoaded', () => {
   fetchListingsFromDB();
 });

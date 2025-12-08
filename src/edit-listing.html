@@ -344,12 +344,12 @@
                           <label class="form-check-label" for="fac_meja">Meja Belajar</label>
                         </div>
                         <div class="form-check">
-                          <input class="form-check-input" type="checkbox" id="fac_laundry" value="Laundry" />
-                          <label class="form-check-label" for="fac_laundry">Laundry</label>
+                          <input class="form-check-input" type="checkbox" id="fac_Bantal_Guling" value="Bantal_Guling" />
+                          <label class="form-check-label" for="fac_Bantal_Guling">Bantal_Guling</label>
                         </div>
                         <div class="form-check">
-                          <input class="form-check-input" type="checkbox" id="fac_parkir" value="Parkir" />
-                          <label class="form-check-label" for="fac_parkir">Parkir</label>
+                          <input class="form-check-input" type="checkbox" id="fac_Sprei" value="Sprei" />
+                          <label class="form-check-label" for="fac_Sprei">Sprei</label>
                         </div>
                       </div>
                     </div>
@@ -758,19 +758,34 @@ function handleImageUpload(e) {
 }
 
 // Form submit handler - GANTI fungsi handleFormSubmit yang lama
+// Form submit handler - FIXED VERSION
 async function handleFormSubmit(e) {
   e.preventDefault();
   
   console.log('=== FORM SUBMIT START ===');
 
   const formData = new FormData();
+  
+  // IDs
   formData.append("id_properti", document.getElementById("id_properti").value);
   formData.append("id_kamar", document.getElementById("id_kamar").value);
+  
+  // Basic Info
   formData.append("nama_properti", document.getElementById("title").value);
-  formData.append("tipe_properti", document.getElementById("category").value);
+  
+  // ✅ KIRIM KATEGORI LANGSUNG (kos-putra, kos-putri, kos-campur, kontrakan)
+  const category = document.getElementById("category").value;
+  formData.append("tipe_properti", category);
+  console.log('Category being sent:', category);
+  
   formData.append("alamat", document.getElementById("address").value);
   formData.append("kota", document.getElementById("district").value);
-  formData.append("deskripsi", document.getElementById("description").value);
+  
+  // ✅ PASTIKAN DESKRIPSI DIKIRIM
+  const deskripsi = document.getElementById("description").value;
+  formData.append("deskripsi", deskripsi);
+  console.log('Deskripsi being sent (length):', deskripsi.length);
+  
   formData.append("latitude", document.getElementById("latitude").value);
   formData.append("longitude", document.getElementById("longitude").value);
   formData.append("harga", document.getElementById("price").value);
@@ -779,25 +794,38 @@ async function handleFormSubmit(e) {
   formData.append("kamar_tersedia", document.getElementById("available").value);
   formData.append("room_size", document.getElementById("roomSize").value);
 
-  // Fasilitas
+  // ✅ Fasilitas - kirim sebagai array
+  const facilities = [];
   document.querySelectorAll('[id^="fac_"]:checked').forEach(function (cb) {
+    facilities.push(cb.value);
     formData.append("fasilitas_kamar[]", cb.value);
   });
+  console.log('Facilities being sent:', facilities);
 
-  formData.append("rules", document.getElementById("rules").value);
+  // Rules
+  const rules = document.getElementById("rules").value;
+  formData.append("rules", rules);
+  console.log('Rules being sent:', rules ? 'Yes' : 'No');
 
-  // Images
+  // ✅ Images - hanya foto BARU yang di-upload
   const imageInput = document.getElementById("imageUpload");
   if (imageInput.files.length > 0) {
+    console.log('Uploading', imageInput.files.length, 'new images');
     for (var i = 0; i < imageInput.files.length; i++) {
       formData.append("images[]", imageInput.files[i]);
     }
+  } else {
+    console.log('No new images to upload');
   }
   
   // Debug: Log FormData contents
-  console.log('FormData contents:');
+  console.log('=== FormData contents ===');
   for (let pair of formData.entries()) {
-    console.log(pair[0] + ': ' + pair[1]);
+    if (pair[0] === 'images[]') {
+      console.log(pair[0] + ': [File: ' + pair[1].name + ']');
+    } else {
+      console.log(pair[0] + ': ' + pair[1]);
+    }
   }
 
   const submitButton = document.getElementById("submitBtn");
@@ -808,10 +836,10 @@ async function handleFormSubmit(e) {
   try {
     console.log('Sending request to api/update_listing.php...');
     
-    // ✅ TAMBAHKAN credentials: 'include' untuk kirim session
+    // ✅ KIRIM dengan credentials untuk session
     const response = await fetch("api/update_listing.php", {
       method: "POST",
-      credentials: 'include',  // ← INI PENTING!
+      credentials: 'include',
       body: formData,
     });
 
@@ -825,21 +853,52 @@ async function handleFormSubmit(e) {
       data = JSON.parse(responseText);
     } catch (e) {
       console.error('JSON parse error:', e);
-      throw new Error('Invalid JSON response from server');
+      throw new Error('Invalid JSON response from server: ' + responseText.substring(0, 100));
     }
 
     if (response.ok && data.status === "success") {
-      alert(data.message);
+      alert('✅ ' + data.message);
       window.location.href = "host-dashboard.html";
     } else {
-      alert("Gagal update listing: " + (data.message || "Error tidak diketahui"));
+      alert("❌ Gagal update listing: " + (data.message || "Error tidak diketahui"));
     }
   } catch (error) {
     console.error("Error:", error);
-    alert("Terjadi kesalahan: " + error.message);
+    alert("❌ Terjadi kesalahan: " + error.message);
   } finally {
     submitButton.disabled = false;
     submitButton.innerHTML = originalText;
+  }
+}
+
+// ✅ FUNGSI BARU - Hapus foto dari database
+async function deletePhoto(photoUrl, idProperti, btnElement) {
+  if (!confirm('Hapus foto ini?')) return;
+  
+  try {
+    const response = await fetch('api/delete_photo.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({
+        photo_url: photoUrl,
+        id_properti: idProperti
+      })
+    });
+    
+    const result = await response.json();
+    
+    if (result.status === 'success') {
+      // Hapus elemen dari DOM
+      const col = btnElement.closest('.col-md-3');
+      col.remove();
+      alert('✅ Foto berhasil dihapus!');
+    } else {
+      alert('❌ Gagal menghapus foto: ' + result.message);
+    }
+  } catch (error) {
+    console.error('Error:', error);
+    alert('❌ Terjadi kesalahan saat menghapus foto');
   }
 }
 
@@ -907,7 +966,7 @@ function initializeEventListeners() {
   
   console.log('Event listeners initialized successfully');
 }
-
+// LOAD DATA SAAT EDIT MODE
 // LOAD DATA SAAT EDIT MODE
 async function loadListingData(id) {
   try {
@@ -941,75 +1000,177 @@ async function loadListingData(id) {
     if (result.status === "success") {
       const data = result.data;
       
-      // Populate form fields
-      document.getElementById("id_properti").value = data.id_properti || "";
-      document.getElementById("id_kamar").value = data.id_kamar || "";
-      document.getElementById("title").value = data.nama_properti || "";
-      document.getElementById("category").value = data.tipe_properti || "";
-      document.getElementById("price").value = data.harga || "";
-      document.getElementById("deposit").value = data.deposit || "";
-      document.getElementById("district").value = data.kecamatan || "";
-      document.getElementById("address").value = data.alamat || "";
+      console.log('Full data object:', data);
+      console.log('Tipe Properti dari DB:', data.tipe_properti);
+      console.log('Tipe Kos dari DB:', data.tipe_kos);
+      console.log('Deskripsi dari DB:', data.deskripsi);
       
-      // Set coordinates
-      if (data.latitude && data.longitude) {
-        const lat = parseFloat(data.latitude);
-        const lng = parseFloat(data.longitude);
-        
-        document.getElementById("latitude").value = lat;
-        document.getElementById("longitude").value = lng;
-        selectedLocation = { lat: lat, lng: lng };
-        
-        document.getElementById("displayLat").textContent = lat.toFixed(7);
-        document.getElementById("displayLng").textContent = lng.toFixed(7);
-        document.getElementById("coordinatesDisplay").style.display = "block";
-      }
+      // ✅ GUNAKAN setTimeout UNTUK MEMASTIKAN DOM READY
+      setTimeout(() => {
+  // Populate form fields
+  document.getElementById("id_properti").value = data.id_properti || "";
+  document.getElementById("id_kamar").value = data.id_kamar || "";
+  
+  // Set title
+  const titleInput = document.getElementById("title");
+  if (titleInput) {
+    titleInput.value = data.nama_properti || "";
+    console.log('Title set to:', titleInput.value);
+  }
 
-      document.getElementById("description").value = data.deskripsi || "";
-      document.getElementById("rooms").value = data.jumlah_kamar || "";
-      document.getElementById("available").value = data.kamar_tersedia || "";
-      document.getElementById("roomSize").value = data.room_size || "";
-      document.getElementById("rules").value = data.rules || "";
+  // ✅ Set category dengan mapping yang benar DAN FORCE VALUE
+  let categoryValue = '';
+  const tipeProperti = data.tipe_properti ? data.tipe_properti.toLowerCase().trim() : '';
+  const tipeKos = data.tipe_kos ? data.tipe_kos.toLowerCase().trim() : '';
 
-      // Check facilities
-      if (data.fasilitas_kamar) {
-        let fasilitas = [];
-        try {
-          fasilitas = JSON.parse(data.fasilitas_kamar);
-        } catch (e) {
-          fasilitas = data.fasilitas_kamar.split(',').map(f => f.trim());
+  console.log('Processed Tipe Properti:', tipeProperti);
+  console.log('Processed Tipe Kos:', tipeKos);
+
+  if (tipeProperti === 'kontrakan') {
+    categoryValue = 'kontrakan';
+  } else if (tipeProperti === 'kos') {
+    if (tipeKos === 'putra') {
+      categoryValue = 'kos-putra';
+    } else if (tipeKos === 'putri') {
+      categoryValue = 'kos-putri';
+    } else if (tipeKos === 'campur') {
+      categoryValue = 'kos-campur';
+    } else {
+      // Fallback jika tipe_kos kosong
+      categoryValue = 'kos-campur';
+    }
+  }
+
+  console.log('Category value yang akan di-set:', categoryValue);
+  
+  const categorySelect = document.getElementById("category");
+  if (categorySelect && categoryValue) {
+    // Method 1: Direct assignment
+    categorySelect.value = categoryValue;
+    
+    // Method 2: Jika masih kosong, coba dengan selectedIndex
+    if (!categorySelect.value || categorySelect.value === "") {
+      const options = categorySelect.options;
+      for (let i = 0; i < options.length; i++) {
+        if (options[i].value === categoryValue) {
+          categorySelect.selectedIndex = i;
+          console.log('Category set via selectedIndex:', i);
+          break;
         }
-        
-        fasilitas.forEach(function(fac) {
-          const checkbox = document.querySelector(`input[type="checkbox"][value="${fac.trim()}"]`);
-          if (checkbox) {
-            checkbox.checked = true;
-          }
-        });
       }
+    }
+    
+    console.log('✅ Category FINAL value:', categorySelect.value);
+    
+    // Trigger change event untuk UI update
+    const changeEvent = new Event('change', { bubbles: true });
+    categorySelect.dispatchEvent(changeEvent);
+  } else {
+    console.warn('⚠️ Category select not found or categoryValue empty');
+  }
 
-      // Load photos
-      if (data.fotos && data.fotos.length > 0) {
-        const preview = document.getElementById("imagePreview");
-        preview.innerHTML = "";
-        
-        data.fotos.forEach(function(foto) {
-          const col = document.createElement("div");
-          col.className = "col-md-3";
-          col.innerHTML =
-            '<div class="position-relative">' +
-            '<img src="' + foto + '" class="img-fluid rounded" alt="Preview">' +
-            '<button type="button" class="btn btn-danger btn-sm position-absolute top-0 end-0 m-2" onclick="this.closest(\'.col-md-3\').remove()">' +
-            '<i class="bi bi-x"></i>' +
-            "</button>" +
-            "</div>";
-          preview.appendChild(col);
-        });
+  document.getElementById("price").value = data.harga || "";
+  document.getElementById("deposit").value = data.deposit || "";
+  document.getElementById("district").value = data.kecamatan || "";
+  document.getElementById("address").value = data.alamat || "";
+  
+  // Set coordinates
+  if (data.latitude && data.longitude) {
+    const lat = parseFloat(data.latitude);
+    const lng = parseFloat(data.longitude);
+    
+    document.getElementById("latitude").value = lat;
+    document.getElementById("longitude").value = lng;
+    selectedLocation = { lat: lat, lng: lng };
+    
+    document.getElementById("displayLat").textContent = lat.toFixed(7);
+    document.getElementById("displayLng").textContent = lng.toFixed(7);
+    document.getElementById("coordinatesDisplay").style.display = "block";
+  }
+
+  // ✅ PASTIKAN DESKRIPSI DI-LOAD DENGAN FORCE DAN MULTIPLE METHODS
+  const descInput = document.getElementById("description");
+  if (descInput && data.deskripsi) {
+    const deskripsiValue = data.deskripsi.trim();
+    
+    // Method 1: Direct value assignment
+    descInput.value = deskripsiValue;
+    
+    // Method 2: Set dengan textContent (untuk textarea)
+    descInput.textContent = deskripsiValue;
+    
+    // Method 3: Set innerHTML
+    descInput.innerHTML = deskripsiValue;
+    
+    // Force trigger input event
+    const inputEvent = new Event('input', { bubbles: true });
+    descInput.dispatchEvent(inputEvent);
+    
+    console.log('✅ Deskripsi loaded:', descInput.value.length, 'characters');
+    console.log('Deskripsi preview:', descInput.value.substring(0, 50) + '...');
+  } else {
+    console.warn('⚠️ Deskripsi input not found or data.deskripsi is empty');
+    console.log('data.deskripsi:', data.deskripsi);
+  }
+  
+  document.getElementById("rooms").value = data.jumlah_kamar || "";
+  document.getElementById("available").value = data.kamar_tersedia || "";
+  document.getElementById("roomSize").value = data.room_size || "";
+  
+  const rulesInput = document.getElementById("rules");
+  if (rulesInput) {
+    rulesInput.value = data.rules || "";
+    console.log('Rules set to:', rulesInput.value);
+  }
+
+  // Check facilities
+  if (data.fasilitas_kamar) {
+    let fasilitas = [];
+    try {
+      fasilitas = JSON.parse(data.fasilitas_kamar);
+    } catch (e) {
+      fasilitas = data.fasilitas_kamar.split(',').map(f => f.trim());
+    }
+    
+    console.log('Fasilitas array:', fasilitas);
+    
+    fasilitas.forEach(function(fac) {
+      const checkbox = document.querySelector(`input[type="checkbox"][value="${fac.trim()}"]`);
+      if (checkbox) {
+        checkbox.checked = true;
+        console.log('✓ Checked facility:', fac);
+      } else {
+        console.log('✗ Facility checkbox not found:', fac);
       }
+    });
+  }
 
-      console.log('Data loaded successfully!');
-      alert('Data berhasil dimuat! Anda dapat mengedit listing.');
-      
+  // ✅ LOAD PHOTOS dengan tombol hapus yang berfungsi
+  if (data.fotos && data.fotos.length > 0) {
+    const preview = document.getElementById("imagePreview");
+    preview.innerHTML = "";
+    
+    data.fotos.forEach(function(foto) {
+      const col = document.createElement("div");
+      col.className = "col-md-3";
+      col.setAttribute('data-photo-url', foto);
+      col.innerHTML =
+        '<div class="position-relative">' +
+        '<img src="' + foto + '" class="img-fluid rounded" alt="Preview">' +
+        '<button type="button" class="btn btn-danger btn-sm position-absolute top-0 end-0 m-2" onclick="deletePhoto(\'' + foto.replace(/'/g, "\\'") + '\', ' + data.id_properti + ', this)">' +
+        '<i class="bi bi-x"></i>' +
+        "</button>" +
+        "</div>";
+      preview.appendChild(col);
+    });
+    
+    console.log('✅ Loaded', data.fotos.length, 'photos');
+  }
+
+  console.log('=== ✅ DATA LOADING COMPLETE ===');
+  alert('✅ Data berhasil dimuat! Anda dapat mengedit listing.');
+  
+}, 200); // ✅ Delay 200ms untuk memastikan DOM ready (dinaikkan dari 100ms)
     } else {
       throw new Error(result.message || 'Gagal memuat data');
     }

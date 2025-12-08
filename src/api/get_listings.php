@@ -19,7 +19,7 @@ try {
     $priceMin = isset($_GET['priceMin']) ? (int)$_GET['priceMin'] : 0;
     $priceMax = isset($_GET['priceMax']) ? (int)$_GET['priceMax'] : 999999999;
     
-    // ✅ QUERY FIXED - Menghilangkan duplikat dengan GROUP BY id_kamar
+    // ✅ QUERY dengan Rating dan Review Count
     $sql = "SELECT 
                 p.id_properti,
                 p.nama_properti,
@@ -41,9 +41,12 @@ try {
                 k.kamar_tersedia,
                 k.jumlah_kamar,
                 k.total_views,
-                (SELECT url_foto FROM foto_properti WHERE id_properti = p.id_properti LIMIT 1) as url_foto
+                (SELECT url_foto FROM foto_properti WHERE id_properti = p.id_properti LIMIT 1) as url_foto,
+                COALESCE(AVG(r.rating), 0) as avg_rating,
+                COUNT(DISTINCT r.id_review) as review_count
             FROM properti p
             INNER JOIN kamar k ON p.id_properti = k.id_properti
+            LEFT JOIN reviews r ON p.id_properti = r.id_properti
             WHERE k.status = 'tersedia'
             AND k.harga BETWEEN :priceMin AND :priceMax";
     
@@ -78,8 +81,9 @@ try {
         $sql .= " AND (p.kecamatan LIKE :location OR p.alamat LIKE :location)";
     }
     
-    // ✅ GROUP BY id_kamar untuk menghilangkan duplikat
-    $sql .= " GROUP BY k.id_kamar ORDER BY k.id_kamar DESC";
+    // ✅ GROUP BY untuk menghilangkan duplikat + ORDER BY rating tertinggi
+    $sql .= " GROUP BY k.id_kamar 
+              ORDER BY avg_rating DESC, review_count DESC, k.total_views DESC";
     
     $stmt = $pdo->prepare($sql);
     $stmt->bindParam(':priceMin', $priceMin, PDO::PARAM_INT);
@@ -134,10 +138,8 @@ try {
         // ✅ Cek apakah nama_kamar sudah mengandung nama_properti
         $title = $row['nama_properti'];
         if (!empty($row['nama_kamar']) && stripos($row['nama_kamar'], $row['nama_properti']) === false) {
-            // Jika nama_kamar tidak mengandung nama_properti, gabungkan
             $title = $row['nama_properti'] . ' - ' . $row['nama_kamar'];
         } elseif (!empty($row['nama_kamar'])) {
-            // Jika sudah mengandung, pakai nama_kamar saja
             $title = $row['nama_kamar'];
         }
         
@@ -152,8 +154,8 @@ try {
             'price' => (int)$row['harga'],
             'deposit' => (int)$row['deposit'],
             'image' => $imageUrl,
-            'rating' => 4.5, // Default rating, bisa diganti dengan data real
-            'reviews' => rand(5, 50), // Random reviews, bisa diganti dengan data real
+            'rating' => round((float)$row['avg_rating'], 1), // ✅ Rating dari database
+            'reviews' => (int)$row['review_count'], // ✅ Jumlah review dari database
             'available' => (int)$row['kamar_tersedia'],
             'rooms' => (int)$row['jumlah_kamar'],
             'roomSize' => $row['room_size'] ?? '3x4m',
@@ -167,7 +169,6 @@ try {
         $listings[] = $listing;
     }
     
-    // ✅ KIRIM ARRAY LANGSUNG (tidak pakai wrapper)
     echo json_encode($listings, JSON_UNESCAPED_UNICODE);
     
 } catch(PDOException $e) {

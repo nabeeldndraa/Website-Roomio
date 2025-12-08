@@ -585,75 +585,109 @@
       }
 
       // Load featured listings
-      function loadFeaturedListings() {
-        const container = document.getElementById("featuredListings");
-        const listings = getFeaturedListings();
+      // ✅ UPDATE: loadFeaturedListings sekarang async
+async function loadFeaturedListings() {
+  const container = document.getElementById("featuredListings");
+  
+  if (!container) return;
+  
+  // Show loading state
+  container.innerHTML = `
+    <div class="col-12 text-center py-5">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+      <p class="mt-3 text-muted">Memuat rekomendasi pilihan...</p>
+    </div>
+  `;
+  
+  // ✅ Ambil data dari database (sudah sorted by rating)
+  const listings = await getFeaturedListings();
 
-        container.innerHTML = listings
-          .slice(0, 3)
-          .map(
-            (listing) => `
-                <div class="col-md-6 col-lg-4">
-                    <div class="card card-hover h-100 border-0 shadow-sm">
-                        <div class="position-relative overflow-hidden" style="height: 200px;">
-                            <img src="${listing.image}" class="card-img-top h-100 object-fit-cover" alt="${listing.title}">
-                            <span class="badge bg-primary position-absolute top-0 start-0 m-3">${listing.type}</span>
-                            <button class="btn btn-light btn-sm rounded-circle position-absolute top-0 end-0 m-3" onclick="toggleFavorite('${listing.id}', event)">
-                                <i class="bi bi-heart"></i>
-                            </button>
-                        </div>
-                        <div class="card-body">
-                            <h6 class="card-title mb-3">${listing.title}</h6>
-                            <div class="d-flex align-items-center text-muted small mb-3">
-                                <i class="bi bi-geo-alt me-1"></i>
-                                ${listing.location}
-                            </div>
-                            <div class="d-flex justify-content-between align-items-center pt-3 border-top">
-                                <div class="d-flex align-items-center gap-1">
-                                    <i class="bi bi-star-fill text-warning"></i>
-                                    <span>${listing.rating}</span>
-                                    <small class="text-muted">(${listing.reviews} ulasan)</small>
-                                </div>
-                            </div>
-                            <div class="mt-3">
-                                <h5 class="text-primary mb-0">Rp ${listing.price.toLocaleString("id-ID")}</h5>
-                                <small class="text-muted">per bulan</small>
-                            </div>
-                        </div>
-                        <div class="card-footer bg-white border-0">
-                            <a href="listing-detail.html?id=${listing.id}" class="btn btn-outline-primary w-100">Lihat Detail</a>
-                        </div>
-                    </div>
-                </div>
-            `
-          )
-          .join("");
-      }
+  if (listings.length === 0) {
+    container.innerHTML = `
+      <div class="col-12 text-center py-5">
+        <i class="bi bi-inbox fs-1 text-muted"></i>
+        <p class="text-muted mt-3">Belum ada listing tersedia</p>
+      </div>
+    `;
+    return;
+  }
 
-      // Toggle favorite
-      function toggleFavorite(id, event) {
-        event.preventDefault();
-        event.stopPropagation();
-        const btn = event.currentTarget;
-        const icon = btn.querySelector("i");
-        icon.classList.toggle("bi-heart");
-        icon.classList.toggle("bi-heart-fill");
-        icon.classList.toggle("text-danger");
-      }
+  container.innerHTML = listings
+    .slice(0, 3)
+    .map((listing) => `
+      <div class="col-md-6 col-lg-4">
+        <div class="card card-hover h-100 border-0 shadow-sm">
+          <div class="position-relative overflow-hidden" style="height: 200px;">
+            <img src="${listing.image}" 
+                 class="card-img-top h-100 w-100" 
+                 style="object-fit: cover;"
+                 alt="${listing.title}"
+                 onerror="this.src='assets/no-image.jpg'">
+            <span class="badge bg-primary position-absolute top-0 start-0 m-3">${listing.type}</span>
+            ${listing.rating >= 4.5 ? '<span class="badge bg-warning text-dark position-absolute" style="top: 3.5rem; left: 0.75rem;"><i class="bi bi-star-fill"></i> Top Rated</span>' : ''}
+            <button class="btn btn-light btn-sm rounded-circle position-absolute top-0 end-0 m-3" onclick="toggleFavorite('${listing.id}', event)">
+              <i class="bi bi-heart"></i>
+            </button>
+          </div>
+          <div class="card-body">
+            <h6 class="card-title mb-3">${listing.title}</h6>
+            <div class="d-flex align-items-center text-muted small mb-3">
+              <i class="bi bi-geo-alt me-1"></i>
+              ${listing.location}
+            </div>
+            <div class="d-flex justify-content-between align-items-center pt-3 border-top">
+              <div class="d-flex align-items-center gap-1">
+                <i class="bi bi-star-fill text-warning"></i>
+                <span class="fw-bold">${listing.rating}</span>
+                <small class="text-muted">(${listing.reviews} ulasan)</small>
+              </div>
+            </div>
+            <div class="mt-3">
+              <h5 class="text-primary mb-0">Rp ${listing.price.toLocaleString("id-ID")}</h5>
+              <small class="text-muted">per bulan</small>
+            </div>
+          </div>
+          <div class="card-footer bg-white border-0">
+            <a href="listing-detail.html?id=${listing.id}" class="btn btn-outline-primary w-100">Lihat Detail</a>
+          </div>
+        </div>
+      </div>
+    `)
+    .join("");
+}
 
-      // Initialize
-      document.addEventListener("DOMContentLoaded", function () {
-    updateAuthUI();
-    loadFeaturedListings();
-    MapManager.init("map"); // ← panggil map di sini
+// Toggle favorite
+function toggleFavorite(id, event) {
+  event.preventDefault();
+  event.stopPropagation();
+  const btn = event.currentTarget;
+  const icon = btn.querySelector("i");
+  icon.classList.toggle("bi-heart");
+  icon.classList.toggle("bi-heart-fill");
+  icon.classList.toggle("text-danger");
+}
+
+// Initialize - ✅ PENTING: Tambahkan async
+document.addEventListener("DOMContentLoaded", async function () {
+  updateAuthUI();
+  await loadFeaturedListings(); // ✅ Tunggu sampai selesai load
+  
+  if (typeof MapManager !== 'undefined') {
+    MapManager.init("map");
+  }
 });
 
-map.on('popupopen', function (e) {
+// Map popup auto-pan
+if (typeof map !== 'undefined') {
+  map.on('popupopen', function (e) {
     map.panTo(e.popup.getLatLng(), {
-        animate: true,
-        duration: 0.3
+      animate: true,
+      duration: 0.3
     });
-});
+  });
+}
     </script>
   </body>
 </html>

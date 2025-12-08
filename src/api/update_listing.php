@@ -1,5 +1,5 @@
 <?php
-// api/update_listing.php
+// api/update_listing.php - FIXED VERSION
 session_start();
 
 header('Content-Type: application/json');
@@ -89,9 +89,32 @@ try {
     // ✅ START TRANSACTION
     $koneksi->begin_transaction();
     
+    // ✅ PARSING KATEGORI (tipe_properti dari frontend: "kos-putra", "kos-putri", "kos-campur", "kontrakan")
+    $category = $_POST['tipe_properti'] ?? '';
+    $tipe_properti = '';
+    $tipe_kos = null;
+    
+    debugLog("Category from form: $category");
+    
+    if ($category === 'kontrakan') {
+        $tipe_properti = 'Kontrakan';
+        $tipe_kos = null;
+    } elseif (strpos($category, 'kos-') === 0) {
+        $tipe_properti = 'Kos';
+        
+        if ($category === 'kos-putra') {
+            $tipe_kos = 'Putra';
+        } elseif ($category === 'kos-putri') {
+            $tipe_kos = 'Putri';
+        } elseif ($category === 'kos-campur') {
+            $tipe_kos = 'Campur';
+        }
+    }
+    
+    debugLog("Parsed - tipe_properti: $tipe_properti, tipe_kos: " . ($tipe_kos ?? 'NULL'));
+    
     // Update data properti
     $nama_properti = $_POST['nama_properti'] ?? '';
-    $tipe_properti = $_POST['tipe_properti'] ?? '';
     $alamat = $_POST['alamat'] ?? '';
     $kota = $_POST['kota'] ?? '';
     $deskripsi = $_POST['deskripsi'] ?? '';
@@ -100,10 +123,14 @@ try {
     $rules = $_POST['rules'] ?? '';
     
     debugLog("Updating properti...");
+    debugLog("nama_properti: $nama_properti");
+    debugLog("deskripsi length: " . strlen($deskripsi));
     
+    // ✅ UPDATE DENGAN TIPE_KOS
     $update_properti = "UPDATE properti SET 
                         nama_properti = ?,
                         tipe_properti = ?,
+                        tipe_kos = ?,
                         alamat = ?,
                         kecamatan = ?,
                         deskripsi = ?,
@@ -113,9 +140,10 @@ try {
                         WHERE id_properti = ?";
     
     $stmt = $koneksi->prepare($update_properti);
-    $stmt->bind_param("ssssddssi", 
+    $stmt->bind_param("sssssddssi", 
         $nama_properti, 
         $tipe_properti, 
+        $tipe_kos,
         $alamat, 
         $kota, 
         $deskripsi, 
@@ -129,7 +157,7 @@ try {
         throw new Exception("Gagal update properti: " . $stmt->error);
     }
     
-    debugLog("Properti updated successfully");
+    debugLog("✅ Properti updated successfully");
     
     // ✅ UPDATE DATA KAMAR
     if ($id_kamar) {
@@ -142,10 +170,11 @@ try {
         // Handle fasilitas
         $fasilitas_kamar = '';
         if (isset($_POST['fasilitas_kamar']) && is_array($_POST['fasilitas_kamar'])) {
-            $fasilitas_kamar = implode(', ', $_POST['fasilitas_kamar']);
+            $fasilitas_kamar = json_encode($_POST['fasilitas_kamar'], JSON_UNESCAPED_UNICODE);
         }
         
         debugLog("Updating kamar ID: $id_kamar");
+        debugLog("fasilitas_kamar: $fasilitas_kamar");
         
         $update_kamar = "UPDATE kamar SET 
                         harga = ?,
@@ -171,7 +200,7 @@ try {
             throw new Exception("Gagal update kamar: " . $stmt_kamar->error);
         }
         
-        debugLog("Kamar updated successfully");
+        debugLog("✅ Kamar updated successfully");
     }
     
     // ✅ HANDLE UPLOAD FOTO BARU
@@ -198,6 +227,12 @@ try {
                     continue;
                 }
                 
+                // Validasi ukuran file (max 5MB)
+                if ($_FILES['images']['size'][$key] > 5 * 1024 * 1024) {
+                    debugLog("Skipping file too large: " . $_FILES['images']['size'][$key]);
+                    continue;
+                }
+                
                 $new_filename = uniqid() . '_' . time() . '.' . $file_extension;
                 $destination = $upload_dir . $new_filename;
                 
@@ -210,9 +245,15 @@ try {
                     
                     if ($stmt_foto->execute()) {
                         $uploaded_count++;
-                        debugLog("Photo uploaded: $url_foto");
+                        debugLog("✅ Photo uploaded: $url_foto");
+                    } else {
+                        debugLog("❌ Failed to insert photo to DB: " . $stmt_foto->error);
                     }
+                } else {
+                    debugLog("❌ Failed to move uploaded file: $filename");
                 }
+            } else {
+                debugLog("❌ Upload error for $filename: " . $_FILES['images']['error'][$key]);
             }
         }
         
@@ -221,7 +262,7 @@ try {
     
     // ✅ COMMIT TRANSACTION
     $koneksi->commit();
-    debugLog("Transaction committed successfully");
+    debugLog("✅ Transaction committed successfully");
     
     echo json_encode([
         'status' => 'success',
@@ -233,7 +274,7 @@ try {
         $koneksi->rollback();
     }
     
-    debugLog("ERROR: " . $e->getMessage());
+    debugLog("❌ ERROR: " . $e->getMessage());
     
     echo json_encode([
         'status' => 'error',
